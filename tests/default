@@ -1,0 +1,34 @@
+
+server {
+	listen 80 default;
+	listen [::]:80 default;
+
+	server_name localhost;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+	listen [::]:443 ssl default_server;
+
+    server_name localhost;
+
+    ssl on;
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    root /var/www/html;
+
+    autoindex on;
+	index index.html index.htm index.php;
+
+    location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    }
+}

@@ -4,7 +4,10 @@ int main()
 {
 	int server_fd = 0;
 	int new_socket = 0;
-	struct sockaddr_in address;
+	struct sockaddr_in address; // структура, хранящая информацию об IP-адресе  слущающего сокета
+
+
+
 
 // int socket(int domain, int type, int protocol);
 
@@ -36,16 +39,14 @@ int main()
 // addrlen — поле socklen_t, представляющее длину структуры sockaddr.
 // Возвращает 0 при успехе и −1 при возникновении ошибки.
 
-	std::cout << "1" << std::endl;
 	std::memset(&address, '0', sizeof(address));
-	std::cout << "2" << std::endl;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = htonl(INADDR_ANY);
 	address.sin_port = htons(PORT);
-	std::cout << "3" << std::endl;
 	if (bind(server_fd, reinterpret_cast<const struct sockaddr*>(&address), sizeof(address)) < 0)
 	{
 		std::cerr << "bind is failure" << std::endl;
+		// closesocket??
 		return 0;
 	}
 
@@ -81,13 +82,66 @@ int main()
 	if (listen(server_fd, 3) < 0)
 	{
 		std::cerr << "socket is not listening" << std::endl;
+		// closesocket??
 		return 0;
 	}	
 
 	if ((new_socket = accept(server_fd, (struct sockaddr*)(&address), (socklen_t *)(&address))) < 0)
 	{
 		std::cerr << "socket is not accept" << std::endl;
+		// closesocket??
 		return 0;
+	}
+
+	const int max_client_buffer_size = 1024;
+	char buf[max_client_buffer_size];
+	int result = 0;
+
+	result = recv(server_fd, buf, max_client_buffer_size, 0);
+
+	std::stringstream response; // сюда будет записываться ответ клиенту
+	std::stringstream response_body; // тело ответа
+
+	if (result == -1)
+	{
+		std::cerr << "can't read data from socket" << std::endl;
+		// closesocket??
+		return 0;
+	}
+	else if (result == 0)
+	{
+		std::cerr << "connection is closed" << std::endl;
+	}
+	else if (result > 0) 
+	{
+		// Мы знаем фактический размер полученных данных, поэтому ставим метку конца строки
+		// В буфере запроса.
+			buf[result] = '\0';
+			
+			response_body << "<title>Test C++ HTTP Server</title>\n"
+			<< "<h1>Test page</h1>\n"
+			<< "<p>This is body of the test page...</p>\n"
+			<< "<h2>Request headers</h2>\n"
+			<< "<pre>" << buf << "</pre>\n"
+			<< "<em><small>Test C++ Http Server</small></em>\n";
+
+		// Формируем весь ответ вместе с заголовками
+			response << "HTTP/1.1 200 OK\r\n"
+			<< "Version: HTTP/1.1\r\n"
+			<< "Content-Type: text/html; charset=utf-8\r\n"
+			<< "Content-Length: " << response_body.str().length()
+			<< "\r\n\r\n"
+			<< response_body.str();
+
+		// Отправляем ответ клиенту с помощью функции send
+		result = send(server_fd, response.str().c_str(),
+			response.str().length(), 0);
+
+		if (result == -1) 
+		{
+			// произошла ошибка при отправке данных
+			std::cerr << "send failed: " << std::endl;
+		}
 	}
 
 

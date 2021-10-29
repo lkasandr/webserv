@@ -7,6 +7,7 @@
 
 
 #include "Configuration.hpp"
+#include <vector>
 
 void read_conf(char *conf_path, Configuration &conf)
 {
@@ -80,6 +81,7 @@ int main(int argc, char **argv)
 		return (1);
 	}
 	Configuration conf;
+	// std::vector<Configuration> configs;
 	try
 	{
 		read_conf(argv[1], conf);
@@ -102,7 +104,7 @@ int main(int argc, char **argv)
 	sockaddr_in sockaddr;
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-	sockaddr.sin_port = htons(8080); // htons is necessary to convert a number to
+	sockaddr.sin_port = htons(conf.getPort()); // htons is necessary to convert a number to
 									// network byte order
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
 		std::cout << "Failed to bind to port from conf. errno: " << errno << std::endl;

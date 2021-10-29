@@ -40,7 +40,7 @@ std::string Configuration::getHost() const
 	return this->host;
 }
 	
-int	Configuration::getPort() const
+u_int	Configuration::getPort() const
 {
 	return this->port;
 }
@@ -85,6 +85,15 @@ void		Configuration::setClientBodySize(std::string value)
 	this->client_body_size = atoi(value.c_str());
 }
 
+// void		Configuration::setServCount(int count)
+// {
+// 	this->serv_count += count;
+// }
+
+// int			Configuration::getServCount() const
+// {
+// 	return this->serv_count;
+// }
 // void Configuration::read_conf(std::string const conf_path)
 // {
 // 	size_t pos_beg;
@@ -135,5 +144,6 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	out << "server_name: " << config.getServerName() << std::endl;
 	out << "default_error_pages: " << config.getDefaultErrorPages() << std::endl;
 	out << "client body size: " << config.getClientBodySize() << std::endl;
+	// out << "serv_count" << config.getServCount() << std::endl;
 	return (out);
 }

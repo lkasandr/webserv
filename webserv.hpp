@@ -1,11 +1,14 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <iostream>
-#include <sstream>
+#include "./socket/Socket.hpp"
+#include "./111/Configuration.hpp"
+#include <cstdlib>
+#include <unistd.h>
+#include <cerrno>
+#include <vector>
 
-#define PORT 8000
+std::vector<std::string> split_line(std::string line);
+int	read_conf(char *path , std::vector<Configuration> &config);
 
 #endif

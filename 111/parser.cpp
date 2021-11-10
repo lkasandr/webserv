@@ -86,28 +86,30 @@ int	read_conf(char *path , std::vector<Configuration> &config)
 	return serv_count;
 }
 
-int main(int argc, char **argv)
-{
-	if (argc != 2)
-	{
-		std::cout << "\033[31mMissing configuration file!\033[0m" << std::endl;
-		return (1);
-	}
-	std::vector<Configuration> configs;
-	int server_count;
-	try
-	{
-		server_count = read_conf(argv[1], configs);
-	}
-	catch(std::string error)
-	{
-		std::cerr << error << '\n';
-		return 1;
-	}
-	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
-	{
-		std::cout << *it;
-	}
-	std::cout << server_count << std::endl;
-	return 0;
-}
+// int main(int argc, char **argv)
+// {
+// 	if (argc != 2)
+// 	{
+// 		std::cout << "\033[31mMissing configuration file!\033[0m" << std::endl;
+// 		return (1);
+// 	}
+// 	std::vector<Configuration> configs;
+// 	int server_count;
+// 	try
+// 	{
+// 		server_count = read_conf(argv[1], configs);
+// 	}
+// 	catch(std::string error)
+// 	{
+// 		std::cerr << error << '\n';
+// 		return 1;
+// 	}
+// 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+// 	{
+// 		// std::cout << *it;
+// 		// создать сокет для каждого конфига
+// 		//
+// 	}
+// 	std::cout << server_count << std::endl;
+// 	return 0;
+// }

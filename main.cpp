@@ -1,149 +1,111 @@
-#include "webserv.hpp"
+#include "Webserv.hpp"
 
-int main()
+// void read_conf(char *conf_path, Configuration &conf)
+// {
+// 	size_t pos_beg;
+// 	size_t pos_end;
+// 	std::string	line;
+// 	// std::string	filename;
+// 	std::ifstream	file;
+// 	// filename = conf_path;
+// 	file.open(conf_path);
+	
+// 	// std::cout << conf.getHost() << std::endl;
+// 	// conf.setHost("drt");
+// 	// file.open(conf_path.c_str());
+// 	// file.open(conf_path);
+// 	if (!file.is_open())
+// 		throw std::string("\033[31mThe configuration file could not be opened\033[0m");
+// 	else if (file.peek() == EOF)
+// 		throw std::string("\033[31mThe configuration file is empty\033[0m");
+// 	while (!file.eof())
+// 	{
+// 		std::getline(file, line);
+// 		pos_beg = 0;
+// 		pos_end = 0;
+// 		while (1)
+// 		{
+// 			if (line.find("Host ", pos_beg) != std::string::npos)
+// 			{
+// 				pos_beg = line.find("Host ", pos_beg) + 5;
+// 				pos_end = line.find(";", pos_beg);
+// 				conf.setHost(line.substr(pos_beg, pos_end - pos_beg));
+// 			}
+// 			else if (line.find("Port ", pos_beg) != std::string::npos)
+// 			{
+// 				pos_beg = line.find("Port") + 5;
+// 				pos_end = line.find(";", pos_beg);
+// 				conf.setPort(line.substr(pos_beg, pos_end - pos_beg));
+// 			}
+// 			else if (line.find("server_name ", pos_beg) != std::string::npos)
+// 			{
+// 				pos_beg = line.find("server_name ") + 12;
+// 				pos_end = line.find(";", pos_beg);
+// 				conf.setServerName(line.substr(pos_beg, pos_end - pos_beg));
+// 			}
+// 			else if (line.find("default_error_pages ", pos_beg) != std::string::npos)
+// 			{
+// 				pos_beg = line.find("default_error_pages ") + 20;
+// 				pos_end = line.find(";", pos_beg);
+// 				conf.setDefaultErrorPages(line.substr(pos_beg, pos_end - pos_beg));
+// 			}
+// 			else if (line.find("client_body_size ", pos_beg) != std::string::npos)
+// 			{
+// 				pos_beg = line.find("client_body_size ") + 17;
+// 				pos_end = line.find(";", pos_beg);
+// 				conf.setClientBodySize(line.substr(pos_beg, pos_end - pos_beg));
+// 			}
+// 			else
+// 				break;
+				
+// 		}
+// 	}
+// 	file.close();
+// }
+
+
+int main(int argc, char **argv)
 {
-	int server_fd = 0;
-	int new_socket = 0;
-	struct sockaddr_in address; // структура, хранящая информацию об IP-адресе  слущающего сокета
-
-
-
-
-// int socket(int domain, int type, int protocol);
-
-// domain - домен связи, в котором должен быть создан сокет:
-// AF_INET      IPv4 Internet protocols                    ip(7)
-
-// type  - тип сервиса. Это выбирается в соответствии со свойствами, требуемыми приложением:
-// SOCK_STREAM Обеспечивает последовательные, надежные, двусторонние потоки байтов на основе соединений. Может поддерживаться механизм внеполосной передачи данных.
-
-//protocol:
-// указать конкретный протокол, который будет использоваться для поддержки работы сокетов. 
-// Это полезно в случаях, когда некоторые семейства могут иметь более одного протокола для поддержки определенного типа службы. 
-// Возвращаемое значение - дескриптор файла (маленькое целое число). Аналогия создания розетки - запрос телефонной линии у телефонной компании.
-// Для сокетов TCP / IP мы хотим указать семейство IP-адресов (AF_INET) и службу виртуальных каналов (SOCK_STREAM). 
-// Поскольку существует только одна форма обслуживания виртуальных каналов, нет никаких вариантов протокола, поэтому последний аргумент, протокол, равен нулю.
-
-	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if (argc != 2)
 	{
-		std::cerr << "cannot create socket" << std::endl;
-		return 0;
+		std::cout << "\033[31mMissing configuration file!\033[0m" << std::endl;
+		return (1);
 	}
-
-// bind() связывает сокет с конкретным адресом. Когда сокет создается при помощи socket(), 
-// он ассоциируется с некоторым семейством адресов, но не с конкретным адресом. 
-// До того как сокет сможет принять входящие соединения, он должен быть связан с адресом. bind() принимает три аргумента:
-
-// sockfd — дескриптор, представляющий сокет при привязке
-// serv_addr — указатель на структуру sockaddr, представляющую адрес, к которому привязываем.
-// addrlen — поле socklen_t, представляющее длину структуры sockaddr.
-// Возвращает 0 при успехе и −1 при возникновении ошибки.
-
-	std::memset(&address, '0', sizeof(address));
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = htonl(INADDR_ANY);
-	address.sin_port = htons(PORT);
-	if (bind(server_fd, reinterpret_cast<const struct sockaddr*>(&address), sizeof(address)) < 0)
+	std::vector<Configuration> configs;
+	std::vector<Socket> sockets;
+	Configuration temp;
+	int server_count;
+	try
 	{
-		std::cerr << "bind is failure" << std::endl;
-		// closesocket??
-		return 0;
+		server_count = read_conf(argv[1], configs);
 	}
-
-	// Прежде чем клиент сможет подключиться к серверу, на сервере должен быть сокет, готовый принимать соединения.
-	// listen сообщает сокету, что он должен быть способен принимать входящие соединения:
-
-	// int listen(int s, int backlog);
-
-	// Первый аргумент - сокет для прослушивания, второй аргумент (backlog) - целое положительное число, 
-	// определяющее, как много запросов связи может быть принято на сокет одновременно. 
-	// В большинстве систем это значение должно быть не больше пяти. 
-	// Заметим, что это число не имеет отношения к числу соединений, которое может поддерживаться сервером. 
-	// Аргумент backlog имеет отношение только к числу запросов на соединение, которые приходят одновременно. 
-	// Число установленных соединений может превышать это число.	
-
-
-	// Accept используется сервером для принятия связи на сокет. 
-	// Сокет должен быть уже слушающим в момент вызова функции. 
-	// Если сервер устанавливает связь с клиентом, то функция accept возвращает новый сокет-дескриптор, 
-	// через который и происходит общение клиента с сервером. 
-	// Пока устанавливается связь клиента с сервером, 
-	// функция accept блокирует другие запросы связи с данным сервером, а после установления связи "прослушивание" запросов возобновляется.
-
-	// int accept(int s, char * name, int* anamelen);
-
-	// Первый аргумент функции - сокет-дескриптор для принятия связей от клиентов. 
-	// Второй аргумент - указатель на адрес клиента (структура sockaddr ) для соответствующего домена. 
-	// Третий аргумент - указатель на целое число - длину структуры адреса. 
-	// Второй и третий аргументы заполняются соответствующими значениями в момент установления связи клиента с сервером 
-	// и позволяют серверу точно определить, с каким именно клиентом он общается. 
-	// Если сервер не интересуется адресом клиента, в качестве второго и третьего аргументов можно задать NULL-указатели.
-
-	if (listen(server_fd, 3) < 0)
+	catch(std::string error)
 	{
-		std::cerr << "socket is not listening" << std::endl;
-		// closesocket??
-		return 0;
-	}	
-
-	if ((new_socket = accept(server_fd, (struct sockaddr*)(&address), (socklen_t *)(&address))) < 0)
-	{
-		std::cerr << "socket is not accept" << std::endl;
-		// closesocket??
-		return 0;
+		std::cerr << error << '\n';
+		return 1;
 	}
-
-	const int max_client_buffer_size = 1024;
-	char buf[max_client_buffer_size];
-	int result = 0;
-
-	result = recv(server_fd, buf, max_client_buffer_size, 0);
-
-	std::stringstream response; // сюда будет записываться ответ клиенту
-	std::stringstream response_body; // тело ответа
-
-	if (result == -1)
+	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
-		std::cerr << "can't read data from socket" << std::endl;
-		// closesocket??
-		return 0;
+		temp = *it;
+		sockets.push_back(temp.getPort());
 	}
-	else if (result == 0)
-	{
-		std::cerr << "connection is closed" << std::endl;
-	}
-	else if (result > 0) 
-	{
-		// Мы знаем фактический размер полученных данных, поэтому ставим метку конца строки
-		// В буфере запроса.
-			buf[result] = '\0';
-			
-			response_body << "<title>Test C++ HTTP Server</title>\n"
-			<< "<h1>Test page</h1>\n"
-			<< "<p>This is body of the test page...</p>\n"
-			<< "<h2>Request headers</h2>\n"
-			<< "<pre>" << buf << "</pre>\n"
-			<< "<em><small>Test C++ Http Server</small></em>\n";
+	std::cout << server_count << std::endl;
 
-		// Формируем весь ответ вместе с заголовками
-			response << "HTTP/1.1 200 OK\r\n"
-			<< "Version: HTTP/1.1\r\n"
-			<< "Content-Type: text/html; charset=utf-8\r\n"
-			<< "Content-Length: " << response_body.str().length()
-			<< "\r\n\r\n"
-			<< response_body.str();
+	Socket socket(9999);
+	int connection = socket.accept_socket();
 
-		// Отправляем ответ клиенту с помощью функции send
-		result = send(server_fd, response.str().c_str(),
-			response.str().length(), 0);
+	// Read from the connection
+	char buffer[150000];
+	read(connection, buffer, 150000);
+	std::cout << "The message was: " << buffer;
 
-		if (result == -1) 
-		{
-			// произошла ошибка при отправке данных
-			std::cerr << "send failed: " << std::endl;
-		}
-	}
+	// Send a message to the connection
+	std::string response = "Good talking to you\n";
+	send(connection, response.c_str(), response.size(), 0);
 
+	// Close the connections
+	close(connection);
+	// close(sockfd);
 
 
 	return 0;

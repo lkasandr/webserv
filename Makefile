@@ -1,8 +1,8 @@
 NAME = webserv
 
-SRCS = ./main.cpp
+SRCS = ./main.cpp ./socket/Socket.cpp  ./111/Configuration.cpp ./111/parser.cpp
 
-HEADER = ./webserv.hpp
+HEADER = ./webserv.hpp ./socket/Socket.hpp ./111/Configuration.hpp
 
 OBJS = $(SRCS:cpp=o)
 

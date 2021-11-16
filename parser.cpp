@@ -22,30 +22,38 @@ std::vector<std::string> split_line(std::string line)
     return servers;
 }
 
-
-int	read_conf(char *path , std::vector<Configuration> &config)
+int	read_conf(const char *path , std::vector<Configuration> &config)
 {
-	std::ifstream	file(path);
+	std::ifstream	file;
 	std::string		line;
-	std::string		tmpline;
+	// std::string		tmpline;
 	std::vector<std::string>	servers;
 	int 			serv_count = 0;
+	file.open(path);
 	if (!file.is_open())
 		throw std::string("\033[31mThe configuration file could not be opened\033[0m");
 	else if (file.peek() == EOF)
 		throw std::string("\033[31mThe configuration file is empty\033[0m");
-	while (std::getline(file, line))
-		tmpline += line;
-	servers = split_line(tmpline);		// делим конфиг файл на блоки - каждый сервер записываем в отдельный стринг для дальнейшего распарсивания строки, для каждого серв создается отдельный конф
+	std::stringstream content;
+    // std::string      tmpline;
+
+	content << file.rdbuf();   //содержимое файла переписываем в контент для дальнейшей работы с ним. файл менять не можем
+    // tmpline = content.str();
+
+	// while (std::getline(file, line))
+	// 	tmpline += line;
+	servers = split_line(content.str());		// делим конфиг файл на блоки - каждый сервер записываем в отдельный стринг для дальнейшего распарсивания строки, для каждого серв создается отдельный конф
+	Configuration	conf;
 	for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
 		line = *it;
 		// std::cout << line << std::endl;
-		Configuration	conf;
+		// Configuration	conf;
 		size_t pos_beg = 0;
 		size_t pos_end = 0;
 		while (1)
 		{
+
 			if (line.find("Host ", pos_beg) != std::string::npos)
 			{
 				pos_beg = line.find("Host ", pos_beg) + 5;
@@ -76,6 +84,13 @@ int	read_conf(char *path , std::vector<Configuration> &config)
 				pos_end = line.find(";", pos_beg);
 				conf.setClientBodySize(line.substr(pos_beg, pos_end - pos_beg));
 			}
+			else if (line.find("http_method ", pos_beg) != std::string::npos)
+			{
+				pos_beg = line.find("http_method ") + 12;
+				pos_end = line.find(";", pos_beg);
+				// std::cout << line.substr(pos_beg, pos_end - pos_beg) << "test" << std::endl;
+				conf.setHttpMethod(line.substr(pos_beg, pos_end - pos_beg));
+			}
 			else
 				break;
 		}
@@ -85,31 +100,3 @@ int	read_conf(char *path , std::vector<Configuration> &config)
 	file.close();
 	return serv_count;
 }
-
-// int main(int argc, char **argv)
-// {
-// 	if (argc != 2)
-// 	{
-// 		std::cout << "\033[31mMissing configuration file!\033[0m" << std::endl;
-// 		return (1);
-// 	}
-// 	std::vector<Configuration> configs;
-// 	int server_count;
-// 	try
-// 	{
-// 		server_count = read_conf(argv[1], configs);
-// 	}
-// 	catch(std::string error)
-// 	{
-// 		std::cerr << error << '\n';
-// 		return 1;
-// 	}
-// 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
-// 	{
-// 		// std::cout << *it;
-// 		// создать сокет для каждого конфига
-// 		//
-// 	}
-// 	std::cout << server_count << std::endl;
-// 	return 0;
-// }

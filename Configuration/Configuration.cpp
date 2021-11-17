@@ -7,12 +7,11 @@ Configuration::Configuration()
 	this->server_name = "localhost";
 	this->default_error_pages = "./html/error.html";
 	this->client_body_size = 30000;
+	this->http_method = "GET POST DELETE";
+	this->method_get = 0;
+	this->method_post = 0;
+	this->method_delete = 0;
 }
-
-// Configuration::Configuration(char *conf_path)
-// {
-// 	// read_conf(conf_path);
-// }
 
 Configuration::Configuration(const Configuration & copy)
 {
@@ -28,12 +27,20 @@ Configuration& Configuration::operator=(const Configuration& other)
 	this->server_name = other.getServerName();
 	this->default_error_pages = other.getDefaultErrorPages();
 	this->client_body_size = other.getClientBodySize();
+	this->http_method = other.getHttpMethod();
+	this->method_get = other.getGet();
+	this->method_post = other.getPost();
+	this->method_delete = other.getDelete();
 	return *this;
 }
 
 Configuration::~Configuration()
 {
 }
+
+////////////
+// Getters//
+////////////
 
 std::string Configuration::getHost() const
 {
@@ -60,6 +67,33 @@ int 		Configuration::getClientBodySize() const
 	return this->client_body_size;
 }
 
+std::string Configuration::getHttpMethod() const
+{
+	return this->http_method;
+}
+
+bool	Configuration::getGet() const
+{
+	// this->checkGet(this->http_method);
+	return this->method_get;
+}
+
+
+bool	Configuration::getPost() const
+{
+	return this->method_post;
+}
+
+
+bool	Configuration::getDelete() const
+{
+	return this->method_delete;
+}
+
+//////////////
+// Setters ///
+//////////////
+
 void	Configuration::setHost(std::string value) 
 {
 	this->host = value;
@@ -85,56 +119,38 @@ void		Configuration::setClientBodySize(std::string value)
 	this->client_body_size = atoi(value.c_str());
 }
 
-// void		Configuration::setServCount(int count)
-// {
-// 	this->serv_count += count;
-// }
+void	Configuration::setHttpMethod(std::string value)
+{
+	this->http_method = value;
+}
 
-// int			Configuration::getServCount() const
-// {
-// 	return this->serv_count;
-// }
-// void Configuration::read_conf(std::string const conf_path)
-// {
-// 	size_t pos_beg;
-// 	size_t pos_end;
-// 	std::string	line;
-// 	std::ifstream	file(conf_path);
-// 	// file.open(conf_path.c_str());
-// 	// file.open(conf_path);
-// 	if (!file.is_open())
-// 		{
-// 			std::cout << "\033[31mThe configuration file didn't open\033[0m" << std::endl;
-// 			// return (1);
-// 		}
-// 	else if (file.peek() == EOF)
-// 	{
-// 		std::cout << "\033[31mThe configuration file is empty\033[0m" << std::endl;
-	
-// 	}
-	
-// 	while (!file.eof())
-// 	{
-// 		std::getline(file, line);
-// 		pos_beg = 0;
-// 		pos_end = 0;
-// 		while (1)
-// 		{
-// 			pos_beg = line.find("Host:", pos_beg);
-// 			if(pos_beg == std::string::npos)
-// 				break;
-// 			else
-// 			{
-// 				pos_beg = line.find("Host:") + 5;
-//                 pos_end = line.find(";", pos_beg);
-//                 this->host = line.substr(pos_beg, pos_end - pos_beg);
-// 				pos_beg += host.length();
-// 			}
-			
-				
-// 		}
-// 	}
-// }
+
+/////////////////
+//////Methods///
+////////////////
+
+bool Configuration::checkGet()
+{
+	if(this->http_method.find("GET") != std::string::npos)
+		this->method_get = true;
+	return this->method_get;
+}
+
+bool Configuration::checkPost()
+{
+	if(this->http_method.find("POST") != std::string::npos)
+		this->method_post = true;
+	return this->method_post;
+}
+
+bool Configuration::checkDelete()
+{
+	if(this->http_method.find("DELETE") != std::string::npos)
+		this->method_delete = true;
+	return this->method_delete;
+}
+
+
 
 std::ostream& operator<<(std::ostream& out, const Configuration& config)
 {
@@ -144,6 +160,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	out << "server_name: " << config.getServerName() << std::endl;
 	out << "default_error_pages: " << config.getDefaultErrorPages() << std::endl;
 	out << "client body size: " << config.getClientBodySize() << std::endl;
+	out << "HTTP methods: " << config.getHttpMethod() << std::endl;
 	// out << "serv_count" << config.getServCount() << std::endl;
 	return (out);
 }

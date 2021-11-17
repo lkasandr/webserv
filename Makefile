@@ -1,29 +1,26 @@
-NAME = webserv
-
-SRCS = ./main.cpp ./socket/Socket.cpp  ./111/Configuration.cpp ./111/parser.cpp
-
-HEADER = ./webserv.hpp ./socket/Socket.hpp ./111/Configuration.hpp
-
-OBJS = $(SRCS:cpp=o)
-
+NAME		= webserv
+CXX			= clang++
+RM			= rm -f
+CXXFLAGS	= -Wall -Wextra -Werror #-std=c++98 -g
+SRCS		= ./main.cpp ./socket/Socket.cpp  ./Configuration/Configuration.cpp  ./Request/Request.cpp ./parser.cpp ./Server/Server.cpp
+OBJS		= $(SRCS:.cpp=.o)
+HEADER		= ./inc/webserv.hpp ./socket/Socket.hpp ./Configuration/Configuration.hpp ./Request/Request.hpp ./Server/Server.hpp
+INC			= inc
 %.o:		%.cpp $(HEADER)
-			${CLANG} $(CPPFLAGS) -c $< -o ${<:.cpp=.o}
+			$(CXX) $(CXXFLAGS) -c $<  -o $(<:.cpp=.o) -I inc
+			
+all:		$(NAME) 
+			@echo "\033[32mWebserv ready\033[0m"
 
-CLANG =		clang++
-CPPFLAGS =	-Wall -Wextra -Werror -std=c++98
-RM =		rm -f
+$(NAME):	$(OBJS) $(HEADER) Makefile
+			$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) 
 
-all :		${NAME}
-
-$(NAME) :	$(OBJS) 
-			$(CLANG) $(CPPFLAGS) -o ${NAME} $(OBJS)
-
-clean :		
+clean:
 			$(RM) $(OBJS)
 
-fclean 	:	clean
-			$(RM) ${NAME}
+fclean:		clean
+			$(RM) $(NAME)
 
-re :		fclean all
+re:			fclean all
 
-.PHONY :	all clean fclean re 
+.PHONY :	all clean fclean re

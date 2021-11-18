@@ -25,7 +25,11 @@ void Socket::bind_socket(unsigned short int port)
     this->addr.sin_family = AF_INET;
     this->addr.sin_port = htons(port);
     this->addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    setsockopt(this->listening_socket_fd, SOL_SOCKET, SO_REUSEADDR, &this->opt, sizeof(this->opt));
+    if (setsockopt(this->listening_socket_fd, SOL_SOCKET, SO_REUSEADDR, &this->opt, sizeof(this->opt)) < 0)
+    {
+        std::cerr << "Error in setsockopt." << std::endl;
+		std::exit(EXIT_FAILURE);
+    }
     if (bind(this->listening_socket_fd, (struct sockaddr*)&this->addr, sizeof(this->addr)) != 0)
     {
         std::cerr << "Error in getting socket address." << std::endl;
@@ -35,7 +39,7 @@ void Socket::bind_socket(unsigned short int port)
 
 void Socket::listen_socket()
 {
-    if (listen(get_listening_socket_fd(), 128) == -1)
+    if (listen(get_listening_socket_fd(), SOMAXCONN) == -1)
     {
         std::cerr << "Error in putting into listening mode." << std::endl;
 		std::exit(EXIT_FAILURE);

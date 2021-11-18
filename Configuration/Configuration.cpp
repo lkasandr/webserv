@@ -161,6 +161,5 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	out << "default_error_pages: " << config.getDefaultErrorPages() << std::endl;
 	out << "client body size: " << config.getClientBodySize() << std::endl;
 	out << "HTTP methods: " << config.getHttpMethod() << std::endl;
-	// out << "serv_count" << config.getServCount() << std::endl;
 	return (out);
 }

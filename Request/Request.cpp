@@ -59,25 +59,9 @@ void		Request::parseRequest(char *buffer)
 {
     std::string		line(buffer);
 	size_t prev = 0, pos = 0;
-    while(pos != line.find("\n", prev)) /*!= std::string::npos)*/
+    while(pos != line.find("\n", prev))
 		pos++;
 	this->first_line = line.substr(prev, pos - prev);
 	setMethod(this->first_line);
 	setUri(this->first_line);
-	
-	
-	// do
-    // {
-    //     pos = line.find("\n", prev);
-    //     if (pos == std::string::npos)
-	// 		pos = line.length();
-    //     this->first_line = line.substr(prev, pos - prev);
-    //     // if (!serv.empty())
-	// 	// 	servers.push_back(serv);
-    //     // prev = pos + 7;
-    // }
-    // while (pos < line.length() && prev < line.length());
-	std::cout << this->first_line << std::endl;
-	std::cout << this->method << std::endl;
-	std::cout << this->uri << std::endl;
 }

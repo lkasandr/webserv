@@ -1,9 +1,11 @@
+#include <sys/socket.h> // For socket functions
+#include <netinet/in.h> // For sockaddr_in
 #include <cstdlib> // For exit() and EXIT_FAILURE
 #include <iostream> // For cout
 #include <unistd.h> // For read
 #include <cerrno>
 
-#include "./Server/Server.hpp"
+#include "Server.hpp"
 #include "Configuration.hpp"
 #include "Request.hpp"
 #include "Socket.hpp"

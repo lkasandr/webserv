@@ -35,11 +35,8 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 	else if (file.peek() == EOF)
 		throw std::string("\033[31mThe configuration file is empty\033[0m");
 	std::stringstream content;
-    // std::string      tmpline;
-
 	content << file.rdbuf();   //содержимое файла переписываем в контент для дальнейшей работы с ним. файл менять не можем
-    // tmpline = content.str();
-
+ 
 	// while (std::getline(file, line))
 	// 	tmpline += line;
 	servers = split_line(content.str());		// делим конфиг файл на блоки - каждый сервер записываем в отдельный стринг для дальнейшего распарсивания строки, для каждого серв создается отдельный конф
@@ -47,13 +44,10 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 	for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
 		line = *it;
-		// std::cout << line << std::endl;
-		// Configuration	conf;
 		size_t pos_beg = 0;
 		size_t pos_end = 0;
 		while (1)
 		{
-
 			if (line.find("Host ", pos_beg) != std::string::npos)
 			{
 				pos_beg = line.find("Host ", pos_beg) + 5;
@@ -88,7 +82,6 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 			{
 				pos_beg = line.find("http_method ") + 12;
 				pos_end = line.find(";", pos_beg);
-				// std::cout << line.substr(pos_beg, pos_end - pos_beg) << "test" << std::endl;
 				conf.setHttpMethod(line.substr(pos_beg, pos_end - pos_beg));
 			}
 			else

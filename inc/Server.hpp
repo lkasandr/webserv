@@ -7,6 +7,8 @@
 #include "Request.hpp"
 #include <vector>
 #include <poll.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 class Server
 {

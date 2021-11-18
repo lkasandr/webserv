@@ -2,9 +2,9 @@ NAME		= webserv
 CXX			= clang++
 RM			= rm -f
 CXXFLAGS	= -Wall -Wextra -Werror #-std=c++98 -g
-SRCS		= ./main.cpp ./socket/Socket.cpp  ./Configuration/Configuration.cpp  ./Request/Request.cpp ./parser.cpp
+SRCS		= ./main.cpp ./socket/Socket.cpp  ./Configuration/Configuration.cpp  ./Request/Request.cpp ./parser.cpp ./Server/Server.cpp
 OBJS		= $(SRCS:.cpp=.o)
-HEADER		= ./inc/webserv.hpp ./socket/Socket.hpp ./Configuration/Configuration.hpp ./Request/Request.hpp
+HEADER		= ./inc/webserv.hpp ./socket/Socket.hpp ./Configuration/Configuration.hpp ./Request/Request.hpp ./Server/Server.hpp
 INC			= inc
 %.o:		%.cpp $(HEADER)
 			$(CXX) $(CXXFLAGS) -c $<  -o $(<:.cpp=.o) -I inc

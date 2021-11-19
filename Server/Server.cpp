@@ -76,8 +76,17 @@ void	Server::main_cycle()
 						std::cout << "The message was: " << buffer;
 						delete[] buffer;
 						// // Send a message to the connection
-						std::string response = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: text/html\r\nContent-Length: 20\r\n\r\nGood talking to you\n";
+						std::string response = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: text/html\r\nContent-Length: 20\r\n\r\n Good day\n";
+						std::ifstream	file;
+						file.open("./rss/html/index.html");
+						if (!file.is_open())
+							std::cout << "error html" << std::endl;
+						std::stringstream content;
+						content << file.rdbuf();
+						// std::cout << content.str();
 						send(this->pfds[i].fd, response.c_str(), response.size(), 0);
+						send(this->pfds[i].fd, content.str().c_str(), content.str().size(), 0);
+						file.close();
 					}
 				}
 			}

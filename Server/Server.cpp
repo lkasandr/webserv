@@ -76,25 +76,52 @@ void	Server::main_cycle()
 						std::cout << "The message was: " << buffer;
 						delete[] buffer;
 						// // Send a message to the connection
-						std::string response = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: text/html\r\nContent-Length: 20\r\n\r\n Good day\n";
+						// std::string response = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: text/html\r\nContent-Length: 20\r\n\r\n Good day\n";
 						std::ifstream	file;
-						file.open("./rss/html/index.html");
+						file.open("./rss/html/main.html");
 						if (!file.is_open())
 							std::cout << "error html" << std::endl;
 						std::stringstream content;
 						content << file.rdbuf();
 						// std::cout << content.str();
-						send(this->pfds[i].fd, response.c_str(), response.size(), 0);
-						send(this->pfds[i].fd, content.str().c_str(), content.str().size(), 0);
+						std:: stringstream response;
+						response << "HTTP/1.1 200 OK\r\n" << "Version: HTTP/1.1\r\n"
+						<< "Content-Type: text/html; charset=utf-8\r\n"
+						<< "Content-Length: " << content.str().length()
+						<< "\r\n\r\n"
+						<< content.str();
+
+						// std::string response = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: text/html\r\nContent-Length: 20\r\n" + content.str() + "\r\n\r\n";
+						send(this->pfds[i].fd, response.str().c_str(), response.str().length(), 0);
+						// send(this->pfds[i].fd, content.str().c_str(), content.str().size(), 0);
 						file.close();
+						if (req.getUri().find("/favicon.ico"))
+						{
+							// std::stringstream response;
+        					// response << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: image/png\r\nContent-Length: " << m_fav_icon_buffer.size() << "\r\n\r\n";
+							
+							std::ifstream	file;
+							file.open("./rss/html/icons8.png");
+							if (!file.is_open())
+								std::cout << "error html" << std::endl;
+							std::stringstream content;
+							content << file.rdbuf();
+							// // std::cout << content.str();
+							std:: stringstream response;
+							response << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: image/apng\r\nContent-Length: " << content.str().size()
+							<< "\r\n\r\n"
+							<< content.str();
+							
+							// std::cout << response.str();
+							// std::string response = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: text/html\r\nContent-Length: 20\r\n" + content.str() + "\r\n\r\n";
+							send(this->pfds[i].fd, response.str().c_str(), response.str().length(), 0);
+							// send(this->pfds[i].fd, content.str().c_str(), content.str().size(), 0);
+							file.close();
+						}
+
 					}
 				}
 			}
-			if (this->pfds[i].revents & POLLOUT)
-			{
-				std::cout << "out\n" ;
-			}
-
 		}
 	}
 }
@@ -103,4 +130,3 @@ void	Server::main_cycle()
 Server::~Server()
 {
 }
-

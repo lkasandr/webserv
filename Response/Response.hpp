@@ -10,7 +10,7 @@ class Response
 private:
 	/* data */
 public:
-	Response(/* args */);
+	Response(int fd);
 	~Response();
 };
 

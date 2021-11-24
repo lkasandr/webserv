@@ -25,6 +25,7 @@ public:
 	void 	init_pfd(int fd);
 	int 	check_fd(int fd);
 	void 	accept_connection(int fd);
+	void	communication(int fd, int i);
 };
 
 

@@ -21,6 +21,11 @@ std::string	Request::getUri() const
 	return this->uri;
 }
 
+std::string	Request::getHTTP_version() const
+{
+	return this->http_version;
+}
+
 std::string	Request::getHost() const
 {
 	return this->host;
@@ -55,6 +60,14 @@ void		Request::setUri(std::string line)
 	this->uri = uri;
 }
 
+void		Request::setHTTP_version(std::string line)
+{
+	std::string version;
+	size_t pos = line.find("HTTP");
+	version.append(line, pos, pos + 8);
+	this->http_version = version;
+}
+
 void		Request::parseRequest(char *buffer)
 {
     std::string		line(buffer);
@@ -64,4 +77,8 @@ void		Request::parseRequest(char *buffer)
 	this->first_line = line.substr(prev, pos - prev);
 	setMethod(this->first_line);
 	setUri(this->first_line);
+	setHTTP_version(this->first_line);
+	// setHeaders();
+	// setBody();
+
 }

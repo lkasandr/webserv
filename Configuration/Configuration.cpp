@@ -11,6 +11,8 @@ Configuration::Configuration()
 	this->method_get = 0;
 	this->method_post = 0;
 	this->method_delete = 0;
+	this->location = "home";
+	this->index = "./rss/home/index.html";
 }
 
 Configuration::Configuration(const Configuration & copy)
@@ -31,6 +33,8 @@ Configuration& Configuration::operator=(const Configuration& other)
 	this->method_get = other.getGet();
 	this->method_post = other.getPost();
 	this->method_delete = other.getDelete();
+	this->location = other.getlocation();
+	this->index = other.getIndex();
 	return *this;
 }
 
@@ -90,6 +94,16 @@ bool	Configuration::getDelete() const
 	return this->method_delete;
 }
 
+std::string Configuration::getlocation() const
+{
+	return this->location;
+}
+
+std::string Configuration::getIndex() const
+{
+	return this->index;
+}
+
 //////////////
 // Setters ///
 //////////////
@@ -122,6 +136,16 @@ void		Configuration::setClientBodySize(std::string value)
 void	Configuration::setHttpMethod(std::string value)
 {
 	this->http_method = value;
+}
+
+void		Configuration::setLocation(std::string value) 
+{
+	this->location = value;
+}
+
+void		Configuration::setIndex(std::string value) 
+{
+	this->index = value;
 }
 
 
@@ -161,5 +185,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	out << "default_error_pages: " << config.getDefaultErrorPages() << std::endl;
 	out << "client body size: " << config.getClientBodySize() << std::endl;
 	out << "HTTP methods: " << config.getHttpMethod() << std::endl;
+	out << "Location: " << config.getlocation() << std::endl;
+	out << "Index: " << config.getIndex() << std::endl;
 	return (out);
 }

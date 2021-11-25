@@ -18,7 +18,9 @@ private:
 	std::string		http_method;
 	bool			method_get;
 	bool			method_post;
-	bool			method_delete;	
+	bool			method_delete;
+	std::string		location;
+	std::string		index;	
 public:
 	Configuration();
 	Configuration(char *conf_path);
@@ -35,12 +37,17 @@ public:
 	bool		getGet() const;
 	bool		getPost() const;
 	bool		getDelete() const;
+	std::string	getlocation() const;
+	std::string	getIndex() const;
+
 	void		setHost(std::string value) ;
 	void		setPort(std::string value);
 	void		setServerName(std::string value) ;
 	void		setDefaultErrorPages(std::string value) ;
 	void		setClientBodySize(std::string value) ;
 	void		setHttpMethod(std::string value);
+	void		setLocation(std::string value);
+	void		setIndex(std::string value);
 	bool		checkGet();
 	bool		checkPost();
 	bool		checkDelete();

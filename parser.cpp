@@ -66,6 +66,18 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 				pos_end = line.find(";", pos_beg);
 				conf.setServerName(line.substr(pos_beg, pos_end - pos_beg));
 			}
+			else if (line.find("location", pos_beg) != std::string::npos)
+			{
+				pos_beg = line.find("location ") + 9;
+				pos_end = line.find(";", pos_beg);
+				conf.setLocation(line.substr(pos_beg, pos_end - pos_beg));
+			}
+			else if (line.find("index ", pos_beg) != std::string::npos)
+			{
+				pos_beg = line.find("index ") + 6;
+				pos_end = line.find(";", pos_beg);
+				conf.setIndex(line.substr(pos_beg, pos_end - pos_beg));
+			}
 			else if (line.find("default_error_pages ", pos_beg) != std::string::npos)
 			{
 				pos_beg = line.find("default_error_pages ") + 20;

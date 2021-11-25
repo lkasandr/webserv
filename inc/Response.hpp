@@ -16,7 +16,6 @@ class Response
 {
 private:
 	int		fd;
-	
 public:
 	Response(int fd);
 	~Response();

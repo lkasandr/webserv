@@ -1,8 +1,91 @@
 #include "Response.hpp"
 
 
-Response::Response(/* args */)
+Response::Response(int fd)
 {
+	this->fd = fd;
+}
+
+void Response::make_response(Request &request, std::vector<Configuration> config, int fd)
+{
+	if (fd > -1)
+		check_method(config, request);
+}
+
+
+void get_method(int fd)
+{
+	std::ifstream	file;
+	file.open("./rss/html/main.html");
+	if (!file.is_open())
+		std::cout << "error html" << std::endl;
+	std::stringstream content;
+	content << file.rdbuf();
+	std:: stringstream response;
+	response << "HTTP/1.1 200 OK\r\n" << "Version: HTTP/1.1\r\n"
+	<< "Content-Type: text/html; charset=utf-8\r\n"
+	<< "Content-Length: " << content.str().length()
+	<< "\r\n\r\n"
+	<< content.str();
+	send(fd, response.str().c_str(), response.str().length(), 0);
+	file.close();
+}
+
+
+void Response::check_method(std::vector<Configuration> configs, Request &request)
+{
+	std::string 	method[3] = {"GET", "POST", "DELETE"};
+	int m = 0;
+	while(m < 3 && request.getMethod().compare(method[m]) != 0 )
+		m++;
+	switch (m)
+	{
+	case 0:
+		std::cout << "Method GET" << std::endl;
+		// for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+		// {
+		// 	if (it->getPort() == request.getPort())
+		// 	{	
+		// 		if (it->checkGet())
+					get_method(this->fd);
+		// 		else
+		// 		{
+		// 			std::cout << "Method not allowed" << std::endl;
+		// 			// 405 error html
+		// 		}
+		// 	}
+		// }
+		break;
+	case 1:
+		std::cout << "Method POST" << std::endl;
+		// for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+		// {
+		// 	if (it->getPort() == request.getPort())
+		// 	{	
+		// 		if (it->checkPost())
+		// 			post_method(fd);
+		// 		else
+		// 			std::cout << "Method not allowed" << std::endl; // 405 error html
+		// 	}
+		// }
+		break;
+	case 2:
+		std::cout << "Method DELETE" << std::endl;
+		// for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+		// {
+		// 	if (it->getPort() == request.getPort())
+		// 	{	
+		// 		if (it->checkDelete())
+		// 			delete_method(fd);
+		// 		else
+		// 			std::cout << "Method not allowed" << std::endl; // 405 error html
+		// 	}
+		// }
+		break;
+	default:
+		std::cout << "Uncknown method" << std::endl;	//501 not implemented
+		break;
+	}	
 }
 
 Response::~Response()

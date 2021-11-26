@@ -60,7 +60,7 @@ void Server::communication(int fd, int i)
 	delete[] buffer;
 
 	Response response(fd);
-	response.make_response(request, config, fd);
+	response.make_response(&request, config);
 }
 
 void	Server::main_cycle()

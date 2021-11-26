@@ -3,7 +3,7 @@
 
 Request::Request()
 {
-
+	this->code = 200;
 }
 
 Request::~Request()
@@ -39,6 +39,11 @@ std::string Request::getHeaders() const
 std::string Request::getBody() const
 {
 	return this->protocol_body;
+}
+
+int Request::getCode() const
+{
+	return this->code;
 }
 
 void		Request::setMethod(std::string line)

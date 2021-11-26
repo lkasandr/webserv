@@ -1,12 +1,13 @@
 #include "webserv.hpp"
 
+
 int main(int argc, char **argv)
 {
 	const char *path = "rss/default.conf";
 	if (argc == 2)
 		path = argv[1];
 	std::vector<Configuration>  configs;
-	int server_count;
+	int server_count;	//???
 	try
 	{
 		server_count = read_conf(path, configs);

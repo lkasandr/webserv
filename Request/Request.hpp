@@ -15,6 +15,7 @@ private:
 	std::string http_version;
 	std::string protocol_headers;
 	std::string	protocol_body;
+	int			code;
 
 public:
 	Request();
@@ -31,6 +32,7 @@ public:
 	std::string	getPort() const;
 	std::string getHeaders() const;
 	std::string getBody() const;
+	int			getCode() const;
 
 	void		setMethod(std::string line);
 	void		setUri(std::string line);

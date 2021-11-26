@@ -66,21 +66,42 @@ std::map<std::string, std::string> Request::getHeaders() const
 // 	}
 // }
 
-void		Request::setUri(std::string line)
+// void		Request::setUri(std::string line)
+// {
+// 	std::string uri;
+// 	size_t pos = line.find_first_of("/");
+// 	size_t end = line.find("HTTP", pos);
+// 	uri.append(line, pos, end - 4);
+// 	this->uri = uri;
+
+// 	std::cout << "URI IS : " << this->uri << std::endl;
+// }
+
+// void		Request::setHTTP_version(std::string line)
+// {
+// 	std::string version;
+// 	size_t pos = line.find("HTTP");
+// 	version.append(line, pos, pos + 8);
+// 	this->http_version = version;
+// }
+
+void Request::setHTTPversion(std::string line)
 {
-	std::string uri;
-	size_t pos = line.find_first_of("/");
-	size_t end = line.find("HTTP", pos);
-	uri.append(line, pos, end - 4);
-	this->uri = uri;
+	this->http_version = line.substr(0, 8);
+	if (this->http_version != "HTTP/1.1")
+		this->code = 505;
 }
 
-void		Request::setHTTP_version(std::string line)
+std::string Request::setURI(std::string line)
 {
-	std::string version;
-	size_t pos = line.find("HTTP");
-	version.append(line, pos, pos + 8);
-	this->http_version = version;
+	size_t pos = 0;
+	std::string temp;
+
+	while(pos != line.find(" ", 1))
+		pos++;
+	this->uri = line.substr(1, pos);
+	temp = line.substr(pos + 1, line.length() - pos);
+	return temp;
 }
 
 std::string		Request::setMethod(std::string line)
@@ -98,19 +119,17 @@ std::string		Request::setMethod(std::string line)
 		if (this->method == available_methods[i])
 			break;
 	}
-	// if (i == 3)
-	// 	this->code = 204;
+	if (i == 3)
+		this->code = 204;
 	temp = line.substr(pos, line.length() - pos);
 	return temp;
 }
 
 void Request::parse_first_line(std::string line)
 {
-	std::string temp;
-
-	temp = setMethod(line);
-	line = temp;
-	// temp = setURI(line);
+	line = setMethod(line);
+	line = setURI(line);
+	setHTTPversion(line);
 }
 
 void		Request::parseRequest(char *buffer)
@@ -121,7 +140,6 @@ void		Request::parseRequest(char *buffer)
 		pos++;
 	parse_first_line(line.substr(prev, pos - prev));
 
-	setUri(line.substr(prev, pos - prev));
 	// setHeaders(line.substr(prev, pos - prev));
 	// setBody(line.substr(prev, pos - prev));
 

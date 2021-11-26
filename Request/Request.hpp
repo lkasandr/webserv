@@ -12,8 +12,12 @@ private:
 	int			code;
 	std::string	method;
 	std::string uri;
-	std::string	host;
 	std::string http_version;
+
+
+
+	std::string	host;
+	
 	std::string protocol_headers;
 	std::string	protocol_body;
 	std::map<std::string, std::string> headers;
@@ -39,10 +43,9 @@ public:
 
 	void parse_first_line(std::string line);
 	std::string setMethod(std::string line);
+	std::string setURI(std::string line);
+	void setHTTPversion(std::string line);
 
-	// void		setMethod(std::string line);
-	void		setUri(std::string line);
-	void		setHTTP_version(std::string line);
 	void		setHost(std::string line);
 	void		setPort(std::string line);
 	

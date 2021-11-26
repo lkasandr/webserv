@@ -1,5 +1,6 @@
 {
 	"files.associations": {
+		"*.conf": "c",
 		"ostream": "cpp",
 		"__bit_reference": "cpp",
 		"__config": "cpp",
@@ -67,6 +68,18 @@
 		"memory_resource": "cpp",
 		"numeric": "cpp",
 		"random": "cpp",
-		"fstream": "cpp"
+		"fstream": "cpp",
+		"__tree": "cpp",
+		"codecvt": "cpp",
+		"compare": "cpp",
+		"condition_variable": "cpp",
+		"iomanip": "cpp",
+		"map": "cpp",
+		"queue": "cpp",
+		"stack": "cpp",
+		"thread": "cpp",
+		"concepts": "cpp",
+		"ranges": "cpp",
+		"stop_token": "cpp"
 	}
 }

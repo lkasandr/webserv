@@ -36,6 +36,11 @@ std::string	Request::getHTTP_version() const
 // 	return this->protocol_headers;
 // }
 
+std::string Request::getHost() const
+{
+	return this->host;
+}
+
 std::string Request::getBody() const
 {
 	return this->protocol_body;
@@ -103,6 +108,18 @@ void Request::parse_first_line(std::string line)
 	setHTTPversion(line);
 }
 
+void Request::add_headers(std::string line)
+{
+	size_t pos = 0;
+	std::string key, value;
+
+	while((pos != line.find(':', 0)) && (pos != std::string::npos))
+		pos++;
+	// key = line.substr(0, pos);
+	// value = line.substr(pos + 1, line.length() - pos);
+	// this->headers.insert(std::make_pair(key, value));
+}
+
 void		Request::parseRequest(char *buffer)
 {
     std::string		line(buffer);
@@ -112,14 +129,15 @@ void		Request::parseRequest(char *buffer)
 		pos++;
 	temp = line.substr(prev, pos - prev);
 	parse_first_line(temp);
-
-	//пока не встретили пустую строку:
-	while(temp != "/r/n/r/n")
+	//пока не встретили пустую строку или не дошли до конца лайна:
+	while(!temp.empty() && temp != "\r\n\r\n")
 	{
 		prev = pos + 1;
-		while(pos != line.find("\n", prev) || pos != line.length())
+		while(pos != line.find("\n", prev) && pos != line.length())
 			pos++;
-		temp = line.substr(prev, pos - prev);	
+		temp = line.substr(prev, pos - prev);
+		if (!temp.empty())
+			add_headers(temp);
 	}
 
 

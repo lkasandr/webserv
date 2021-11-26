@@ -4,18 +4,19 @@
 #include <string>
 #include <iostream>
 #include <istream>
+#include <map>
 
 class Request
 {
 private:
-	std::string	first_line;
+	int			code;
 	std::string	method;
 	std::string uri;
 	std::string	host;
 	std::string http_version;
 	std::string protocol_headers;
 	std::string	protocol_body;
-	int			code;
+	std::map<std::string, std::string> headers;
 
 public:
 	Request();
@@ -30,11 +31,16 @@ public:
 	std::string	getHost() const;
 	std::string getHTTP_version() const;
 	std::string	getPort() const;
-	std::string getHeaders() const;
+	// std::string getHeaders() const;
 	std::string getBody() const;
-	int			getCode() const;
+	int getCode() const;
+	std::map<std::string, std::string> getHeaders() const;
 
-	void		setMethod(std::string line);
+
+	void parse_first_line(std::string line);
+	std::string setMethod(std::string line);
+
+	// void		setMethod(std::string line);
 	void		setUri(std::string line);
 	void		setHTTP_version(std::string line);
 	void		setHost(std::string line);

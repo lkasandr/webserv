@@ -26,15 +26,15 @@ std::string	Request::getHTTP_version() const
 	return this->http_version;
 }
 
-std::string	Request::getHost() const
-{
-	return this->http_version;
-}
-
 // std::string	Request::getHost() const
 // {
-// 	return this->host;
+// 	return this->http_version;
 // }
+
+std::string	Request::getHost() const
+{
+	return this->host;
+}
 
 // std::string Request::getHeaders() const
 // {
@@ -98,8 +98,8 @@ std::string		Request::setMethod(std::string line)
 		if (this->method == available_methods[i])
 			break;
 	}
-	if (i == 3)
-		this->code = 204;
+	// if (i == 3)
+	// 	this->code = 204;
 	temp = line.substr(pos, line.length() - pos);
 	return temp;
 }
@@ -121,9 +121,9 @@ void		Request::parseRequest(char *buffer)
 		pos++;
 	parse_first_line(line.substr(prev, pos - prev));
 
-	
-	// setHeaders();
-	// setBody();
+	setUri(line.substr(prev, pos - prev));
+	// setHeaders(line.substr(prev, pos - prev));
+	// setBody(line.substr(prev, pos - prev));
 
 // /r/n/r/n - пустая строка перед body
 

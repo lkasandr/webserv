@@ -11,6 +11,10 @@ Request::~Request()
 
 }
 
+// ................................
+// ............ГЕТТЕРЫ.............
+// ................................
+
 std::string	Request::getMethod() const
 {
 	return this->method;
@@ -26,15 +30,6 @@ std::string	Request::getHTTP_version() const
 	return this->http_version;
 }
 
-// std::string	Request::getHost() const
-// {
-// 	return this->http_version;
-// }
-
-std::string	Request::getHost() const
-{
-	return this->host;
-}
 
 // std::string Request::getHeaders() const
 // {
@@ -56,35 +51,11 @@ std::map<std::string, std::string> Request::getHeaders() const
 	return this->headers;
 }
 
-// void		Request::setMethod(std::string line)
-// {
-// 	std::string	method[3] = {"GET", "POST", "DELETE"};
-// 	for(int i = 0; i < 3; i++)
-// 	{
-// 		if(line.find(method[i]) != std::string::npos)
-// 			this->method = method[i];
-// 	}
-// }
 
-// void		Request::setUri(std::string line)
-// {
-// 	std::string uri;
-// 	size_t pos = line.find_first_of("/");
-// 	size_t end = line.find("HTTP", pos);
-// 	uri.append(line, pos, end - 4);
-// 	this->uri = uri;
 
-// 	std::cout << "URI IS : " << this->uri << std::endl;
-// }
-
-// void		Request::setHTTP_version(std::string line)
-// {
-// 	std::string version;
-// 	size_t pos = line.find("HTTP");
-// 	version.append(line, pos, pos + 8);
-// 	this->http_version = version;
-// }
-
+// ................................
+// ............СЕТТЕРЫ.............
+// ................................
 void Request::setHTTPversion(std::string line)
 {
 	this->http_version = line.substr(0, 8);
@@ -135,10 +106,22 @@ void Request::parse_first_line(std::string line)
 void		Request::parseRequest(char *buffer)
 {
     std::string		line(buffer);
+	std::string		temp;
 	size_t prev = 0, pos = 0;
     while(pos != line.find("\n", prev))
 		pos++;
-	parse_first_line(line.substr(prev, pos - prev));
+	temp = line.substr(prev, pos - prev);
+	parse_first_line(temp);
+
+	//пока не встретили пустую строку:
+	while(temp != "/r/n/r/n")
+	{
+		prev = pos + 1;
+		while(pos != line.find("\n", prev) || pos != line.length())
+			pos++;
+		temp = line.substr(prev, pos - prev);	
+	}
+
 
 	// setHeaders(line.substr(prev, pos - prev));
 	// setBody(line.substr(prev, pos - prev));
@@ -152,4 +135,11 @@ void		Request::parseRequest(char *buffer)
 
 
 
-// method 
+// GET / HTTP/1.1
+// Host: localhost:8000
+// Upgrade-Insecure-Requests: 1
+// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15
+// Accept-Language: ru
+// Accept-Encoding: gzip, deflate
+// Connection: keep-alive

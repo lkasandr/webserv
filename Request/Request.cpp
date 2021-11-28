@@ -1,5 +1,7 @@
 #include "Request.hpp"
 
+#include <cctype>
+
 
 Request::Request()
 {
@@ -110,14 +112,16 @@ void Request::parse_first_line(std::string line)
 
 void Request::add_headers(std::string line)
 {
-	size_t pos = 0;
 	std::string key, value;
+	u_long i = 0;
 
-	while((pos != line.find(':', 0)) && (pos != std::string::npos))
-		pos++;
-	// key = line.substr(0, pos);
-	// value = line.substr(pos + 1, line.length() - pos);
-	// this->headers.insert(std::make_pair(key, value));
+	for (i = 0; i < line.length(); i++) {
+  		if (line[i] == ':')
+     		break;
+  	}
+	key = line.substr(0, i);
+	value = line.substr(i + 2, line.length() - i);
+	this->headers.insert(std::make_pair(key, value));
 }
 
 void		Request::parseRequest(char *buffer)
@@ -129,14 +133,13 @@ void		Request::parseRequest(char *buffer)
 		pos++;
 	temp = line.substr(prev, pos - prev);
 	parse_first_line(temp);
-	//пока не встретили пустую строку или не дошли до конца лайна:
-	while(!temp.empty() && temp != "\r\n\r\n")
+	while(!temp.empty() && (temp != "\r\n"))
 	{
 		prev = pos + 1;
 		while(pos != line.find("\n", prev) && pos != line.length())
 			pos++;
 		temp = line.substr(prev, pos - prev);
-		if (!temp.empty())
+		if (!temp.empty() && (temp != "\r"))
 			add_headers(temp);
 	}
 

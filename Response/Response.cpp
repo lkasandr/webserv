@@ -85,13 +85,13 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
-	// if (this->status_code != 200)
-	// 	check_errors(this->status_code);
-	// else
-	// {
+	if (this->status_code != 200)
+		check_errors(this->status_code);
+	else
+	{
 		check_method(config, request);
 		check_errors(this->status_code);
-	// }
+	}
 
 	// формируем ответ
 	if (request->getMethod() == "GET")
@@ -161,17 +161,6 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 // // 	send(fd, response.str().c_str(), response.str().length(), 0);
 // }
 
-// void	Response::method_post(std::vector<Configuration> configs, Request *request)
-// {
-// 	std::fstream postFile;
-
-// 	postFile.open(uri.c_str(), std::ios::app);
-
-// 	if (!postFile.is_open())
-// 		throw std::string "POST error, make file\n"
-	
-// 	postFile << _req->getBody().getBody();
-// }
 
 
 void Response::check_method(std::vector<Configuration> configs, Request *request)
@@ -241,12 +230,18 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 				if (it->checkDelete())
 				{
 					this->server = "Server: " + it->getServerName() + "\r\n";
-					this->content_path = "./rss" + uri_str;
-					std::cout << this->content_path.c_str() << std::endl;
-					 if (remove(this->content_path.c_str()))
+					
+					uri_str = "./rss" + uri_str;
+					
+					this->content_path = uri_str.c_str();
+					std::cout << this->content_path << std::endl;
+
+					
+					if (remove(this->content_path.c_str()))
         			{
 						// webserv/rss/delete/file.c
 						// throw std::string ("Error in remove DELETE method.");
+						// webserv/rss/test_delete/file_to_delete.html
 						std::cout << "Error in remove DELETE method." ;
 						std::cerr << errno << strerror(errno);
 					}

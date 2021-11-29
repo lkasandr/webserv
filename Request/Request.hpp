@@ -10,7 +10,7 @@ class Request
 		std::string	method;
 		std::string uri;
 		std::string http_version;
-		std::string	protocol_body;
+		std::string	body;
 		std::map<std::string, std::string> headers;
 
 	public:

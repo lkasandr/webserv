@@ -1,21 +1,12 @@
 #include "Request.hpp"
 
-#include <cctype>
-
-
 Request::Request()
 {
 	this->code = 200;
 }
 
 Request::~Request()
-{
-
-}
-
-// ................................
-// ............ГЕТТЕРЫ.............
-// ................................
+{}
 
 std::string	Request::getMethod() const
 {
@@ -30,17 +21,6 @@ std::string	Request::getUri() const
 std::string	Request::getHTTP_version() const
 {
 	return this->http_version;
-}
-
-
-// std::string Request::getHeaders() const
-// {
-// 	return this->protocol_headers;
-// }
-
-std::string Request::getHost() const
-{
-	return this->host;
 }
 
 std::string Request::getBody() const
@@ -58,11 +38,6 @@ std::map<std::string, std::string> Request::getHeaders() const
 	return this->headers;
 }
 
-
-
-// ................................
-// ............СЕТТЕРЫ.............
-// ................................
 void Request::setHTTPversion(std::string line)
 {
 	this->http_version = line.substr(0, 8);
@@ -98,7 +73,7 @@ std::string		Request::setMethod(std::string line)
 			break;
 	}
 	if (i == 3)
-		this->code = 204;
+		this->code = 501;
 	temp = line.substr(pos, line.length() - pos);
 	return temp;
 }
@@ -115,13 +90,19 @@ void Request::add_headers(std::string line)
 	std::string key, value;
 	u_long i = 0;
 
-	for (i = 0; i < line.length(); i++) {
+	for (i = 0; i < line.length(); i++) 
+	{
   		if (line[i] == ':')
      		break;
   	}
-	key = line.substr(0, i);
-	value = line.substr(i + 2, line.length() - i);
-	this->headers.insert(std::make_pair(key, value));
+	if (i == line.length())
+		this->code = 505;
+	else 
+	{
+		key = line.substr(0, i);
+		value = line.substr(i + 2, line.length() - i);
+		this->headers.insert(std::make_pair(key, value));
+	}
 }
 
 void		Request::parseRequest(char *buffer)
@@ -142,20 +123,17 @@ void		Request::parseRequest(char *buffer)
 		if (!temp.empty() && (temp != "\r"))
 			add_headers(temp);
 	}
+}
 
-
-	// setHeaders(line.substr(prev, pos - prev));
-	// setBody(line.substr(prev, pos - prev));
+// setHeaders(line.substr(prev, pos - prev));
+// setBody(line.substr(prev, pos - prev));
 
 // /r/n/r/n - пустая строка перед body
 
-// Request - status code - при ошибке - 204. 400, 505.   200 - по умолчанию
+// Request - status code - при ошибке - 204. 400, 505.   
+// status code = 200 - по умолчанию
 
-
-}
-
-
-
+// что вообще приходит из браузера:
 // GET / HTTP/1.1
 // Host: localhost:8000
 // Upgrade-Insecure-Requests: 1

@@ -7,6 +7,7 @@ class Request
 {
 	private:
 		int			code;
+		bool		cgi;
 		std::string	method;
 		std::string uri;
 		std::string http_version;
@@ -23,6 +24,8 @@ class Request
 		void parse_first_line(std::string line);
 		void add_headers(std::string line);
 		void setHTTPversion(std::string line);
+		void setBody(std::string line);
+		bool getCGI() const;
 		std::string	getMethod() const;
 		std::string	getUri() const;
 		std::string getHTTP_version() const;

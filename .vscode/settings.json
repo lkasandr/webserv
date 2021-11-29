@@ -81,6 +81,8 @@
 		"concepts": "cpp",
 		"ranges": "cpp",
 		"stop_token": "cpp",
-		"list": "cpp"
+		"list": "cpp",
+		"filesystem": "cpp",
+		"__functional_03": "cpp"
 	}
 }

@@ -25,7 +25,7 @@ std::string	Request::getHTTP_version() const
 
 std::string Request::getBody() const
 {
-	return this->protocol_body;
+	return this->body;
 }
 
 int Request::getCode() const
@@ -114,16 +114,28 @@ void		Request::parseRequest(char *buffer)
 		pos++;
 	temp = line.substr(prev, pos - prev);
 	parse_first_line(temp);
-	while(!temp.empty() && (temp != "\r\n"))
+	while(!temp.empty() && (temp != "\r"))
 	{
-		prev = pos + 1;
+		pos++;
+		prev = pos;
 		while(pos != line.find("\n", prev) && pos != line.length())
 			pos++;
-		temp = line.substr(prev, pos - prev);
+		temp = line.substr(prev, pos - prev + 1);
 		if (!temp.empty() && (temp != "\r"))
 			add_headers(temp);
+		if (temp == "\r")
+		{
+			std::cout << "WRITE BODY" << std::endl;
+			break;
+		}
 	}
+	if (temp == "\r")
+		std::cout << "WRITE BODY" << std::endl;
 }
+
+//CGI 1 or 0 from URI
+//проверить каким образом приходит пост (все ли прочитано)
+//ошибка substr где-то
 
 // setHeaders(line.substr(prev, pos - prev));
 // setBody(line.substr(prev, pos - prev));
@@ -142,3 +154,5 @@ void		Request::parseRequest(char *buffer)
 // Accept-Language: ru
 // Accept-Encoding: gzip, deflate
 // Connection: keep-alive
+
+//curl -X POST  http://localhost:8000 -d "name=value" -I

@@ -1,6 +1,8 @@
 #include "Response.hpp"
 #include <string.h>
 #include <errno.h>
+#include <string>
+#include <cstdio>
 
 Response::Response(int fd): fd(fd) 
 {
@@ -207,8 +209,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 			{	
 				if (it->checkPost())
 				{
-				
-					
+								
 					this->server = "Server: " + it->getServerName() + "\r\n";
 					this->content_path = it->getIndex();
 				}	
@@ -230,20 +231,19 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 				if (it->checkDelete())
 				{
 					this->server = "Server: " + it->getServerName() + "\r\n";
-					
-					uri_str = "./rss" + uri_str;
-					
-					this->content_path = uri_str.c_str();
-					std::cout << this->content_path << std::endl;
-
-					
+					this->content_path = uri_str.insert(0, std::string("./rss"));
+					for(size_t i = 0; i < this->content_path.length(); i++)
+   					{
+						if(this->content_path[i] == ' ')
+						{
+							this->content_path.erase(i,1);
+							i--;
+						}
+   					}
 					if (remove(this->content_path.c_str()))
         			{
-						// webserv/rss/delete/file.c
-						// throw std::string ("Error in remove DELETE method.");
-						// webserv/rss/test_delete/file_to_delete.html
-						std::cout << "Error in remove DELETE method." ;
-						std::cerr << errno << strerror(errno);
+						this->status_code = 500;
+						std::cout << "Error in remove DELETE method." << std::endl;
 					}
 				}	
 				else
@@ -267,16 +267,13 @@ Response::~Response()
 }
 
 
-std::ostream& operator<<(std::ostream& out, const Response& resp)
-{
-	out << "\nResponse:\n";
-	// out << "Status code: " << resp.status_code << resp.code_description << std::endl;
-	// out << "Port: " << config.getPort() << std::endl;
-	// out << "server_name: " << config.getServerName() << std::endl;
-	// out << "default_error_pages: " << config.getDefaultErrorPages() << std::endl;
-	// out << "client body size: " << config.getClientBodySize() << std::endl;
-	// out << "HTTP methods: " << config.getHttpMethod() << std::endl;
-	// out << "Location: " << config.getlocation() << std::endl;
-	// out << "Index: " << config.getIndex() << std::endl;
-	return (out);
-}
+// std::ostream& operator<<(std::ostream& out, const Response& resp)
+// {
+// 	out << "\nResponse:\n";
+// 	out << "Status code: " << resp.status_code << " " << resp.code_description << std::endl;
+// 	out << "HTTP version: " << resp.version << std::endl;
+// 	out << "Server_name: " << resp.server << std::endl;
+// 	out << "Date: " << resp.date << std::endl;
+// 	out << "Allow methods: " << resp.allow_method << std::endl;
+// 	return (out);
+// }

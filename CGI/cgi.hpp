@@ -14,6 +14,7 @@ class CGI
         CGI(Request req);
         ~CGI();
         void cgi_main(void);
+        std::string getQueryString(std::string URI);
 };
 
 

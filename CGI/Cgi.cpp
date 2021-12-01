@@ -2,42 +2,96 @@
 
 CGI::CGI(Request req)
 {
+    // REQUEST_METHOD +
+    // REQUEST_URI +
+    // QUERY_STRING +
+    // REMOTE_ADDR
+    // SCRIPT_NAME
+    // HTTP_COOKIE
+    // HTTP_REFERER
+
     this->env["REQUEST_METHOD"] = req.getMethod();
-    //здесь нужна map для заголовоков из запроса
-    std::map<std::string, std::string> headers;
-    if (headers.find("Authorization") != headers.end())
-    {
-        this->env["AUTH_TYPE"] = headers["Authorization"];
-        // if (this->env["AUTH_TYPE"] != "Basic" && this->env["AUTH_TYPE"] != "Digest"
-        //     && this->env["AUTH_TYPE"] != "NTLM" && this->env["AUTH_TYPE"] != "Negotiate")
-        // {
-        //     std::cout << "You have an errors AUTH_TYPE!";
-        // }                                                    // нужна ли проверка  AUTH_TYPE ????
-    }
-
-    this->env["CONTENT_LENGTH"] = std::to_string(this->body.length());
-
-    if (this->env["REQUEST_METHOD"] == "POST")
-        this->env["CONTENT_TYPE"] = headers["Content-type"];
-    
+    this->env["REQUEST_URI"] = req.getUri();
+    this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);
     this->env["GATEWAY_INTERFACE"] = "CGI/1.1";
 
-    // this->env["PATH_INFO"] =        //взять из request
+}
 
-    // пример PATH_INFO:
-    // http://somehost.com/cgi-bin/somescript/this%2eis%2epath%3binfo
+std::string CGI::getQueryString(std::string URI)
+{
+    size_t pos = 0;
+    std::string QueryString;
 
-    // /this.is.the.path;info
+    while(pos != URI.find("?", 0))
+			pos++;
+    QueryString = URI.substr(pos, URI.length() - pos);
+    return QueryString;
+}
+
+CGI::~CGI()
+{
+
+}
+
+void CGI::cgi_main(void)
+{
+    pid_t pid;
+    int status;
+
+    switch(pid=fork())
+    {
+        case -1: 
+        {
+            std::cerr << "Process creation failed" << std::endl;
+        }
+        case 0 : 
+        {
+            // execve(name_of_script, NULL, env) - выполнение скрипта cgi
+        }
+        default : 
+        {
+            waitpid(pid, &status, 0);
+        }
+    }
+}
 
 
-    // this->env["PATH_TRANSLATED"] =     //взять из request
+// this->env["REQUEST_METHOD"] = req.getMethod();
+    // //здесь нужна map для заголовоков из запроса
+    // std::map<std::string, std::string> headers;
+    // if (headers.find("Authorization") != headers.end())
+    // {
+    //     this->env["AUTH_TYPE"] = headers["Authorization"];
+    //     // if (this->env["AUTH_TYPE"] != "Basic" && this->env["AUTH_TYPE"] != "Digest"
+    //     //     && this->env["AUTH_TYPE"] != "NTLM" && this->env["AUTH_TYPE"] != "Negotiate")
+    //     // {
+    //     //     std::cout << "You have an errors AUTH_TYPE!";
+    //     // }                                                    // нужна ли проверка  AUTH_TYPE ????
+    // }
+
+    // this->env["CONTENT_LENGTH"] = std::to_string(this->body.length());
+
+    // if (this->env["REQUEST_METHOD"] == "POST")
+    //     this->env["CONTENT_TYPE"] = headers["Content-type"];
+    
+    // this->env["GATEWAY_INTERFACE"] = "CGI/1.1";
+
+    // // this->env["PATH_INFO"] =        //взять из request
+
+    // // пример PATH_INFO:
+    // // http://somehost.com/cgi-bin/somescript/this%2eis%2epath%3binfo
+
+    // // /this.is.the.path;info
 
 
-    // this->env["QUERY_STRING"] =            //взять из request
+    // // this->env["PATH_TRANSLATED"] =     //взять из request
 
-    this->env["REMOTE_ADDR"] = headers["HTTP_X_FORWARDED_FOR"];
 
-    this->env["REMOTE_HOST"] = req.getHost();                  //под вопросом 
+    // // this->env["QUERY_STRING"] =            //взять из request
+
+    // this->env["REMOTE_ADDR"] = headers["HTTP_X_FORWARDED_FOR"];
+
+    // this->env["REMOTE_HOST"] = req.getHost();                  //под вопросом 
 
     // this->env["REMOTE_IDENT"] = ;
 
@@ -85,34 +139,4 @@ CGI::CGI(Request req)
     
     // std::cout << this->env["REQUEST_METHOD"] << std::endl;
     // std::cout << this->env["QUERY_STRING"] << std::endl;
-    std::cout << this->env["SERVER_PROTOCOL"] << std::endl;
-    
-
-}
-
-CGI::~CGI()
-{
-
-}
-
-void CGI::cgi_main(void)
-{
-    pid_t pid;
-    int status;
-
-    switch(pid=fork())
-    {
-        case -1: 
-        {
-            std::cerr << "Process creation failed" << std::endl;
-        }
-        case 0 : 
-        {
-            // execve(name_of_script, NULL, env) - выполнение скрипта cgi
-        }
-        default : 
-        {
-            waitpid(pid, &status, 0);
-        }
-    }
-}
+    // std::cout << this->env["SERVER_PROTOCOL"] << std::endl;

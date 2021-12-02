@@ -1,49 +1,42 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-#include <string>
+#include "webserv.hpp"
 #include <iostream>
-#include <istream>
+#include <map>
+#include <string>
+#include <string_view>
 
 class Request
 {
-private:
-	std::string	first_line;
-	std::string	method;
-	std::string uri;
-	std::string	host;
-	std::string http_version;
-	std::string protocol_headers;
-	std::string	protocol_body;
-	int			code;
+	private:
+		int			code;
+		bool		cgi;
+		std::string	method;
+		std::string uri;
+		std::string http_version;
+		std::string	body;
+		std::map<std::string, std::string> headers;
 
-public:
-	Request();
-	Request(const Request& copy);
-	Request& operator=(const Request& other);
-	~Request();
-
-	void		parseRequest(char *buffer);
-
-	std::string	getMethod() const;
-	std::string	getUri() const;
-	std::string	getHost() const;
-	std::string getHTTP_version() const;
-	std::string	getPort() const;
-	std::string getHeaders() const;
-	std::string getBody() const;
-	int			getCode() const;
-
-	void		setMethod(std::string line);
-	void		setUri(std::string line);
-	void		setHTTP_version(std::string line);
-	void		setHost(std::string line);
-	void		setPort(std::string line);
-	
+	public:
+		Request();
+		Request(const Request& copy);
+		Request& operator=(const Request& other);
+		~Request();
+		int getCode() const;
+		void parseRequest(char *buffer);
+		void parse_first_line(std::string line);
+		void add_headers(std::string line);
+		void setHTTPversion(std::string line);
+		void setBody(std::string line);
+		bool getCGI() const;
+		std::string	getMethod() const;
+		std::string	getUri() const;
+		std::string getHTTP_version() const;
+		std::string getBody() const;
+		std::string setMethod(std::string line);
+		std::string setURI(std::string line);
+		std::map<std::string, std::string> getHeaders() const;
 };
-
-
-
-
 
 #endif

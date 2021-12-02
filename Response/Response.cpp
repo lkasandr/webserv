@@ -13,6 +13,7 @@ Response::Response(int fd): fd(fd)
 	this->connection = "Connection: Keep-Alive\r\n";
 	this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 	this->allow_method = "";
+	this->setCookie = "";
 }
 
 std::string get_date()
@@ -106,15 +107,15 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 			this->status_code = 404;
 			this->code_description = " Not Found\r\n";
 			this->connection = "Connection: Close\r\n";
-			file.open("./rss/error/error.html");
+			file.open("./rss/error/404.html");
 		}
 		std::stringstream content;
 		content << file.rdbuf();
 		std:: stringstream response;
 		response << this->version << this->status_code << this->code_description
 		<< this->date << this->server << this->connection << this->allow_method
-		<< this->contentType << "Content-Length: " << content.str().length() 
-		<< "\r\n\r\n" << content.str();
+		<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+		<< this->setCookie << "\r\n\r\n" << content.str();
 		send(fd, response.str().c_str(), response.str().length(), 0);
 		file.close();
 	}
@@ -123,7 +124,7 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 		std:: stringstream response;
 		response << this->version << this->status_code << this->code_description
 		<< this->date << this->server << this->connection << this->allow_method
-		<< "\r\n\r\n";
+		<< "\r\n\r\n" << " ";
 		send(fd, response.str().c_str(), response.str().length(), 0);
 	}
 }
@@ -151,6 +152,8 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 				{
 					this->server = "Server: " + it->getServerName() + "\r\n";
 					this->content_path = it->getIndex();
+					if (this->setCookie == "")
+						this->setCookie = "Set-Cookie: name=" + it->getServerName() + "\r\n";
 				}	
 				else
 				{
@@ -173,6 +176,11 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 					if(request->getBody().size() > (size_t) it->getClientBodySize())
 					{	
 						this->status_code = 413;
+						break;
+					}
+					if(request->getBody().length() == 0 || request->getBody().size() == 0)
+					{
+						this->status_code = 204;
 						break;
 					}
 					std::fstream newfile;
@@ -283,6 +291,5 @@ std::ostream& operator<<(std::ostream& out, const Response& resp)
 	out << "HTTP version: " << resp.getVersion() << std::endl;
 	out << resp.getServer();
 	out << "Date: " << resp.getDate();
-	out << "Allow methods: " << resp.getAllow_method() << std::endl;
 	return (out);
 }

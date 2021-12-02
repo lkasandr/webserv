@@ -60,6 +60,8 @@ void Server::communication(int fd, int i)
 	delete[] buffer;
 	Response response(fd);
 	response.make_response(&request, config);
+	// close(fd);				///???
+	// pfds.erase(pfds.begin() + i);		///???
 	std::cout << response;
 }
 

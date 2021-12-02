@@ -11,27 +11,26 @@
 #include "webserv.hpp"
 #include <fstream>
 #include <sstream>
-
-
+#include <cstdio>
 
 class Request;
-
+class Configuration;
 
 class Response
 {
 private:
 	int					fd;
 	int					status_code;
-	std::stringstream 	content;
+	std::string			code_description;
+	std::string 		content_path;
+	std::string			version;
 	std::string			server;
 	std::string			date;
 	std::string			contentType;
-	std::string			contentLength;
-	std::string			lastModified;
+	std::string			allow_method;
+	std::string			location;
 	std::string			connection;
-	std::string			transferEncoding;
 	std::string			setCookie;
-	
 public:
 	Response(int fd);
 	// Response(const Response & copy);
@@ -41,8 +40,20 @@ public:
 	void make_response(Request *request, std::vector<Configuration> config);
 	void check_method(std::vector<Configuration> configs, Request *request);
 	void get_method(int fd, Configuration & conf);
+	int	 find_config(std::vector<Configuration> configs, std::string URI);
+	void check_errors(int code);
+
+	//getters
+
+	int getStatus_code() const;
+	std::string getCodeDescription() const;
+	std::string getVersion() const;
+	std::string getServer() const;
+	std::string getDate() const;
+	std::string getAllow_method() const;
 };
 
+std::ostream& operator<<(std::ostream& out, const Response& response);
 
 
 #endif

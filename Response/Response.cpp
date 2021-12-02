@@ -32,49 +32,50 @@ void Response::check_errors(int code)
 	{
 	case 204:	// No Content
 		this->code_description = " No Content\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/204.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		break;
 	case 301: // Moved Permanently
 		this->code_description = " Moved Permanently\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/301.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		break;
 	case 400: // Bad Request 
 		this->code_description = " Bad Request\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/400.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		break;
 	case 404: // Not Found
 		this->code_description = " Not Found\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/404.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		this->connection = "Connection: Close\r\n";
 		break;
 	case 405: // Method Not Allowed 
 		this->code_description = " Method Not Allowed\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/405.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		break;
 	case 413: // Payload Too Large
 		this->code_description = " Payload Too Large\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/413.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
+		this->connection = "Connection: Close\r\n";
 		break;
 	case 500: //  Internal Server Error
 		this->code_description = " Internal Server Error\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/500.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		this->connection = "Connection: Close\r\n";
 		break;
 	case 501: //  Not Implemented
 		this->code_description = " Not Implemented\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/501.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		break;
 	case 505: //  HTTP Version Not Supported
 		this->code_description = " HTTP Version Not Supported\r\n";
-		this->content_path = "./rss/error/error.html";
+		this->content_path = "./rss/error/505.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		this->connection = "Connection: Close\r\n";
 		break;
@@ -127,49 +128,13 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 	}
 }
 
-// void	send_icon(int fd)
-// {
-// 	std::vector<char> 	m_fav_icon_buffer;
-// 	std::ifstream f_icon_file;
-// 	// fs::path path_icon_file = fs::current_path() / "icons" / "favicon.png";
-// 	f_icon_file.open("./rss/html/icons8.png", std::ios::binary | std::ios::ate);
-
-// 	if(!f_icon_file.is_open())
-// 	{
-// 		std::cerr << "favicon file did not opened! path - " << "./rss/html/favicon.ico" << std::endl;
-// 	}
-
-// 	std::streamsize size = f_icon_file.tellg();
-// 	m_fav_icon_buffer.resize(size);
-// 	f_icon_file.seekg(0, std::ios::beg);
-// 	if(!f_icon_file.read(m_fav_icon_buffer.data(), size))
-// 	{
-// 		std::cerr << "favicon read error!" << std::endl;
-// 	}
-// 	f_icon_file.close();
-// 	std::stringstream response;
-// 	response << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: image/png\r\nContent-Length: " << m_fav_icon_buffer.size() << "\r\n\r\n"
-// 	<< m_fav_icon_buffer.data();
-	
-// 	send(fd, response.str().c_str(), response.str().size(), 0);
-// // 	// std::ifstream 		file;
-// // 	// file.open("./rss/html/favicon.ico");
-
-// // 	// // favicon_buffer.data()
-// // 	// std::stringstream content;
-// // 	// content << file.rdbuf();
-// // 	// std::stringstream response;
-// //     // response << "HTTP/1.1 200 OK\r\nConnection: Keep-alive\r\nContent-Type: image/png\r\nContent-Length: " << content.str().size() << "\r\n\r\n" << content.str();
-// // 	send(fd, response.str().c_str(), response.str().length(), 0);
-// }
-
-
-
 void Response::check_method(std::vector<Configuration> configs, Request *request)
 {
 	std::string uri_str = request->getUri();
 	if (uri_str == "/ ")
 		uri_str = "/home ";
+	if (uri_str == "/redirect ")
+		this->status_code = 301;
 	std::string 	method[3] = {"GET", "POST", "DELETE"};
 	int m = 0;
 	while(m < 3 && request->getMethod().compare(method[m]) != 0 )
@@ -180,11 +145,6 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 		std::cout << "Method GET" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
-			// if (uri_str.find("favicon"))
-			// {
-			// 	send_icon(this->fd);
-			// 	break;
-			// }
 			if (uri_str.find(it->getlocation()) != std::string::npos)
 			{	
 				if (it->checkGet())
@@ -209,9 +169,26 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 			{	
 				if (it->checkPost())
 				{
-								
 					this->server = "Server: " + it->getServerName() + "\r\n";
-					this->content_path = it->getIndex();
+					if(request->getBody().size() > (size_t) it->getClientBodySize())
+					{	
+						this->status_code = 413;
+						break;
+					}
+					std::fstream newfile;
+					newfile.open("./rss/post/test_post.txt", std::ios_base::app);
+					if (!newfile.is_open())
+					{
+						this->status_code = 500;
+						break;
+					}
+					newfile << request->getBody();
+					this->status_code = 201;
+					this->code_description = " Created.";
+					this->location = "./rss/post/test_post.txt";
+					this->connection = "Connection: Close\r\n";
+					newfile.close();
+					break;
 				}	
 				else
 				{
@@ -266,14 +243,46 @@ Response::~Response()
 {
 }
 
+// getters
 
-// std::ostream& operator<<(std::ostream& out, const Response& resp)
-// {
-// 	out << "\nResponse:\n";
-// 	out << "Status code: " << resp.status_code << " " << resp.code_description << std::endl;
-// 	out << "HTTP version: " << resp.version << std::endl;
-// 	out << "Server_name: " << resp.server << std::endl;
-// 	out << "Date: " << resp.date << std::endl;
-// 	out << "Allow methods: " << resp.allow_method << std::endl;
-// 	return (out);
-// }
+int Response::getStatus_code() const
+{
+	return this->status_code;
+}
+
+std::string Response::getCodeDescription() const
+{
+	return this->code_description;
+}
+
+std::string Response::getVersion() const
+{
+	return this->version;
+}
+
+std::string Response::getServer() const
+{
+	return this->server;
+}
+
+std::string Response::getDate() const
+{
+	return this->date;
+}
+
+std::string Response::getAllow_method() const
+{
+	return this->allow_method;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const Response& resp)
+{
+	out << "\033[33mResponse: \033[0m";
+	out << "Status code: " << resp.getStatus_code() << " " << resp.getCodeDescription();
+	out << "HTTP version: " << resp.getVersion() << std::endl;
+	out << resp.getServer();
+	out << "Date: " << resp.getDate();
+	out << "Allow methods: " << resp.getAllow_method() << std::endl;
+	return (out);
+}

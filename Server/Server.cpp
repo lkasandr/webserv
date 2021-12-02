@@ -56,11 +56,11 @@ void Server::communication(int fd, int i)
 	}
 	Request	request;
 	request.parseRequest(buffer);
-	std::cout << "\033[33mThe message was: \033[0m" << buffer;
+	std::cout << "\033[33mRequest: \033[0m" << buffer;
 	delete[] buffer;
-
 	Response response(fd);
 	response.make_response(&request, config);
+	std::cout << response;
 }
 
 void	Server::main_cycle()

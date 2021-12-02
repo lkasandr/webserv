@@ -53,11 +53,11 @@ void Request::setBody(std::string line)
 void Request::setHTTPversion(std::string line)
 {
 	this->http_version = line.substr(0, 8);
-	// std::cout << this->http_version  << std::endl;
+	std::cout << "HTTP VERSION: " << this->http_version  << std::endl;
 	// std::cout << this->http_version.length()  << std::endl;
 	if (this->http_version != "HTTP/1.1")
 		this->code = 505;
-	// std::cout << "CODE IN REQUEST: " << code << std::endl;
+	std::cout << "CODE IN REQUEST: " << code << std::endl;
 }
 
 std::string Request::setURI(std::string line)
@@ -87,7 +87,7 @@ std::string		Request::setMethod(std::string line)
 	std::string temp;
 	std::string	available_methods[3] = {"GET", "POST", "DELETE"};
 
-	while(pos != line.find(" ", 0))
+	while(pos != line.find(" ", 0) && (pos != line.length()))
 		pos++;
 	this->method = line.substr(0, pos);
 	for(i = 0; i < available_methods->size(); i++)
@@ -134,20 +134,29 @@ void		Request::parseRequest(char *buffer)
     std::string		line(buffer);
 	std::string		temp;
 	size_t prev = 0, pos = 0;
+	// std::cout << "1" << std::endl;
+	// std::cout << "BUFFER: " << buffer << std::endl;
     while(pos != line.find("\n", prev))
 		pos++;
+	// std::cout << "2" << std::endl;
 	temp = line.substr(prev, pos - prev);
+	// std::cout << "3" << std::endl;
 	parse_first_line(temp);
-	while(!temp.empty() && (temp != "\r\n"))
+	// std::cout << "4" << std::endl;
+	while(temp.empty() && (temp != "\r\n") && (pos < line.length()))
 	{
 		pos++;
 		prev = pos;
 		while(pos != line.find("\n", prev) && pos != line.length())
 			pos++;
 		temp = line.substr(prev, pos - prev + 1);
+		// std::cout << "2" << std::endl;
 		if (!temp.empty() && (temp != "\r\n"))
 			add_headers(temp);
+		std::cout << "TEMP: " << temp << std::endl;
+		// std::cout << "3" << std::endl;
 	}
+	// std::cout << "4" << std::endl;
 	if (getMethod() == "POST")
 	{
 		prev = pos;
@@ -157,6 +166,7 @@ void		Request::parseRequest(char *buffer)
 		// std::cout << "BODY: " << temp << std::endl;
 		setBody(temp);
 	}
+	// std::cout << "5" << std::endl;
 }
 
 //CGI 1 or 0 from URI

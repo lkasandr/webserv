@@ -10,6 +10,7 @@ CGI::CGI(Request req)
     // HTTP_COOKIE
     // HTTP_REFERER
 
+    //content-type = chunk (content-lenght) - раз
     this->env["REQUEST_METHOD"] = req.getMethod();
     this->env["REQUEST_URI"] = req.getUri();
     this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);

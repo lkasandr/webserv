@@ -1,45 +1,4 @@
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-BODY IS HERE
-BODY IS HERE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-Host: localhost:8000
-User-Agent: Go-http-client/1.1
-Transfer-Encoding: chunked
-Content-Type: test/file
-Accept-Encoding: 
-Host: localhost:8000
-User-Agent: Go-http-client/1.1
-Transfer-Encoding: chunked
-Content-Type: test/file
-Accept-Encoding: 
-Host: localhost:8000
-User-Agent: Go-http-client/1.1
-Transfer-Encoding: chunked
-Content-
-Host: localhost:8000
-User-Agent: Go-http-client/1.1
-Transfer-Encoding: chunked
-Content-
-Host: localhost:8000
-User-Agent: Go-http-client/1.1
-Transfer-Encoding: chunked
-Content-
 Host: localhost:8000
 User-Agent: Go-http-client/1.1
 Transfer-Encoding: chunked
@@ -51,21 +10,98 @@ Content-Type: plain/text
 Content-Length: 36
 
 BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
-=======
-fname=&lname=
-fname=&lname=
-fname=&lname=
-fname=&lname=
->>>>>>> Stashed changes
-=======
-fname=&lname=
-fname=&lname=
-fname=&lname=
-fname=&lname=
->>>>>>> Stashed changes
-=======
-fname=&lname=
-fname=&lname=
-fname=&lname=
-fname=&lname=
->>>>>>> Stashed changes
+Host: localhost:8081
+User-Agent: curl/7.68.0
+Accept: */*
+Content-Type: plain/text
+Content-Length: 36
+
+BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
+Host: localhost:8081
+User-Agent: curl/7.68.0
+Accept: */*
+Content-Type: plain/text
+Content-Length: 36
+
+BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: 
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: 
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: gzip
+
+0
+
+nt: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: gzip
+
+0
+
+nt: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-POST /post HTTP/1.1
+Host: localhost:8081
+User-Agent: curl/7.68.0
+Accept: */*
+Content-Type: plain/text
+Content-Length: 36
+
+BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjEnsfer-Encoding: chunked
+Content-
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: 
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: POST /post HTTP/1.1
+Host: localhost:8081
+User-Agent: curl/7.68.0
+Accept: */*
+Content-Type: plain/text
+Content-Length: 36
+
+BODY IS HERhfdjhdfjghjfhgdjfhgjdhfjE
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzipunked
+Content-

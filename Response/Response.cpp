@@ -178,11 +178,11 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 						this->status_code = 413;
 						break;
 					}
-					if(request->getBody().length() == 0 || request->getBody().size() == 0)
-					{
-						this->status_code = 204;
-						break;
-					}
+					// if(request->getBody().length() == 0 || request->getBody().size() == 0)
+					// {
+					// 	this->status_code = 204;
+					// 	break;
+					// }
 					std::fstream newfile;
 					newfile.open("./rss/post/test_post.txt", std::ios_base::app);
 					if (!newfile.is_open())
@@ -192,7 +192,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 					}
 					newfile << request->getBody();
 					this->status_code = 201;
-					this->code_description = " Created.";
+					this->code_description = " Created.\r\n";
 					this->location = "./rss/post/test_post.txt";
 					this->connection = "Connection: Close\r\n";
 					newfile.close();

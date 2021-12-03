@@ -53,11 +53,11 @@ void Request::setBody(std::string line)
 void Request::setHTTPversion(std::string line)
 {
 	this->http_version = line.substr(0, 8);
-	std::cout << "HTTP VERSION: " << this->http_version  << std::endl;
+	// std::cout << "HTTP VERSION: " << this->http_version  << std::endl;
 	// std::cout << this->http_version.length()  << std::endl;
 	if (this->http_version != "HTTP/1.1")
 		this->code = 505;
-	std::cout << "CODE IN REQUEST: " << code << std::endl;
+	// std::cout << "CODE IN REQUEST: " << code << std::endl;
 }
 
 std::string Request::setURI(std::string line)

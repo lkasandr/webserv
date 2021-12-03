@@ -183,5 +183,5 @@ Server::~Server()
 
 const char* Server::SocketError::what(void) const throw()
 {
-	return "Socket's error";
+	return "\033[31mSocket's error \033[0m";
 }

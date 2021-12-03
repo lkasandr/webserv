@@ -34,7 +34,7 @@ int Socket::bind_socket(unsigned short int port)
     }
     if (bind(this->listening_socket_fd, (struct sockaddr*)&this->addr, sizeof(this->addr)) != 0)
     {
-        std::cerr << "Error in getting socket address." << std::endl;
+        std::cerr << "\033[31mError in getting socket address. \033[0m" << std::endl;
 		// std::exit(EXIT_FAILURE);
         return (-1);
     }

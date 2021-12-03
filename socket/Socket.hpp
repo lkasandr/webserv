@@ -12,6 +12,7 @@ class Socket
         int listening_socket_fd;
         int accept_socket_fd;
         int opt;
+        unsigned short int port;
         struct sockaddr_in addr;
         struct sockaddr_in new_addr;
         socklen_t len;
@@ -19,13 +20,17 @@ class Socket
     public:
         Socket(unsigned short int port);
         ~Socket();
-        void create_socket();
-        void bind_socket(unsigned short int port);
-        void listen_socket();
+        // void create_socket();
+        // void bind_socket(unsigned short int port);
+        // void listen_socket();
         int accept_socket();
-        //геттеры:
         int get_listening_socket_fd();
         int get_accept_socket_fd();
+        
+        int create_socket();
+        int bind_socket(unsigned short int port);
+        int listen_socket();
+        int setting_socket();
 };
 
 #endif

@@ -48,8 +48,8 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	this->body = line;
-	// if(this->body.length() == 0 || this->body.size() == 0)
-	// 	this->code = 204;
+	if(this->body.length() == 0 || this->body.size() == 0)
+		this->code = 204;
 }
 
 void Request::setHTTPversion(std::string line)

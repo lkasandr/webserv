@@ -35,6 +35,12 @@ public:
 	public:
 		const char* what(void) const throw();
 	};
+
+	class SocketError: public std::exception 
+	{
+	public:
+		const char* what(void) const throw();
+	};
 };
 
 

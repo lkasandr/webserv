@@ -1,13 +1,14 @@
 #include "Socket.hpp"
 
-void Socket::create_socket()
+int Socket::create_socket()
 {
     this->listening_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->listening_socket_fd == -1)
     {
         std::cerr << "Error in socket creation." << std::endl;
-		std::exit(EXIT_FAILURE);
+		return (-1);
     }
+    return (0);
 }
 
 int Socket::get_listening_socket_fd()
@@ -20,7 +21,7 @@ int Socket::get_accept_socket_fd()
     return this->accept_socket_fd;
 }
 
-void Socket::bind_socket(unsigned short int port)
+int Socket::bind_socket(unsigned short int port)
 {
     this->addr.sin_family = AF_INET;
     this->addr.sin_port = htons(port);
@@ -28,22 +29,27 @@ void Socket::bind_socket(unsigned short int port)
     if (setsockopt(this->listening_socket_fd, SOL_SOCKET, SO_REUSEADDR, &this->opt, sizeof(this->opt)) < 0)
     {
         std::cerr << "Error in setsockopt." << std::endl;
-		std::exit(EXIT_FAILURE);
+		// std::exit(EXIT_FAILURE);
+        return (-1);
     }
     if (bind(this->listening_socket_fd, (struct sockaddr*)&this->addr, sizeof(this->addr)) != 0)
     {
         std::cerr << "Error in getting socket address." << std::endl;
-		std::exit(EXIT_FAILURE);
+		// std::exit(EXIT_FAILURE);
+        return (-1);
     }
+    return 0;
 }
 
-void Socket::listen_socket()
+int Socket::listen_socket()
 {
     if (listen(get_listening_socket_fd(), SOMAXCONN) == -1)
     {
         std::cerr << "Error in putting into listening mode." << std::endl;
-		std::exit(EXIT_FAILURE);
+		// std::exit(EXIT_FAILURE);
+        return (-1);
     }
+    return 0;
 }
 
 int Socket::accept_socket()
@@ -58,16 +64,29 @@ int Socket::accept_socket()
     return (this->accept_socket_fd);
 }
 
-Socket::Socket(unsigned short int port)
+
+
+Socket::Socket(unsigned short int port) : port(port)
 {
         this->opt = 1;
-        Socket::create_socket();
-        Socket::bind_socket(port);
-        Socket::listen_socket();
+        // Socket::create_socket();
+        // Socket::bind_socket(port);
+        // Socket::listen_socket();
 }
 
 Socket::~Socket()
 {
     // close(this->listening_socket_fd);
     // close(this->accept_socket_fd);
+}
+
+int Socket::setting_socket()
+{
+    if (Socket::create_socket() == -1)
+        return (-1);
+    if (Socket::bind_socket(this->port) == -1)
+        return (-1);
+    if (Socket::listen_socket() == -1)
+        return (-1);
+    return 0;
 }

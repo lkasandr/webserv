@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <fstream>
 #include <sstream>
+#include "Client.hpp"
 
 class Server
 {
@@ -20,6 +21,7 @@ private:
 	std::vector<Socket>			sockets;
 	std::vector<struct pollfd> 	pfds;  //структура для создания очереди сокетов
 	std::vector<Configuration>  config;
+	std::vector<Client>			clients;
 public:
 	Server(std::vector<Configuration> configs);
 	~Server();
@@ -29,6 +31,7 @@ public:
 	int 	check_fd(int fd);
 	void 	accept_connection(int fd);
 	void	communication(int fd, int i);
+	bool 	check_client(int fd, char* buffer);
 
 	class ClientCloseConnection: public std::exception 
 	{

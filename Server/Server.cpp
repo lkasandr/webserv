@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include <cstring>
 
 Server::Server(std::vector<Configuration> configs)
 {
@@ -52,6 +53,23 @@ void Server::accept_connection(int fd)
 	}
 }
 
+bool Server::check_client(int fd, char *buffer)
+{
+	// std::cout << "49 " << fd << " check client\n";
+	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+	{
+		if (it->getClientFd() == fd)
+		{
+			it->msg.append(buffer);
+			if (it->msg.find("0\r\n\r\n"))
+				it->chunk_ready = true;
+			// std::cout << "55" << it->msg;
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void Server::communication(int fd, int i)
 {
 	char *buffer = new char[25000];
@@ -62,15 +80,50 @@ void Server::communication(int fd, int i)
 		pfds.erase(pfds.begin() + i); 	// убираем fd из очереди
 		throw ClientCloseConnection();
 	}
-	Request	request;
-	request.parseRequest(buffer);
-	std::cout << "\033[33mRequest: \033[0m" << buffer;
+	if(!check_client(fd, buffer))
+	{
+		clients.push_back(Client(fd));
+		if (strstr(buffer, "Transfer-Encoding: chunked") == 0)
+		{
+			Request	request;
+			request.parseRequest(buffer);
+			std::cout << "\033[33mRequest: \033[0m" << buffer;
+			Response response(fd);
+			response.make_response(&request, config);
+			// close(fd);				///???
+			// pfds.erase(pfds.begin() + i);		///???
+			std::cout << response;
+		}
+	}
+	else
+	{
+		for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+		{	
+			if(it->chunk_ready)
+			{
+				
+				char *buf = new char[it->msg.length() + 1];
+				// strcpy(buf, it->msg.c_str());
+				buf = strdup(it->msg.c_str());		
+				Request	request;
+				request.parseRequest(buf);
+				std::cout << "\033[33mCHUNK Request: \033[0m" << buf;
+				Response response(fd);
+				response.make_response(&request, config);
+				// close(fd);				///???
+				// pfds.erase(pfds.begin() + i);		///???
+				std::cout << response;
+				delete [] buf;
+			}	
+		}
+	}
+
 	delete[] buffer;
-	Response response(fd);
-	response.make_response(&request, config);
-	// close(fd);				///???
-	// pfds.erase(pfds.begin() + i);		///???
-	std::cout << response;
+	// Response response(fd);
+	// response.make_response(&request, config);
+	// // close(fd);				///???
+	// // pfds.erase(pfds.begin() + i);		///???
+	// std::cout << response;
 }
 
 void	Server::main_cycle()
@@ -95,6 +148,15 @@ void	Server::main_cycle()
 					else
 						communication(this->pfds[i].fd, i);	
 				}
+				// if (this->pfds[i].revents & POLLOUT)
+				// {
+				// 	Response response(this->pfds[i].fd);
+				// 	response.make_response(&request, config);
+				// 	// close(fd);				///???
+				// 	// pfds.erase(pfds.begin() + i);		///???
+				// 	std::cout << response;
+				// }
+				
 			}
 		}
 	}

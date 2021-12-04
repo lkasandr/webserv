@@ -48,6 +48,8 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	this->body = line;
+    if(this->body.length() == 0 || this->body.size() == 0)
+        this->code = 204;
 }
 
 void Request::setHTTPversion(std::string line)
@@ -163,7 +165,7 @@ void		Request::parseRequest(char *buffer)
 		while(pos != line.length())
 			pos++;
 		temp = line.substr(prev, pos - prev + 1);
-		// std::cout << "BODY: " << temp << std::endl;
+		std::cout << "BODY: " << temp << std::endl;
 		setBody(temp);
 	}
 	// std::cout << "5" << std::endl;

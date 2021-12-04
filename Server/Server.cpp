@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include <cstring>
+#include <string.h>
 
 Server::Server(std::vector<Configuration> configs)
 {
@@ -7,17 +8,17 @@ Server::Server(std::vector<Configuration> configs)
 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		std::cout << *it;
-		Socket	sock(it->getPort());
 		try{
-		if (sock.setting_socket() == -1)
-			throw SocketError();
+			Socket	sock(it->getPort());
+			if (sock.setting_socket() == -1)
+				throw SocketError();
+			this->sockets.push_back(sock);
+			init_pfd(sock.get_listening_socket_fd());
 		}
 		catch(const std::exception& e)
 		{
 			std::cerr << e.what() << '\n';
 		}
-		this->sockets.push_back(sock);
-		init_pfd(sock.get_listening_socket_fd());
 	}
 }
 
@@ -73,6 +74,7 @@ bool Server::check_client(int fd, char *buffer)
 void Server::communication(int fd, int i)
 {
 	char *buffer = new char[25000];
+	memset((void *)buffer, 0, 25000);
 	int message = recv(fd, buffer, 25000, 0);  // считываем входящее сообщение
 	if (message <= 0)
 	{
@@ -113,6 +115,7 @@ void Server::communication(int fd, int i)
 			response.make_response(&request, config);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
+			it->msg.clear();
 			std::cout << response;
 			delete [] buf;
 		}	

@@ -1,0 +1,44 @@
+
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: 
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzipunked
+Content-Type: test/file
+Accept-Encoding: 
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzipunked
+Content-Type: test/file
+Accept-Encoding: GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzipunked
+Content-Type: test/file
+Accept-Encoding: 
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: gzip
+
+0
+0GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Go-http-client/1.1
+Accept-Encodin
+0
+

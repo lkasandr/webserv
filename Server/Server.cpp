@@ -8,6 +8,14 @@ Server::Server(std::vector<Configuration> configs)
 	{
 		std::cout << *it;
 		Socket	sock(it->getPort());
+		try{
+		if (sock.setting_socket() == -1)
+			throw SocketError();
+		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+		}
 		this->sockets.push_back(sock);
 		init_pfd(sock.get_listening_socket_fd());
 	}
@@ -156,4 +164,9 @@ Server::~Server()
 		close(it->get_listening_socket_fd());
 		std::cout << "close sockets fd" << std::endl;
 	}
+}
+
+const char* Server::SocketError::what(void) const throw()
+{
+	return "\033[31mSocket's error \033[0m";
 }

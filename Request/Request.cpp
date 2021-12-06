@@ -47,14 +47,11 @@ std::map<std::string, std::string> Request::getHeaders() const
 
 void Request::setBody(std::string line)
 {
-	this->body = line;
-<<<<<<< HEAD
-    if(this->body.length() == 0 || this->body.size() == 0)
+	size_t pos = 0;
+	pos = line.find("0\r\n\r\n");
+	this->body = line.substr(0, pos);
+    if(this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
         this->code = 204;
-=======
-	if(this->body.length() == 0 || this->body.size() == 0)
-		this->code = 204;
->>>>>>> 34b778aad479f448c4898455f2c698ffe7c72861
 }
 
 void Request::setHTTPversion(std::string line)
@@ -150,7 +147,7 @@ void		Request::parseRequest(char *buffer)
 	// std::cout << "3" << std::endl;
 	parse_first_line(temp);
 	// std::cout << "4" << std::endl;
-	while(temp.empty() && (temp != "\r\n") && (pos < line.length()))
+	while(!temp.empty() && (temp != "\r\n") && (pos < line.length()))
 	{
 		pos++;
 		prev = pos;
@@ -158,9 +155,10 @@ void		Request::parseRequest(char *buffer)
 			pos++;
 		temp = line.substr(prev, pos - prev + 1);
 		// std::cout << "2" << std::endl;
-		if (!temp.empty() && (temp != "\r\n"))
+		// if (!temp.empty() && (temp != "\r\n"))
+		if (!temp.empty() && !(temp.find("\r\n\r\n")))
 			add_headers(temp);
-		std::cout << "TEMP: " << temp << std::endl;
+		// std::cout << "TEMP: " << temp << std::endl;
 		// std::cout << "3" << std::endl;
 	}
 	// std::cout << "4" << std::endl;
@@ -175,6 +173,14 @@ void		Request::parseRequest(char *buffer)
 	}
 	// std::cout << "5" << std::endl;
 }
+
+std::string Request::check_content_type()
+{
+	if (headers.find("Content-Type:") != headers.end())
+		std::cout << "FIND 180\n";
+	return "h";
+}
+
 
 //CGI 1 or 0 from URI
 //проверить каким образом приходит пост (все ли прочитано)

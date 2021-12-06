@@ -33,6 +33,7 @@ class Request
 		std::string setMethod(std::string line);
 		std::string setURI(std::string line);
 		std::map<std::string, std::string> getHeaders() const;
+		std::string check_content_type();
 };
 
 #endif

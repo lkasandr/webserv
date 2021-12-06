@@ -47,7 +47,7 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	size_t pos = 0;
-	if (line.length() == 0)
+	if (line.length() == 0 || (line[0] != '\r' && line[1] != '\n'))
 	{
 		this->code = 204;
 		this->body = line;
@@ -59,6 +59,7 @@ void Request::setBody(std::string line)
     {
 		this->code = 204;
 	}
+	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)
@@ -161,12 +162,12 @@ void		Request::parseRequest(char *buffer)
 		if (pos == line.find("\r\n"))
 		{
 			temp = line.substr(0, pos);
-			// std::cout << "TEMP: " << temp << std::endl;
-			// std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
+			std::cout << "TEMP: " << temp << std::endl;
+			std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
 			line = line.substr(pos + 2, line.length());
 			add_headers(temp);
-			// std::cout << "LINE: " << line << std::endl;
-			// std::cout << "LINE_LENGHT: " << line.length() << std::endl;
+			std::cout << "LINE: " << line << std::endl;
+			std::cout << "LINE_LENGHT: " << line.length() << std::endl;
 			// std::cout << "POS: " << pos << std::endl;
 			pos = -1;
 		}
@@ -174,8 +175,8 @@ void		Request::parseRequest(char *buffer)
 	}
 	if (getMethod() == "POST")
 	{
-		// std::cout << "LINE in post: " << line << std::endl;
-		// std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
+		std::cout << "LINE in post: " << line << std::endl;
+		std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
 		setBody(line);
 	}
 	// для вывода this->headers:

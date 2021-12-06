@@ -20,7 +20,7 @@ class Request
 
 	public:
 		Request();
-		Request(const Request& copy);
+		// Request(const Request& copy);
 		Request& operator=(const Request& other);
 		~Request();
 		int getCode() const;

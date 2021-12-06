@@ -2,6 +2,7 @@
 #include <cstring>
 #include <string.h>
 
+
 Server::Server(std::vector<Configuration> configs)
 {
 	this->config = configs;
@@ -111,6 +112,20 @@ void Server::communication(int fd, int i)
 			std::cout << "\033[33mBUF: " << buf << "\033[0m";
 			request.parseRequest(buf);
 			std::cout << "\033[33mCHUNK Request: \033[0m" << buf;
+
+			if(request.getHeaders().find("Content-Type:") != request.getHeaders().end())
+			{
+				std::map <std::string, std::string> map = request.getHeaders();
+				// std::map <std::string, std::string>::const_iterator it = map.at("Content-Type:") ;
+				std::map <std::string, std::string> :: iterator it;
+ 
+				it = map.find("Content-Type");
+				// std::cout << it->second << std::endl;
+				
+				std::cout << "\n response 199 \n" <<  it->second << "\n";
+			}
+			CGI cgi(request);
+
 			Response response(fd);
 			response.make_response(&request, config);
 			close(fd);				///???

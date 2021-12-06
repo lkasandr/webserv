@@ -15,6 +15,10 @@
 #include <sstream>
 #include "Client.hpp"
 
+#include "CGI.hpp"
+
+// class Request;
+
 class Server
 {
 private:

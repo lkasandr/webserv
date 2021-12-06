@@ -124,7 +124,8 @@ void Server::communication(int fd, int i)
 				
 				std::cout << "\n response 199 \n" <<  it->second << "\n";
 			}
-			CGI cgi(request);
+			// CGI cgi(request);
+			// cgi.cgi_main();
 
 			Response response(fd);
 			response.make_response(&request, config);

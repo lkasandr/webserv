@@ -47,10 +47,19 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	size_t pos = 0;
-	pos = line.find("0\r\n\r\n");
-	this->body = line.substr(0, pos);
-    if(this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
-        this->code = 204;
+	if (line.length() == 0)
+	{
+		this->code = 204;
+		this->body = line;
+		return ;
+	}
+	if (pos == line.find("0\r\n\r\n"))
+		this->body = line.substr(0, pos);
+    if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
+    {
+		this->code = 204;
+	}
+
 }
 
 void Request::setHTTPversion(std::string line)
@@ -58,8 +67,8 @@ void Request::setHTTPversion(std::string line)
 	this->http_version = line.substr(0, 8);
 	if (this->http_version != "HTTP/1.1")
 		this->code = 505;
-	std::cout << "HTTP VERSION: " << this->http_version << std::endl;
-	std::cout << "CODE IS " << this->code << std::endl;
+	// std::cout << "HTTP VERSION: " << this->http_version << std::endl;
+	// std::cout << "CODE IS " << this->code << std::endl;
 }
 
 std::string Request::setURI(std::string line)
@@ -125,8 +134,8 @@ void Request::add_headers(std::string line)
 	if (i == line.length())
 	{
 		this->code = 505;
-		std::cout << "????????????" << std::endl;
-		std::cout << "LINE: " << line << std::endl;
+		// std::cout << "????????????" << std::endl;
+		// std::cout << "LINE: " << line << std::endl;
 	}
 	else 
 	{
@@ -145,40 +154,39 @@ void		Request::parseRequest(char *buffer)
 		pos++;
 	temp = line.substr(prev, pos - prev);
 	parse_first_line(temp);
-	while(!temp.empty() && (temp != "\r\n") && (pos < line.length()))
+	line = line.substr(pos + 1, line.length());
+	// std::cout << "LINE: " << line << std::endl;
+	pos = 0;
+	while(pos != line.length() && line != "\r\n" && line != "\r\n\r\n")
 	{
-		pos++;
-		prev = pos;
-		while(pos != line.find("\n", prev) && pos != line.length())
-			pos++;
-		temp = line.substr(prev, pos - prev + 1);
-		if (!(temp.find("\r\n\r\n")))    
+		if (pos == line.find("\r\n"))
 		{
+			temp = line.substr(0, pos);
+			// std::cout << "TEMP: " << temp << std::endl;
+			// std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
+			line = line.substr(pos + 2, line.length());
 			add_headers(temp);
+			// std::cout << "LINE: " << line << std::endl;
+			// std::cout << "LINE_LENGHT: " << line.length() << std::endl;
+			// std::cout << "POS: " << pos << std::endl;
+			pos = -1;
 		}
+		pos++;
 	}
 	if (getMethod() == "POST")
 	{
-		prev = pos;
-		while(pos != line.length())
-			pos++;
-		temp = line.substr(prev, pos - prev + 1);
-		// std::cout << "BODY: " << temp << std::endl;
-		setBody(temp);
+		// std::cout << "LINE in post: " << line << std::endl;
+		// std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
+		setBody(line);
 	}
 	// для вывода this->headers:
 	// std::cout << "\033[35mMethod: " << getMethod() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mURI: " << getUri() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mHTTP Version: " << getHTTP_version() << "\033[0m" << std::endl;
-	std::map<std::string, std::string>::iterator it;
-	std::cout << "HEADERS: " << std::endl;
-	for (it=this->headers.begin(); it!=this->headers.end(); it++)
-		std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
-	
-	// std::map <std::string, std::string> :: iterator it;
- 
-	// it = this->headers.find("Content-Type:");
-	// std::cout << it->second << std::endl;
+	// std::map<std::string, std::string>::iterator it;
+	// std::cout << "HEADERS: " << std::endl;
+	// for (it=this->headers.begin(); it!=this->headers.end(); it++)
+	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
 

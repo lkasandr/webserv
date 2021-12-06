@@ -42,3 +42,12 @@ User-Agent: Go-http-client/1.1
 Accept-Encodin
 0
 Accept-Encoding: 
+--------------------------e5a4aaba3cab5e17
+Content-Disposition: form-data; name="“name"
+
+user”
+--------------------------e5a4aaba3cab5e17
+Content-Disposition: form-data; name="“password"
+
+test”
+--------------------------e5a4aaba3cab5e17--

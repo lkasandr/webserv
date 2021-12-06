@@ -14,8 +14,9 @@ CGI::CGI(Request req)
     
     this->env["REQUEST_METHOD"] = req.getMethod();
     this->env["REQUEST_URI"] = req.getUri();
-    // this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);
+    this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);
     this->env["GATEWAY_INTERFACE"] = "CGI/1.1";
+    
 
     // char **env = map_to_array();
 
@@ -37,9 +38,6 @@ CGI::~CGI()
 
 }
 
-//
-// нужна функция для перевода map в char**
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 char** CGI::map_to_array()
 {
     char** env;
@@ -67,6 +65,7 @@ char** CGI::map_to_array()
     return env;
 }
 
+
 void CGI::cgi_main(void)
 {
     pid_t pid;
@@ -82,6 +81,7 @@ void CGI::cgi_main(void)
         }
         case 0 : 
         {
+            
             execve("Script", NULL, env); // - выполнение скрипта cgi
             
             std::cout << "ZAPUSK SCRIPTA" << std::endl;

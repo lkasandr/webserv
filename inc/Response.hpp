@@ -37,8 +37,8 @@ public:
 	// Response& operator=(const Response & other);
 	~Response();
 
-	void make_response(Request *request, std::vector<Configuration> config);
-	void check_method(std::vector<Configuration> configs, Request *request);
+	void make_response(Request *request, std::vector<Configuration> config, bool file);
+	void check_method(std::vector<Configuration> configs, Request *request, bool file);
 	void get_method(int fd, Configuration & conf);
 	int	 find_config(std::vector<Configuration> configs, std::string URI);
 	void check_errors(int code);

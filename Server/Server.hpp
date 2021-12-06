@@ -15,6 +15,10 @@
 #include <sstream>
 #include "Client.hpp"
 
+#include "CGI.hpp"
+
+// class Request;
+
 class Server
 {
 private:
@@ -22,6 +26,7 @@ private:
 	std::vector<struct pollfd> 	pfds;  //структура для создания очереди сокетов
 	std::vector<Configuration>  config;
 	std::vector<Client>			clients;
+	bool						post_file;
 public:
 	Server(std::vector<Configuration> configs);
 	~Server();

@@ -1,4 +1,4 @@
-#include "Cgi.hpp"
+#include "CGI.hpp"
 
 CGI::CGI(Request req)
 {
@@ -11,10 +11,13 @@ CGI::CGI(Request req)
     // HTTP_REFERER
 
     //content-type = chunk (content-lenght) - раз
+    
     this->env["REQUEST_METHOD"] = req.getMethod();
     this->env["REQUEST_URI"] = req.getUri();
-    this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);
+    // this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);
     this->env["GATEWAY_INTERFACE"] = "CGI/1.1";
+
+    char **env = map_to_array();
 
 }
 
@@ -34,10 +37,50 @@ CGI::~CGI()
 
 }
 
+//
+// нужна функция для перевода map в char**
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+char** CGI::map_to_array()
+{
+    char** env;
+
+    env = new char*[this->env.size() + 1];
+    int i = 0;
+    std::map<std::string, std::string> :: iterator it;
+    for (it = this->env.begin(); it != this->env.end(); it++)
+    {
+        std::string ValueAndKey = it->first + "=" + it->second;
+        env[i] = new char[ValueAndKey.size() + 1];
+        env[i] = strcpy(env[i], ValueAndKey.c_str());
+        i++;
+    }
+    env[i] = nullptr;
+
+    std::cout << "CHECK THAT YOUR ENV IS GOOD ^_^" << std::endl;
+    i = 0;
+    while(env[i])
+    {
+        std::cout << env[i] << std::endl;
+        i++;
+    }
+
+    return env;
+}
+
 void CGI::cgi_main(void)
 {
     pid_t pid;
     int status;
+    char **env = new char*[this->env.size() + 1];;
+    //копи-паст из гита для проверки скрипта :) написать свою функцию
+    int	j = 0;
+	for (std::map<std::string, std::string>::const_iterator i = this->env.begin(); i != this->env.end(); i++) {
+		std::string	element = i->first + "=" + i->second;
+		env[j] = new char[element.size() + 1];
+		env[j] = strcpy(env[j], (const char*)element.c_str());
+		j++;
+	}
+	env[j] = NULL;
 
     switch(pid=fork())
     {
@@ -47,7 +90,7 @@ void CGI::cgi_main(void)
         }
         case 0 : 
         {
-            // execve(name_of_script, NULL, env) - выполнение скрипта cgi
+            execve("Script", NULL, env); // - выполнение скрипта cgi
         }
         default : 
         {

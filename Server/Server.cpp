@@ -1,5 +1,7 @@
 #include "Server.hpp"
 #include <cstring>
+#include <string.h>
+
 
 Server::Server(std::vector<Configuration> configs)
 {
@@ -7,17 +9,17 @@ Server::Server(std::vector<Configuration> configs)
 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		std::cout << *it;
-		Socket	sock(it->getPort());
 		try{
-		if (sock.setting_socket() == -1)
-			throw SocketError();
+			Socket	sock(it->getPort());
+			if (sock.setting_socket() == -1)
+				throw SocketError();
+			this->sockets.push_back(sock);
+			init_pfd(sock.get_listening_socket_fd());
 		}
 		catch(const std::exception& e)
 		{
 			std::cerr << e.what() << '\n';
 		}
-		this->sockets.push_back(sock);
-		init_pfd(sock.get_listening_socket_fd());
 	}
 }
 
@@ -81,6 +83,8 @@ void Server::communication(int fd, int i)
 		pfds.erase(pfds.begin() + i); 	// убираем fd из очереди
 		throw ClientCloseConnection();
 	}
+	if (strstr(buffer, "Content-Type: multipart/form-data;") != 0)   /// костыль!!! изменить когда заработают заголовки
+		post_file = true;
 	if(!check_client(fd, buffer))
 	{
 		if (strstr(buffer, "Transfer-Encoding: chunked") != 0)
@@ -94,7 +98,7 @@ void Server::communication(int fd, int i)
 			request.parseRequest(buffer);
 			std::cout << "\033[33mRequest: \033[0m" << buffer;
 			Response response(fd);
-			response.make_response(&request, config);
+			response.make_response(&request, config, post_file);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
 			std::cout << response;
@@ -111,7 +115,7 @@ void Server::communication(int fd, int i)
 			request.parseRequest(buf);
 			std::cout << "\033[33mCHUNK Request: \033[0m" << buf;
 			Response response(fd);
-			response.make_response(&request, config);
+			response.make_response(&request, config, post_file);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
 			it->msg.clear();

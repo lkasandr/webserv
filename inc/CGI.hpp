@@ -1,9 +1,11 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 
-#include "../inc/webserv.hpp"
+// #include "webserv.hpp"
+
+#include "webserv.hpp"
 // #include "Request.hpp"
-#include <unistd.h>
+#include <map>
 
 class Request;
 

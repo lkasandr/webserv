@@ -31,7 +31,6 @@ std::string Request::getBody() const
 
 int Request::getCode() const
 {
-	// std::cout << "CODE IN REQUEST: " << code << std::endl;
 	return this->code;
 }
 
@@ -48,20 +47,28 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	size_t pos = 0;
+	if (line.length() == 0)
+	{
+		this->code = 204;
+		this->body = line;
+		return ;
+	}
 	pos = line.find("0\r\n\r\n");
 	this->body = line.substr(0, pos);
-    if(this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
-        this->code = 204;
+    if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
+    {
+		this->code = 204;
+	}
+
 }
 
 void Request::setHTTPversion(std::string line)
 {
 	this->http_version = line.substr(0, 8);
-	// std::cout << "HTTP VERSION: " << this->http_version  << std::endl;
-	// std::cout << this->http_version.length()  << std::endl;
 	if (this->http_version != "HTTP/1.1")
 		this->code = 505;
-	// std::cout << "CODE IN REQUEST: " << code << std::endl;
+	// std::cout << "HTTP VERSION: " << this->http_version << std::endl;
+	// std::cout << "CODE IS " << this->code << std::endl;
 }
 
 std::string Request::setURI(std::string line)
@@ -79,7 +86,9 @@ std::string Request::setURI(std::string line)
 		temp = line.substr(pos + 1, line.length() - pos);
 		cgi_indicator = this->uri.substr(0, 9);
 		if (cgi_indicator == "/cgi-bin/")
+		{
 			this->cgi = 1;
+		}
 	}
 	return temp;
 }
@@ -123,13 +132,16 @@ void Request::add_headers(std::string line)
      		break;
   	}
 	if (i == line.length())
+	{
 		this->code = 505;
+		// std::cout << "????????????" << std::endl;
+		// std::cout << "LINE: " << line << std::endl;
+	}
 	else 
 	{
 		key = line.substr(0, i);
 		value = line.substr(i + 2, line.length() - i);
 		this->headers.insert(std::make_pair(key, value));
-		// std::cout << "HEADERS: " << key << ": " << value << std::endl;
 	}
 }
 
@@ -138,71 +150,60 @@ void		Request::parseRequest(char *buffer)
     std::string		line(buffer);
 	std::string		temp;
 	size_t prev = 0, pos = 0;
-	// std::cout << "1" << std::endl;
-	// std::cout << "BUFFER: " << buffer << std::endl;
     while(pos != line.find("\n", prev))
 		pos++;
-	// std::cout << "2" << std::endl;
 	temp = line.substr(prev, pos - prev);
-	// std::cout << "3" << std::endl;
 	parse_first_line(temp);
-	// std::cout << "4" << std::endl;
-	while(!temp.empty() && (temp != "\r\n") && (pos < line.length()))
+	line = line.substr(pos + 1, line.length());
+	// std::cout << "LINE: " << line << std::endl;
+	pos = 0;
+	while(pos != line.length() && line != "\r\n" && line != "\r\n\r\n")
 	{
-		pos++;
-		prev = pos;
-		while(pos != line.find("\n", prev) && pos != line.length())
-			pos++;
-		temp = line.substr(prev, pos - prev + 1);
-		// std::cout << "2" << std::endl;
-		// if (!temp.empty() && (temp != "\r\n"))
-		if (!temp.empty() && !(temp.find("\r\n\r\n")))
+		if (pos == line.find("\r\n"))
+		{
+			temp = line.substr(0, pos);
+			// std::cout << "TEMP: " << temp << std::endl;
+			// std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
+			line = line.substr(pos + 2, line.length());
 			add_headers(temp);
-		// std::cout << "TEMP: " << temp << std::endl;
-		// std::cout << "3" << std::endl;
+			// std::cout << "LINE: " << line << std::endl;
+			// std::cout << "LINE_LENGHT: " << line.length() << std::endl;
+			// std::cout << "POS: " << pos << std::endl;
+			pos = -1;
+		}
+		pos++;
 	}
-	// std::cout << "4" << std::endl;
 	if (getMethod() == "POST")
 	{
-		prev = pos;
-		while(pos != line.length())
-			pos++;
-		temp = line.substr(prev, pos - prev + 1);
-		std::cout << "BODY: " << temp << std::endl;
-		setBody(temp);
+		std::cout << "LINE in post: " << line << std::endl;
+		std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
+		setBody(line);
 	}
-	// std::cout << "5" << std::endl;
+	// для вывода this->headers:
+	// std::cout << "\033[35mMethod: " << getMethod() << "\033[0m" << std::endl;
+	// std::cout << "\033[35mURI: " << getUri() << "\033[0m" << std::endl;
+	// std::cout << "\033[35mHTTP Version: " << getHTTP_version() << "\033[0m" << std::endl;
+	// std::map<std::string, std::string>::iterator it;
+	// std::cout << "HEADERS: " << std::endl;
+	// for (it=this->headers.begin(); it!=this->headers.end(); it++)
+	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
-std::string Request::check_content_type()
-{
-	if (headers.find("Content-Type:") != headers.end())
-		std::cout << "FIND 180\n";
-	return "h";
-}
 
 
-//CGI 1 or 0 from URI
-//проверить каким образом приходит пост (все ли прочитано)
 
-// setHeaders(line.substr(prev, pos - prev));
-// setBody(line.substr(prev, pos - prev));
+// curl http://localhost:8000     			+
 
-// /r/n/r/n - пустая строка перед body
+// curl http://localhost:8000
+//    -H "Cache-Control: must-revalidate"
+//    -H "Pragma: no-cache"
+//    -H "Expires: 0"             			+
 
-// Request - status code - при ошибке - 204. 400, 505.   
-// status code = 200 - по умолчанию
+// curl -I http://localhost:8000  			+
 
-// что вообще приходит из браузера:
-// GET / HTTP/1.1
-// Host: localhost:8000
-// Upgrade-Insecure-Requests: 1
-// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15
-// Accept-Language: ru
-// Accept-Encoding: gzip, deflate
-// Connection: keep-alive
+// curl -I --http2 http://localhost:8000  	+
 
-// curl -X POST  http://localhost:8000 -d "name=value" -I
-// curl -d "data=example1&data2=example2" http://localhost:8000
-// curl -X POST -F “name=user” -F “password=test” http://localhost:8000
+// curl -L http://localhost:8000 			+
+
+
+

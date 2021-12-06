@@ -85,7 +85,7 @@ void Response::check_errors(int code)
 	}
 }
 
-void Response::make_response(Request *request, std::vector<Configuration> config)
+void Response::make_response(Request *request, std::vector<Configuration> config, bool file)
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
@@ -93,7 +93,7 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 		check_errors(this->status_code);
 	else
 	{
-		check_method(config, request);
+		check_method(config, request, file);
 		check_errors(this->status_code);
 	}
 
@@ -129,22 +129,7 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 	}
 }
 
-// void check_content_type(Request *request)
-// {
-// 	if (request->getHeaders().find("Content-Type: ") != request->getHeaders().end())
-// 	{				// {
-// 		std::map <std::string, std::string>::const_iterator & it ; //: request->getHeaders().find("Content-Type: ");
-// 		it = request->getHeaders().find("Content-Type: ");
-// 		std::cout << "\n response 138 " << it->first << " " <<  it->second << std::endl;
-// 	}				// }
-
-// 	for (const auto & it : request->getHeaders())
-//     {
-//         std::cout << "\n response 138 " << it.first << ' ' << it.second << "\n";
-//     }
-// }
-
-void Response::check_method(std::vector<Configuration> configs, Request *request)
+void Response::check_method(std::vector<Configuration> configs, Request *request, bool file)
 {
 	std::string uri_str = request->getUri();
 	if (uri_str == "/ ")
@@ -193,46 +178,42 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 						this->status_code = 413;
 						break;
 					}
-					std::string type = request->check_content_type();
-					// check_content_type(request);
-					// for (const auto & it : request->getHeaders())
-					// {
-					// 	std::cout << "\n response 199 " << it.first << ' ' << it.second << "\n";
-					// }
-					// if(request->getHeaders().find("Content-Type:") != request->getHeaders().end())
-					// {
-					// 	// std::map <std::string, std::string> map = request->getHeaders();
-					// 	// std::map <std::string, std::string>::const_iterator it = map.at("Content-Type:") ; 
-					// 	std::string key;
-					// 	key = request->getHeaders()["Content-Type: "];
-						
-					// 	std::cout << "\n response 199 \n" <<  key << "\n";
-					// }
-					// if(request->getHeaders().find("Content-Type:") != request->getHeaders().end())
-					// {
-					// 	std::map <std::string, std::string> map = request->getHeaders();
-						
-					// 	std::map <std::string, std::string> :: iterator it;
-		
-					// 	it = map.find("Content-Type");
-					// 	// std::cout << it->second << std::endl;
-						
-					// 	std::cout << "\n response 199 \n" <<  it->second << "\n";
-					// }
-					
-					// std::fstream newfile;
-					// newfile.open("./rss/post/test_post.txt", std::ios_base::app);
-					// if (!newfile.is_open())
-					// {
-					// 	this->status_code = 500;
-					// 	break;
-					// }
-					// newfile << request->getBody();
-					// this->status_code = 201;
-					// this->code_description = " Created.\r\n";
-					// this->location = "./rss/post/test_post.txt";
-					// this->connection = "Connection: Close\r\n";
-					// newfile.close();
+					if(file)
+					{
+						std::cout << "HEADERS: " << std::endl;
+						std::map<std::string, std::string>::const_iterator it;
+						it=request->getHeaders().find("Content-Type");
+						std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+						std::fstream newfile;
+						newfile.open("new", std::ios_base::out);
+						if (!newfile.is_open())
+						{
+							this->status_code = 500;
+							break;
+						}
+						newfile.write(request->getBody().c_str(), request->getBody().size());
+						newfile.close();
+						this->status_code = 201;
+						this->code_description = " Created.\r\n";
+						this->location = "./rss/upload";
+						this->connection = "Connection: Close\r\n";
+					}
+					else
+					{
+						std::fstream newfile;
+						newfile.open("./rss/post/test_post.txt", std::ios_base::app);
+						if (!newfile.is_open())
+						{
+							this->status_code = 500;
+							break;
+						}
+						newfile << request->getBody();
+						this->status_code = 201;
+						this->code_description = " Created.\r\n";
+						this->location = "./rss/post/test_post.txt";
+						this->connection = "Connection: Close\r\n";
+						newfile.close();
+					}
 					break;
 				}	
 				else

@@ -47,7 +47,7 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	size_t pos = 0;
-	if (line.length() == 0)
+	if (line.length() == 0 || (line[0] != '\r' && line[1] != '\n'))
 	{
 		this->code = 204;
 		this->body = line;
@@ -59,7 +59,7 @@ void Request::setBody(std::string line)
     {
 		this->code = 204;
 	}
-
+	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)
@@ -157,17 +157,17 @@ void		Request::parseRequest(char *buffer)
 	line = line.substr(pos + 1, line.length());
 	// std::cout << "LINE: " << line << std::endl;
 	pos = 0;
-	while(pos != line.length() && line != "\r\n" && line != "\r\n\r\n")
+	while(pos != line.length() && line[0] != '\r' && line[1] != '\n')
 	{
 		if (pos == line.find("\r\n"))
 		{
 			temp = line.substr(0, pos);
-			// std::cout << "TEMP: " << temp << std::endl;
-			// std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
+			std::cout << "TEMP: " << temp << std::endl;
+			std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
 			line = line.substr(pos + 2, line.length());
 			add_headers(temp);
-			// std::cout << "LINE: " << line << std::endl;
-			// std::cout << "LINE_LENGHT: " << line.length() << std::endl;
+			std::cout << "LINE: " << line << std::endl;
+			std::cout << "LINE_LENGHT: " << line.length() << std::endl;
 			// std::cout << "POS: " << pos << std::endl;
 			pos = -1;
 		}
@@ -183,10 +183,10 @@ void		Request::parseRequest(char *buffer)
 	// std::cout << "\033[35mMethod: " << getMethod() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mURI: " << getUri() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mHTTP Version: " << getHTTP_version() << "\033[0m" << std::endl;
-	// std::map<std::string, std::string>::iterator it;
-	// std::cout << "HEADERS: " << std::endl;
-	// for (it=this->headers.begin(); it!=this->headers.end(); it++)
-	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+	std::map<std::string, std::string>::iterator it;
+	std::cout << "HEADERS: " << std::endl;
+	for (it=this->headers.begin(); it!=this->headers.end(); it++)
+		std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
 

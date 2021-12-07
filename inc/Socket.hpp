@@ -12,6 +12,7 @@ class Socket
         int listening_socket_fd;
         int accept_socket_fd;
         int opt;
+        unsigned short int port;
         struct sockaddr_in addr;
         struct sockaddr_in new_addr;
         socklen_t len;

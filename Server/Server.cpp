@@ -83,8 +83,6 @@ void Server::communication(int fd, int i)
 		pfds.erase(pfds.begin() + i); 	// убираем fd из очереди
 		throw ClientCloseConnection();
 	}
-	if (strstr(buffer, "Content-Type: multipart/form-data;") != 0)   /// костыль!!! изменить когда заработают заголовки
-		post_file = true;
 	if(!check_client(fd, buffer))
 	{
 		if (strstr(buffer, "Transfer-Encoding: chunked") != 0)
@@ -98,7 +96,7 @@ void Server::communication(int fd, int i)
 			request.parseRequest(buffer);
 			std::cout << "\033[33mRequest: \033[0m" << buffer;
 			Response response(fd);
-			response.make_response(&request, config, post_file);
+			response.make_response(&request, config);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
 			std::cout << response;
@@ -114,28 +112,11 @@ void Server::communication(int fd, int i)
 			std::cout << "\033[33mBUF: " << buf << "\033[0m";
 			request.parseRequest(buf);
 			std::cout << "\033[33mCHUNK Request: \033[0m" << buf;
-<<<<<<< HEAD
-=======
-
-			if(request.getHeaders().find("Content-Type:") != request.getHeaders().end())
-			{
-				std::map <std::string, std::string> map = request.getHeaders();
-				// std::map <std::string, std::string>::const_iterator it = map.at("Content-Type:") ;
-				std::map <std::string, std::string> :: iterator it;
- 
-				it = map.find("Content-Type");
-				// std::cout << it->second << std::endl;
-				
-				std::cout << "\n response 199 \n" <<  it->second << "\n";
-			}
-			// CGI cgi(request);
-			// cgi.cgi_main();
-
->>>>>>> ee380e0f62c8a0e2db0b65457070ee84630655f5
 			Response response(fd);
-			response.make_response(&request, config, post_file);
+			response.make_response(&request, config);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
+			// clients.erase(it);
 			it->msg.clear();
 			std::cout << response;
 			delete [] buf;

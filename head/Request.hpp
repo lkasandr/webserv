@@ -13,6 +13,7 @@ class Request
 		std::string http_version;
 		std::string	body;
 		std::map<std::string, std::string> headers;
+		bool		post_file;
 
 	public:
 		Request();
@@ -26,6 +27,7 @@ class Request
 		void setHTTPversion(std::string line);
 		void setBody(std::string line);
 		bool getCGI() const;
+		bool getPostFile() const;
 		std::string	getMethod() const;
 		std::string	getUri() const;
 		std::string getHTTP_version() const;
@@ -34,6 +36,7 @@ class Request
 		std::string setURI(std::string line);
 		std::map<std::string, std::string> getHeaders() const;
 		std::string check_content_type();
+		std::string	boundary;
 };
 
 #endif

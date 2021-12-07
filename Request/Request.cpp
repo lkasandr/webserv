@@ -4,6 +4,7 @@ Request::Request()
 {
 	this->code = 200;
 	this->cgi = 0;
+	this->post_file = false;
 }
 
 Request::~Request()
@@ -59,7 +60,7 @@ void Request::setBody(std::string line)
     {
 		this->code = 204;
 	}
-	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
+	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)
@@ -142,6 +143,11 @@ void Request::add_headers(std::string line)
 		key = line.substr(0, i);
 		value = line.substr(i + 2, line.length() - i);
 		this->headers.insert(std::make_pair(key, value));
+		if(key == "Content-Type" && value.find("multipart/form-data") != std::string::npos)
+		{
+			this->post_file = true;
+			this->boundary = value.substr(value.find("boundary=") + 9);
+		}
 	}
 }
 
@@ -162,12 +168,12 @@ void		Request::parseRequest(char *buffer)
 		if (pos == line.find("\r\n"))
 		{
 			temp = line.substr(0, pos);
-			std::cout << "TEMP: " << temp << std::endl;
-			std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
+			// std::cout << "TEMP: " << temp << std::endl;
+			// std::cout << "TEMP_LENGHT: " << temp.length() << std::endl;
 			line = line.substr(pos + 2, line.length());
 			add_headers(temp);
-			std::cout << "LINE: " << line << std::endl;
-			std::cout << "LINE_LENGHT: " << line.length() << std::endl;
+			// std::cout << "LINE: " << line << std::endl;
+			// std::cout << "LINE_LENGHT: " << line.length() << std::endl;
 			// std::cout << "POS: " << pos << std::endl;
 			pos = -1;
 		}
@@ -175,7 +181,8 @@ void		Request::parseRequest(char *buffer)
 	}
 	if (getMethod() == "POST")
 	{
-		std::cout << "LINE in post: " << line << std::endl;
+		std::cout << "\nLINE in post: " << line << std::endl;
+		std::cout << "\nbuffer in post: " << line << std::endl;
 		std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
 		setBody(line);
 	}
@@ -183,13 +190,16 @@ void		Request::parseRequest(char *buffer)
 	// std::cout << "\033[35mMethod: " << getMethod() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mURI: " << getUri() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mHTTP Version: " << getHTTP_version() << "\033[0m" << std::endl;
-	std::map<std::string, std::string>::iterator it;
-	std::cout << "HEADERS: " << std::endl;
-	for (it=this->headers.begin(); it!=this->headers.end(); it++)
-		std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+	// std::map<std::string, std::string>::iterator it;
+	// std::cout << "HEADERS: " << std::endl;
+	// for (it=this->headers.begin(); it!=this->headers.end(); it++)
+	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
-
+bool Request::getPostFile() const
+{
+	return this->post_file;
+}
 
 
 // curl http://localhost:8000     			+

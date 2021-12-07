@@ -85,7 +85,7 @@ void Response::check_errors(int code)
 	}
 }
 
-void Response::make_response(Request *request, std::vector<Configuration> config, bool file)
+void Response::make_response(Request *request, std::vector<Configuration> config)
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
@@ -93,10 +93,9 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 		check_errors(this->status_code);
 	else
 	{
-		check_method(config, request, file);
+		check_method(config, request);
 		check_errors(this->status_code);
 	}
-
 	// формируем ответ
 	if (request->getMethod() == "GET")
 	{
@@ -129,7 +128,7 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 	}
 }
 
-void Response::check_method(std::vector<Configuration> configs, Request *request, bool file)
+void Response::check_method(std::vector<Configuration> configs, Request *request)
 {
 	std::string uri_str = request->getUri();
 	if (uri_str == "/ ")
@@ -142,8 +141,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 		m++;
 	switch (m)
 	{
-	case 0:
-		std::cout << "Method GET" << std::endl;
+	case 0: 	//		std::cout << "Method GET" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
 			if (uri_str.find(it->getlocation()) != std::string::npos)
@@ -164,8 +162,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 			}
 		}
 		break;
-	case 1:
-		std::cout << "Method POST" << std::endl;
+	case 1:		//	std::cout << "Method POST" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
 			if (uri_str.find(it->getlocation()) != std::string::npos)
@@ -178,14 +175,13 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 						this->status_code = 413;
 						break;
 					}
-					if(file)
+					if(request->getPostFile() == true)
 					{
-						std::cout << "HEADERS: " << std::endl;
-						std::map<std::string, std::string>::const_iterator it;
-						it=request->getHeaders().find("Content-Type");
-						std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+						std::cout << "FILE: "  << request->getPostFile() << std::endl;
+						std::cout << "BODY " << request->getBody() << std::endl;
+						std::cout << "BOUND " << request->boundary << std::endl;
 						std::fstream newfile;
-						newfile.open("new", std::ios_base::out);
+						newfile.open("new", std::ios_base::out | std::ios_base::binary);
 						if (!newfile.is_open())
 						{
 							this->status_code = 500;
@@ -225,8 +221,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 			}
 		}
 		break;
-	case 2:
-		std::cout << "Method DELETE" << std::endl;
+	case 2: // std::cout << "Method DELETE" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
 			if (uri_str.find(it->getlocation()) != std::string::npos)

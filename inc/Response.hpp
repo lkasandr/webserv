@@ -12,6 +12,8 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <map>
+#include <vector>
 
 class Request;
 class Configuration;
@@ -37,8 +39,8 @@ public:
 	// Response& operator=(const Response & other);
 	~Response();
 
-	void make_response(Request *request, std::vector<Configuration> config, bool file);
-	void check_method(std::vector<Configuration> configs, Request *request, bool file);
+	void make_response(Request *request, std::vector<Configuration> config);
+	void check_method(std::vector<Configuration> configs, Request *request);
 	void get_method(int fd, Configuration & conf);
 	int	 find_config(std::vector<Configuration> configs, std::string URI);
 	void check_errors(int code);

@@ -6,8 +6,8 @@ SRCS		= ./main.cpp ./socket/Socket.cpp  ./Configuration/Configuration.cpp  \
 			  ./Request/Request.cpp ./parser.cpp ./Server/Server.cpp ./Response/Response.cpp \
 			  ./Client/Client.cpp #./CGI/CGI.cpp
 OBJS		= $(SRCS:.cpp=.o)
-HEADER		= ./inc/webserv.hpp ./socket/Socket.hpp ./Configuration/Configuration.hpp \
-			  ./Request/Request.hpp ./Server/Server.hpp ./Response/Response.hpp ./Client/Client.hpp #./CGI/CGI.hpp
+HEADER		= ./inc/webserv.hpp ./inc/Socket.hpp ./inc/Configuration.hpp \
+			  ./inc/Request.hpp ./inc/Server.hpp ./inc/Response.hpp ./inc/Client.hpp #./CGI/CGI.hpp
 INC			= inc
 %.o:		%.cpp $(HEADER)
 			$(CXX) $(CXXFLAGS) -c $<  -o $(<:.cpp=.o) -I inc

@@ -146,7 +146,9 @@ void Request::add_headers(std::string line)
 		if(key == "Content-Type" && value.find("multipart/form-data") != std::string::npos)
 		{
 			this->post_file = true;
-			this->boundary = value.substr(value.find("boundary=") + 9);
+			size_t pos1 = value.find("boundary=") + 9;
+			size_t pos2 = value.find("\r\n");
+			this->boundary = value.substr(pos1, pos2 - pos1);
 		}
 	}
 }

@@ -85,7 +85,7 @@ void Server::communication(int fd, int i)
 	}
 	if(!check_client(fd, buffer))
 	{
-		if (strstr(buffer, "Transfer-Encoding: chunked") != 0)
+		if (strstr(buffer, "Transfer-Encoding: chunked") != 0 || strstr(buffer, "Content-Type: multipart/form-data") != 0)
 		{
 			clients.push_back(Client(fd));
 			check_client(fd, buffer);

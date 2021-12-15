@@ -1,7 +1,9 @@
 #include "Server.hpp"
 #include <cstring>
 #include <string.h>
+#include <stdio.h>
 
+Server	*server;
 
 Server::Server(std::vector<Configuration> configs)
 {
@@ -38,6 +40,8 @@ int Server::check_fd(int fd)
 	{
 		if (it->get_listening_socket_fd() == fd)
 			return 1;
+
+			//найти конфиг в котором этот сокет создан, по порту
 	}
 	return 0;
 }
@@ -55,7 +59,34 @@ void Server::accept_connection(int fd)
 	}
 }
 
-bool Server::check_client(int fd, char *buffer)
+int check_content_length(char *buffer)
+{
+	std::string line(buffer);
+	int len = 0;
+	size_t pos;
+	if ((pos = line.find("Content-Length: ") + 16) != std::string::npos)
+	{
+		size_t pos_end = line.find("\n", pos);
+		line = line.substr(pos, pos_end - pos);
+		std::cout << "LINE 68 " << line << "\n";
+		len = atoi(line.c_str());
+	}
+	std::cout << "LEN 69 " << len << "\n";
+	return len;
+}
+
+std::string check_file_end(std::string bound)
+{
+	// std::string bound(buffer);
+	size_t pos1 = bound.find("boundary=") + 9;
+	size_t pos2 = bound.find("\r\n", pos1);
+	std::string boundary = bound.substr(pos1, pos2 - pos1);
+	boundary = boundary + "--";
+	std::cout << "BOUND " << boundary << std::endl;
+	return boundary;
+}
+
+bool Server::check_client(int fd, char *buffer, int i)
 {
 	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
@@ -68,27 +99,43 @@ bool Server::check_client(int fd, char *buffer)
 				it->chunk_ready = false;
 			return 1;
 		}
+		// else if (it->getFileFd() == fd)
+		// {
+		// 	size_t read = 0;
+		// 	char   buffer[100000];
+
+		// 	read = fread(buffer, sizeof(char), 100000, it->getStream());
+		// 	if (ferror(it->getStream()))
+		// 		std::cout << "File read error" << std::endl;
+		// 	it->msg.append(buffer, read);
+		// 	if (feof(it->getStream()))
+		// 		it->chunk_ready = true;
+		// 	else 
+		// 		it->chunk_ready = false;
+		// 	return 1;
+		// }
 	}
 	return 0;
 }
 
 void Server::communication(int fd, int i)
 {
-	char *buffer = new char[25000];
-	memset((void *)buffer, 0, 25000);
-	int message = recv(fd, buffer, 25000, 0);  // считываем входящее сообщение
+	char *buffer = new char[8000000];
+	memset((void *)buffer, 0, 8000000);
+	int message = recv(fd, buffer, 800000, 0);  // считываем входящее сообщение
+	std::cout << "BUFFER " << buffer << "\n";
 	if (message <= 0)
 	{
 		close(fd);
 		pfds.erase(pfds.begin() + i); 	// убираем fd из очереди
 		throw ClientCloseConnection();
 	}
-	if(!check_client(fd, buffer))
+	if(!check_client(fd, buffer, i))
 	{
 		if (strstr(buffer, "Transfer-Encoding: chunked") != 0 || strstr(buffer, "Content-Type: multipart/form-data") != 0)
 		{
 			clients.push_back(Client(fd));
-			check_client(fd, buffer);
+			check_client(fd, buffer, i);
 		}
 		else
 		{
@@ -109,9 +156,8 @@ void Server::communication(int fd, int i)
 			it->chunk_ready = false;
 			char *buf = strdup(it->msg.c_str());		
 			Request	request;
-			std::cout << "\033[33mBUF: " << buf << "\033[0m";
 			request.parseRequest(buf);
-			std::cout << "\033[33mCHUNK Request: \033[0m" << buf;
+			std::cout << "\033[33mRequest: \033[0m" << buf;
 			Response response(fd);
 			response.make_response(&request, config);
 			close(fd);				///???
@@ -125,15 +171,24 @@ void Server::communication(int fd, int i)
 	delete[] buffer;
 }
 
+
+void	sig_handler(int signal)
+{
+	server->~Server();
+	std::cout << "Exiting the server " << std::endl;
+}
+
 void	Server::main_cycle()
 {
+	server = this;
+	signal(SIGINT, sig_handler);	
 	try
 	{
 		struct pollfd* array = &this->pfds[0];
 		int ret = poll(array, this->pfds.size(), 1000);
 		if (ret == -1)
 		{
-			std::cerr << "Poll error\n";
+			std::cerr << "Poll close\n";
 			exit(1);
 		}
 		else
@@ -145,7 +200,7 @@ void	Server::main_cycle()
 					if (check_fd(this->pfds[i].fd))		// проверяем в каком сокете произошло событие
 						accept_connection(this->pfds[i].fd);
 					else
-						communication(this->pfds[i].fd, i);	
+						communication(this->pfds[i].fd, i);	 // добавить какой конфиг
 				}
 			}
 		}
@@ -167,8 +222,9 @@ Server::~Server()
 	{
 		close(it->get_accept_socket_fd());
 		close(it->get_listening_socket_fd());
-		std::cout << "close sockets fd" << std::endl;
+		std::cout << "close sockets fd " << it->get_listening_socket_fd() << std::endl;
 	}
+	
 }
 
 const char* Server::SocketError::what(void) const throw()

@@ -14,10 +14,11 @@
 #include <fstream>
 #include <sstream>
 #include "Client.hpp"
-
+#include <signal.h>
 #include "CGI.hpp"
 
 class Client;
+class Response;
 
 class Server
 {
@@ -35,7 +36,7 @@ public:
 	int 	check_fd(int fd);
 	void 	accept_connection(int fd);
 	void	communication(int fd, int i);
-	bool 	check_client(int fd, char* buffer);
+	bool 	check_client(int fd, char* buffer, int i);
 
 	class ClientCloseConnection: public std::exception 
 	{

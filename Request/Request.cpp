@@ -54,13 +54,16 @@ void Request::setBody(std::string line)
 		this->body = line;
 		return ;
 	}
+	// if (this->post_file == true)
+	// 	pos = line.find(this->boundary + "--");
+	// else
 	pos = line.find("0\r\n\r\n");
 	this->body = line.substr(0, pos);
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
 		this->code = 204;
 	}
-	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
+	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)

@@ -177,36 +177,25 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 					}
 					if(request->getPostFile() == true)
 					{
-						std::cout << "FILE: "  << request->getPostFile() << std::endl;
-						std::cout << "BODY " << request->getBody() << std::endl;
-						std::cout << "BOUND " << request->boundary << std::endl;
 						std::string content = request->getBody();
 						std::string filename = "./rss/upload/" + content.substr((content.find("filename=\"") + 10));
 						filename = filename.substr(0, filename.find("\""));
-						std::cout << "FILENAME " << filename << std::endl;
-						size_t pos_beg = content.find_first_of(request->boundary) + request->boundary.length() + 2;
-						
-						int skip = 0;
-						size_t i;
-						for (i = pos_beg; i < content.length(); i++)
-						{
-							if (content[i] == '\n')
-								skip++;
-							if (skip == 4)
-								break;
-						}
-						pos_beg = i;
-						size_t pos_end = content.find(request->boundary + "--\r\n") - 4;
+						size_t pos_beg = content.find("\r\n\r\n") + 4;
+						size_t pos_end = content.find(request->boundary + "--\r\n") - 2;
 						content = content.substr(pos_beg, pos_end - pos_beg);
 					
-						std::fstream newfile;
-						newfile.open(filename, std::ios_base::out | std::ios_base::binary);
+						std::ofstream newfile;
+						newfile.open(filename, /*, std::ios_base::out | */std::ios_base::binary);
 						if (!newfile.is_open())
 						{
 							this->status_code = 500;
 							break;
 						}
+
+						const char *buf = content.c_str();
+
 						newfile.write(content.c_str(), content.size());
+						// newfile << content;
 						newfile.close();
 						this->status_code = 201;
 						this->code_description = " Created.\r\n";

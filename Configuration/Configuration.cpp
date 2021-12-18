@@ -13,6 +13,7 @@ Configuration::Configuration()
 	this->method_delete = 0;
 	this->location = "home";
 	this->index = "./rss/home/index.html";
+	this->path.clear();
 }
 
 Configuration::Configuration(const Configuration & copy)
@@ -33,7 +34,7 @@ Configuration& Configuration::operator=(const Configuration& other)
 	this->method_get = other.getGet();
 	this->method_post = other.getPost();
 	this->method_delete = other.getDelete();
-	this->location = other.getlocation();
+	this->location = other.getLocation();
 	this->index = other.getIndex();
 	return *this;
 }
@@ -94,14 +95,34 @@ bool	Configuration::getDelete() const
 	return this->method_delete;
 }
 
-std::string Configuration::getlocation() const
+std::string Configuration::getLocation() const
 {
 	return this->location;
+}
+
+std::string Configuration::getRoot() const
+{
+	return this->root;
 }
 
 std::string Configuration::getIndex() const
 {
 	return this->index;
+}
+
+std::string	Configuration::getCGI() const
+{
+	return this->CGI_pass;
+}
+
+std::map<std::string, std::string> Configuration::getPath() const
+{
+	// вывод map Path:
+	// std::map<std::string, std::string>::const_iterator it;
+	// std::cout << "Location + root: " << std::endl;
+	// for (it=this->path.begin(); it!=this->path.end(); it++)
+	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+	return this->path;
 }
 
 //////////////
@@ -141,6 +162,7 @@ void	Configuration::setHttpMethod(std::string value)
 void		Configuration::setLocation(std::string value) 
 {
 	this->location = value;
+	// this->location.push_back(value);
 }
 
 void		Configuration::setIndex(std::string value) 
@@ -148,6 +170,24 @@ void		Configuration::setIndex(std::string value)
 	this->index = value;
 }
 
+void		Configuration::setCGI(std::string value)
+{
+	this->CGI_pass = value;
+}
+
+void		Configuration::setRoot(std::string value)
+{
+	// this->root.push_back(value);
+	this->root = value;
+}
+
+void	Configuration::setPath(std::string location, std::string root)
+{
+	// std::cout << location << " " << root << std::endl;
+	this->path.insert(std::pair<std::string, std::string>(location, root));
+	// std::cout << this->path[location] << std::endl;
+
+}
 
 /////////////////
 //////Methods///
@@ -174,8 +214,6 @@ bool Configuration::checkDelete()
 	return this->method_delete;
 }
 
-
-
 std::ostream& operator<<(std::ostream& out, const Configuration& config)
 {
 	out << "\nConfiguration:\n";
@@ -185,7 +223,15 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	out << "default_error_pages: " << config.getDefaultErrorPages() << std::endl;
 	out << "client body size: " << config.getClientBodySize() << std::endl;
 	out << "HTTP methods: " << config.getHttpMethod() << std::endl;
-	out << "Location: " << config.getlocation() << std::endl;
+	// out << "Location: " << config.getLocation() << std::endl;
+	//вывод map Path:
+	// std::map<std::string, std::string> path;
+	// path = config.getPath();
+	// std::map<std::string, std::string>::iterator it;
+	// std::cout << "Location + root: " << std::endl;
+	// for (it=path.begin(); it!=path.end(); it++)
+		// std::cout << "\033[35m" << config.getPath()["/"] << "\033[0m" << std::endl;
+	
 	out << "Index: " << config.getIndex() << std::endl;
 	return (out);
 }

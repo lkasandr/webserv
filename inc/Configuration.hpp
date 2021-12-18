@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <cstdlib>
+#include <map>
 
 class Configuration
 {
@@ -19,8 +20,12 @@ private:
 	bool			method_get;
 	bool			method_post;
 	bool			method_delete;
-	std::string		location;
-	std::string		index;	
+	// std::string		location;
+	std::string location;
+	std::string root;
+	std::map<std::string, std::string> path;
+	std::string		index;
+	std::string		CGI_pass;
 public:
 	Configuration();
 	Configuration(char *conf_path);
@@ -37,8 +42,12 @@ public:
 	bool		getGet() const;
 	bool		getPost() const;
 	bool		getDelete() const;
-	std::string	getlocation() const;
+	std::string getLocation() const;
+	std::string getRoot() const;
+	std::map<std::string, std::string> getPath() const;
+	// std::string getLocation() const;
 	std::string	getIndex() const;
+	std::string	getCGI() const;
 
 	void		setHost(std::string value) ;
 	void		setPort(std::string value);
@@ -48,6 +57,9 @@ public:
 	void		setHttpMethod(std::string value);
 	void		setLocation(std::string value);
 	void		setIndex(std::string value);
+	void		setCGI(std::string value);
+	void		setRoot(std::string value);
+	void		setPath(std::string location, std::string root);
 	bool		checkGet();
 	bool		checkPost();
 	bool		checkDelete();

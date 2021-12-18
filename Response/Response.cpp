@@ -128,6 +128,19 @@ void Response::make_response(Request *request, std::vector<Configuration> config
 	}
 }
 
+int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
+{
+	std::map<std::string, std::string>::const_iterator it;
+	for (it=path.begin(); it!=path.end(); it++)
+	{
+		if (uri_str.find(it->first) != std::string::npos)
+		{
+			
+		}
+	}
+	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+}
+
 void Response::check_method(std::vector<Configuration> configs, Request *request)
 {
 	std::string uri_str = request->getUri();
@@ -144,7 +157,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 	case 0: 	//		std::cout << "Method GET" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
-			if (uri_str.find(it->getlocation()) != std::string::npos)
+			if (uri_str.find(it->getLocation()) != std::string::npos)
 			{	
 				if (it->checkGet())
 				{
@@ -165,7 +178,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 	case 1:		//	std::cout << "Method POST" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
-			if (uri_str.find(it->getlocation()) != std::string::npos)
+			if (uri_str.find(it->getLocation()) != std::string::npos)
 			{	
 				if (it->checkPost())
 				{
@@ -232,7 +245,7 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 	case 2: // std::cout << "Method DELETE" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
-			if (uri_str.find(it->getlocation()) != std::string::npos)
+			if (uri_str.find(it->getLocation()) != std::string::npos)
 			{	
 				if (it->checkDelete())
 				{

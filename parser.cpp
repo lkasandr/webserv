@@ -22,11 +22,49 @@ std::vector<std::string> split_line(std::string line)
     return servers;
 }
 
+std::string get_key(std::string line)
+{
+	int i = 0;
+	int j = 0;
+
+	while (line[i] && line[i] != ' ')
+		i++;
+	while (line[j] && line[j] != ';')
+		j++;
+	return (line.substr(i + 1, j - i - 1));
+}
+
+void add_config(std::string line, Configuration& conf)
+{
+	if (line.find("Host ", 0) != std::string::npos)
+		conf.setHost(get_key(line));
+	else if (line.find("Port ", 0) != std::string::npos)
+		conf.setPort(get_key(line));
+	else if (line.find("server_name ", 0) != std::string::npos)
+		conf.setServerName(get_key(line));
+	else if (line.find("location ", 0) != std::string::npos)
+		conf.setLocation(get_key(line));
+	else if (line.find("root ", 0) != std::string::npos)
+	{
+		conf.setRoot(get_key(line));
+		conf.setPath(conf.getLocation(), conf.getRoot());
+	}
+	else if (line.find("index ", 0) != std::string::npos)
+		conf.setIndex(get_key(line));
+	else if (line.find("default_error_pages ", 0) != std::string::npos)
+		conf.setDefaultErrorPages(get_key(line));
+	else if (line.find("client_body_size ", 0) != std::string::npos)
+		conf.setClientBodySize(get_key(line));
+	else if (line.find("http_method ", 0) != std::string::npos)
+		conf.setHttpMethod(get_key(line));
+	else if (line.find("cgi_pass ", 0) != std::string::npos)
+		conf.setCGI(get_key(line));
+}
+
 int	read_conf(const char *path , std::vector<Configuration> &config)
 {
 	std::ifstream	file;
 	std::string		line;
-	// std::string		tmpline;
 	std::vector<std::string>	servers;
 	int 			serv_count = 0;
 	file.open(path);
@@ -36,69 +74,26 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 		throw std::string("\033[31mThe configuration file is empty\033[0m");
 	std::stringstream content;
 	content << file.rdbuf();   //содержимое файла переписываем в контент для дальнейшей работы с ним. файл менять не можем
- 
-	// while (std::getline(file, line))
-	// 	tmpline += line;
 	servers = split_line(content.str());		// делим конфиг файл на блоки - каждый сервер записываем в отдельный стринг для дальнейшего распарсивания строки, для каждого серв создается отдельный конф
-	Configuration	conf;
+	// Configuration	conf;
 	for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
 		line = *it;
-		size_t pos_beg = 0;
-		size_t pos_end = 0;
-		while (1)
+		Configuration	conf;
+		size_t pos = 0;
+		std::string temp;
+		while(pos < line.length())
 		{
-			if (line.find("Host ", pos_beg) != std::string::npos)
+			if (pos == line.find("\n"))
 			{
-				pos_beg = line.find("Host ", pos_beg) + 5;
-				pos_end = line.find(";", pos_beg);
-				conf.setHost(line.substr(pos_beg, pos_end - pos_beg));
+				temp = line.substr(0, pos);
+				line = line.substr(pos + 1, line.length());
+				add_config(temp, conf);
+				pos = -1;
 			}
-			else if (line.find("Port ", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("Port") + 5;
-				pos_end = line.find(";", pos_beg);
-				conf.setPort(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else if (line.find("server_name ", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("server_name ") + 12;
-				pos_end = line.find(";", pos_beg);
-				conf.setServerName(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else if (line.find("location", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("location ") + 9;
-				pos_end = line.find(";", pos_beg);
-				conf.setLocation(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else if (line.find("index ", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("index ") + 6;
-				pos_end = line.find(";", pos_beg);
-				conf.setIndex(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else if (line.find("default_error_pages ", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("default_error_pages ") + 20;
-				pos_end = line.find(";", pos_beg);
-				conf.setDefaultErrorPages(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else if (line.find("client_body_size ", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("client_body_size ") + 17;
-				pos_end = line.find(";", pos_beg);
-				conf.setClientBodySize(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else if (line.find("http_method ", pos_beg) != std::string::npos)
-			{
-				pos_beg = line.find("http_method ") + 12;
-				pos_end = line.find(";", pos_beg);
-				conf.setHttpMethod(line.substr(pos_beg, pos_end - pos_beg));
-			}
-			else
-				break;
+			pos++;
 		}
+		conf.getPath();
 		config.push_back(conf);
 		serv_count++;
 	}

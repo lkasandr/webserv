@@ -141,31 +141,11 @@ int compare_uri_path(std::string uri_str, std::map<std::string, std::string> pat
 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
-// std::string Response::getContentPath(Configuration conf, std::string uri)
-// {
-// 	std::string contentPath;
-
-// 	// if (uri == "/home ")
-// 	// 	return ("/rss");
-// 	std::cout << "URI: " << uri << std::endl;
-
-// 	std::map<std::string, std::string> map
-
-// 	std::map<std::string, std::string>::const_iterator it = conf.getPath().begin();
-
-// 	while(it != conf.getPath().end())
-// 	{
-// 		if (uri.find(it->first) != std::string::npos)
-// 		{
-// 			// contentPath = it->second + it->first;
-// 			std::cout << "location: " << it->first << std::endl;
-// 			std::cout << "root: " << it->second << std::endl;
-// 			return contentPath;
-// 		}
-// 		it++;
-// 	}
-// 	return NULL;
-// }
+std::string Response::getContentPath(Configuration conf, std::string uri)
+{
+	if (uri == "/home ")
+		return ("./rss/home/index.html");
+}
 
 void Response::check_method(Configuration *configs, Request *request)
 {
@@ -185,6 +165,8 @@ void Response::check_method(Configuration *configs, Request *request)
 		{
 			this->server = "Server: " + configs->getServerName() + "\r\n";
 			this->content_path = configs->getIndex();
+			// this->content_path = getContentPath(*configs, uri_str);
+			// std::cout << "CONTENT_PATH: " << this->content_path << std::endl;
 			if (this->setCookie == "")
 				this->setCookie = "Set-Cookie: name=" + configs->getServerName() + "\r\n";
 		}	
@@ -220,7 +202,7 @@ void Response::check_method(Configuration *configs, Request *request)
 						break;
 					}
 
-					const char *buf = content.c_str();
+					// const char *buf = content.c_str();
 
 					newfile.write(content.c_str(), content.size());
 					// newfile << content;

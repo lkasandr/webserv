@@ -141,6 +141,32 @@ int compare_uri_path(std::string uri_str, std::map<std::string, std::string> pat
 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
+// std::string Response::getContentPath(Configuration conf, std::string uri)
+// {
+// 	std::string contentPath;
+
+// 	// if (uri == "/home ")
+// 	// 	return ("/rss");
+// 	std::cout << "URI: " << uri << std::endl;
+
+// 	std::map<std::string, std::string> map
+
+// 	std::map<std::string, std::string>::const_iterator it = conf.getPath().begin();
+
+// 	while(it != conf.getPath().end())
+// 	{
+// 		if (uri.find(it->first) != std::string::npos)
+// 		{
+// 			// contentPath = it->second + it->first;
+// 			std::cout << "location: " << it->first << std::endl;
+// 			std::cout << "root: " << it->second << std::endl;
+// 			return contentPath;
+// 		}
+// 		it++;
+// 	}
+// 	return NULL;
+// }
+
 void Response::check_method(std::vector<Configuration> configs, Request *request)
 {
 	std::string uri_str = request->getUri();
@@ -157,12 +183,16 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 	case 0: 	//		std::cout << "Method GET" << std::endl;
 		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 		{
-			if (uri_str.find(it->getLocation()) != std::string::npos)
+			// if (uri_str.find(it->getLocation()) != std::string::npos)
 			{	
 				if (it->checkGet())
 				{
 					this->server = "Server: " + it->getServerName() + "\r\n";
-					this->content_path = it->getIndex();
+					this->content_path = it->getIndex();        //написать функцию, которая возвращает путь по  uri, root и location
+
+					// this->content_path = getContentPath(*it, uri_str);
+					// std::cout << "CONTENT_PATH: " << this->content_path << std::endl;
+
 					if (this->setCookie == "")
 						this->setCookie = "Set-Cookie: name=" + it->getServerName() + "\r\n";
 				}	
@@ -251,6 +281,10 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 				{
 					this->server = "Server: " + it->getServerName() + "\r\n";
 					this->content_path = uri_str.insert(0, std::string("./rss"));
+
+					// this->content_path = getContentPath(*it, uri_str);
+					// std::cout << "CONTENT_PATH: " << this->content_path << std::endl;
+
 					for(size_t i = 0; i < this->content_path.length(); i++)
    					{
 						if(this->content_path[i] == ' ')

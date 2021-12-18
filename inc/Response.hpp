@@ -53,6 +53,8 @@ public:
 	std::string getServer() const;
 	std::string getDate() const;
 	std::string getAllow_method() const;
+
+	std::string getContentPath(Configuration conf, std::string uri);
 };
 
 std::ostream& operator<<(std::ostream& out, const Response& response);

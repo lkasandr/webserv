@@ -85,7 +85,7 @@ void Response::check_errors(int code)
 	}
 }
 
-void Response::make_response(Request *request, std::vector<Configuration> config)
+void Response::make_response(Request *request, Configuration *config)
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
@@ -141,7 +141,7 @@ int compare_uri_path(std::string uri_str, std::map<std::string, std::string> pat
 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 }
 
-void Response::check_method(std::vector<Configuration> configs, Request *request)
+void Response::check_method(Configuration *configs, Request *request)
 {
 	std::string uri_str = request->getUri();
 	if (uri_str == "/ ")
@@ -155,123 +155,102 @@ void Response::check_method(std::vector<Configuration> configs, Request *request
 	switch (m)
 	{
 	case 0: 	//		std::cout << "Method GET" << std::endl;
-		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+		if (configs->checkGet())
 		{
-			if (uri_str.find(it->getLocation()) != std::string::npos)
-			{	
-				if (it->checkGet())
-				{
-					this->server = "Server: " + it->getServerName() + "\r\n";
-					this->content_path = it->getIndex();
-					if (this->setCookie == "")
-						this->setCookie = "Set-Cookie: name=" + it->getServerName() + "\r\n";
-				}	
-				else
-				{
-					this->status_code = 405;
-					this->allow_method = "Allow: " + it->getHttpMethod() + "\r\n";
-				}
-				break;
-			}
+			this->server = "Server: " + configs->getServerName() + "\r\n";
+			this->content_path = configs->getIndex();
+			if (this->setCookie == "")
+				this->setCookie = "Set-Cookie: name=" + configs->getServerName() + "\r\n";
+		}	
+		else
+		{
+			this->status_code = 405;
+			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
 	case 1:		//	std::cout << "Method POST" << std::endl;
-		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
-		{
-			if (uri_str.find(it->getLocation()) != std::string::npos)
-			{	
-				if (it->checkPost())
+			if (configs->checkPost())
+			{
+				this->server = "Server: " + configs->getServerName() + "\r\n";
+				if(request->getBody().size() > (size_t) configs->getClientBodySize())
+				{	
+					this->status_code = 413;
+					break;
+				}
+				if(request->getPostFile() == true)
 				{
-					this->server = "Server: " + it->getServerName() + "\r\n";
-					if(request->getBody().size() > (size_t) it->getClientBodySize())
-					{	
-						this->status_code = 413;
+					std::string content = request->getBody();
+					std::string filename = "./rss/upload/" + content.substr((content.find("filename=\"") + 10));
+					filename = filename.substr(0, filename.find("\""));
+					size_t pos_beg = content.find("\r\n\r\n") + 4;
+					size_t pos_end = content.find(request->boundary + "--\r\n") - 2;
+					content = content.substr(pos_beg, pos_end - pos_beg);
+				
+					std::ofstream newfile;
+					newfile.open(filename, /*, std::ios_base::out | */std::ios_base::binary);
+					if (!newfile.is_open())
+					{
+						this->status_code = 500;
 						break;
 					}
-					if(request->getPostFile() == true)
-					{
-						std::string content = request->getBody();
-						std::string filename = "./rss/upload/" + content.substr((content.find("filename=\"") + 10));
-						filename = filename.substr(0, filename.find("\""));
-						size_t pos_beg = content.find("\r\n\r\n") + 4;
-						size_t pos_end = content.find(request->boundary + "--\r\n") - 2;
-						content = content.substr(pos_beg, pos_end - pos_beg);
-					
-						std::ofstream newfile;
-						newfile.open(filename, /*, std::ios_base::out | */std::ios_base::binary);
-						if (!newfile.is_open())
-						{
-							this->status_code = 500;
-							break;
-						}
 
-						const char *buf = content.c_str();
+					const char *buf = content.c_str();
 
-						newfile.write(content.c_str(), content.size());
-						// newfile << content;
-						newfile.close();
-						this->status_code = 201;
-						this->code_description = " Created.\r\n";
-						this->location = "./rss/upload";
-						this->connection = "Connection: Close\r\n";
-					}
-					else
-					{
-						std::fstream newfile;
-						newfile.open("./rss/post/test_post.txt", std::ios_base::app);
-						if (!newfile.is_open())
-						{
-							this->status_code = 500;
-							break;
-						}
-						newfile << request->getBody();
-						this->status_code = 201;
-						this->code_description = " Created.\r\n";
-						this->location = "./rss/post/test_post.txt";
-						this->connection = "Connection: Close\r\n";
-						newfile.close();
-					}
-					break;
-				}	
+					newfile.write(content.c_str(), content.size());
+					// newfile << content;
+					newfile.close();
+					this->status_code = 201;
+					this->code_description = " Created.\r\n";
+					this->location = "./rss/upload";
+					this->connection = "Connection: Close\r\n";
+				}
 				else
 				{
-					this->status_code = 405;
-					this->allow_method = "Allow: " + it->getHttpMethod() + "\r\n";
-				}
-				break;
-			}
-		}
-		break;
-	case 2: // std::cout << "Method DELETE" << std::endl;
-		for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
-		{
-			if (uri_str.find(it->getLocation()) != std::string::npos)
-			{	
-				if (it->checkDelete())
-				{
-					this->server = "Server: " + it->getServerName() + "\r\n";
-					this->content_path = uri_str.insert(0, std::string("./rss"));
-					for(size_t i = 0; i < this->content_path.length(); i++)
-   					{
-						if(this->content_path[i] == ' ')
-						{
-							this->content_path.erase(i,1);
-							i--;
-						}
-   					}
-					if (remove(this->content_path.c_str()))
-        			{
+					std::fstream newfile;
+					newfile.open("./rss/post/test_post.txt", std::ios_base::app);
+					if (!newfile.is_open())
+					{
 						this->status_code = 500;
-						std::cout << "Error in remove DELETE method." << std::endl;
+						break;
 					}
-				}	
-				else
-				{
-					this->status_code = 405;
-					this->allow_method = "Allow: " + it->getHttpMethod() + "\r\n";
+					newfile << request->getBody();
+					this->status_code = 201;
+					this->code_description = " Created.\r\n";
+					this->location = "./rss/post/test_post.txt";
+					this->connection = "Connection: Close\r\n";
+					newfile.close();
 				}
 				break;
+			}	
+			else
+			{
+				this->status_code = 405;
+				this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 			}
+			break;
+	case 2: // std::cout << "Method DELETE" << std::endl;
+		if (configs->checkDelete())
+		{
+			this->server = "Server: " + configs->getServerName() + "\r\n";
+			this->content_path = uri_str.insert(0, std::string("./rss"));
+			for(size_t i = 0; i < this->content_path.length(); i++)
+			{
+				if(this->content_path[i] == ' ')
+				{
+					this->content_path.erase(i,1);
+					i--;
+				}
+			}
+			if (remove(this->content_path.c_str()))
+			{
+				this->status_code = 500;
+				std::cout << "Error in remove DELETE method." << std::endl;
+			}
+		}	
+		else
+		{
+			this->status_code = 405;
+			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
 	default:

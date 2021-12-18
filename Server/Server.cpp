@@ -118,6 +118,20 @@ bool Server::check_client(int fd, char *buffer, int i)
 	return 0;
 }
 
+Configuration &check_server(Request *request, std::vector<Configuration> configs)
+{
+	std::string host = request->getHeaders().find("Host")->second;
+	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+	{
+		if(it->getHost() == host)
+		{
+			std::cout << host << " - find host\n" ;
+			return ((*it));
+		}
+	}
+	// return ;
+}
+
 void Server::communication(int fd, int i)
 {
 	char *buffer = new char[8000000];
@@ -142,8 +156,10 @@ void Server::communication(int fd, int i)
 			Request	request;
 			request.parseRequest(buffer);
 			std::cout << "\033[33mRequest: \033[0m" << buffer;
+			Configuration conf = check_server(&request, config);
+			std::cout << "conf: " << conf << std::endl;
 			Response response(fd);
-			response.make_response(&request, config);
+			response.make_response(&request, &conf);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
 			std::cout << response;
@@ -158,8 +174,9 @@ void Server::communication(int fd, int i)
 			Request	request;
 			request.parseRequest(buf);
 			std::cout << "\033[33mRequest: \033[0m" << buf;
+			Configuration conf = check_server(&request, config);
 			Response response(fd);
-			response.make_response(&request, config);
+			response.make_response(&request, &conf);
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
 			// clients.erase(it);

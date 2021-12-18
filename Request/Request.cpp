@@ -186,11 +186,13 @@ void		Request::parseRequest(char *buffer)
 	}
 	if (getMethod() == "POST")
 	{
-		std::cout << "\nLINE in post: " << line << std::endl;
-		std::cout << "\nbuffer in post: " << line << std::endl;
-		std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
+		// std::cout << "\nLINE in post: " << line << std::endl;
+		// std::cout << "\nbuffer in post: " << line << std::endl;
+		// std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
 		setBody(line);
 	}
+
+	
 	// для вывода this->headers:
 	// std::cout << "\033[35mMethod: " << getMethod() << "\033[0m" << std::endl;
 	// std::cout << "\033[35mURI: " << getUri() << "\033[0m" << std::endl;

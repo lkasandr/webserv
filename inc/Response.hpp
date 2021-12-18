@@ -46,7 +46,6 @@ public:
 	void check_errors(int code);
 
 	//getters
-
 	int getStatus_code() const;
 	std::string getCodeDescription() const;
 	std::string getVersion() const;

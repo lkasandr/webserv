@@ -40,8 +40,6 @@ int Server::check_fd(int fd)
 	{
 		if (it->get_listening_socket_fd() == fd)
 			return 1;
-
-			//найти конфиг в котором этот сокет создан, по порту
 	}
 	return 0;
 }
@@ -64,125 +62,116 @@ int check_content_length(char *buffer)
 	std::string line(buffer);
 	int len = 0;
 	size_t pos;
-	if ((pos = line.find("Content-Length: ") + 16) != std::string::npos)
+	pos = line.find("Content-Length: ");
+	if (/*(pos = line.find("Content-Length: ") + 16)*/ pos != std::string::npos)
 	{
+		pos = line.find("Content-Length: ") + 16;
 		size_t pos_end = line.find("\n", pos);
 		line = line.substr(pos, pos_end - pos);
-		std::cout << "LINE 68 " << line << "\n";
 		len = atoi(line.c_str());
 	}
-	std::cout << "LEN 69 " << len << "\n";
 	return len;
 }
 
-std::string check_file_end(std::string bound)
-{
-	// std::string bound(buffer);
-	size_t pos1 = bound.find("boundary=") + 9;
-	size_t pos2 = bound.find("\r\n", pos1);
-	std::string boundary = bound.substr(pos1, pos2 - pos1);
-	boundary = boundary + "--";
-	std::cout << "BOUND " << boundary << std::endl;
-	return boundary;
-}
+// std::string check_file_end(std::string bound)
+// {
+// 	// std::string bound(buffer);
+// 	size_t pos1 = bound.find("boundary=") + 9;
+// 	size_t pos2 = bound.find("\r\n", pos1);
+// 	std::string boundary = bound.substr(pos1, pos2 - pos1);
+// 	boundary = boundary + "--";
+// 	std::cout << "BOUND " << boundary << std::endl;
+// 	return boundary;
+// }
 
-bool Server::check_client(int fd, char *buffer, int i)
+void Server::check_ready(int fd, char *buffer, int i)
 {
-	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
 		if (it->getClientFd() == fd)
 		{
-			it->msg.append(buffer);
-			if (it->msg.find("0\r\n\r\n"))
+			it->msg.append(buffer, i);
+			if(!it->getContentLen())
+				it->setContentLen(check_content_length(buffer));
+			if (it->msg.length() >= (size_t)it->getContentLen() || (!it->getContentLen() && (it->msg.find("0\r\n\r\n") != std::string::npos)))
 				it->chunk_ready = true;
 			else 
 				it->chunk_ready = false;
-			return 1;
+			return;
 		}
-		// else if (it->getFileFd() == fd)
-		// {
-		// 	size_t read = 0;
-		// 	char   buffer[100000];
-
-		// 	read = fread(buffer, sizeof(char), 100000, it->getStream());
-		// 	if (ferror(it->getStream()))
-		// 		std::cout << "File read error" << std::endl;
-		// 	it->msg.append(buffer, read);
-		// 	if (feof(it->getStream()))
-		// 		it->chunk_ready = true;
-		// 	else 
-		// 		it->chunk_ready = false;
-		// 	return 1;
-		// }
 	}
-	return 0;
+	return;
 }
 
-Configuration &check_server(Request *request, std::vector<Configuration> configs)
+// Configuration &check_server(Request *request, std::vector<Configuration> configs)
+// {
+// 	std::string host = request->getHeaders().find("Host")->second;
+// 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
+// 	{
+// 		if(it->getHost() == host)
+// 			return ((*it));
+// 	}
+// 	// return ;
+// }
+
+bool check_server(Request *request, std::vector<Configuration> configs, Configuration *conf)
 {
 	std::string host = request->getHeaders().find("Host")->second;
 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		if(it->getHost() == host)
 		{
-			std::cout << host << " - find host\n" ;
-			return ((*it));
+			*conf = ((*it));
+			return 1;
 		}
 	}
-	// return ;
+	return 0;
+}
+
+bool check_client(int fd, std::list<Client> clients)
+{
+	for (std::list<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getClientFd() == fd)
+			return 1;
+	}
+	return 0;
 }
 
 void Server::communication(int fd, int i)
 {
-	char *buffer = new char[8000000];
-	memset((void *)buffer, 0, 8000000);
-	int message = recv(fd, buffer, 800000, 0);  // считываем входящее сообщение
-	std::cout << "BUFFER " << buffer << "\n";
+	char *buffer = new char[4096];
+	memset((void *)buffer, 0, 4096);
+	int message = recv(fd, buffer, 4096, 0);  // считываем входящее сообщение
 	if (message <= 0)
 	{
 		close(fd);
 		pfds.erase(pfds.begin() + i); 	// убираем fd из очереди
 		throw ClientCloseConnection();
 	}
-	if(!check_client(fd, buffer, i))
-	{
-		if (strstr(buffer, "Transfer-Encoding: chunked") != 0 || strstr(buffer, "Content-Type: multipart/form-data") != 0)
-		{
-			clients.push_back(Client(fd));
-			check_client(fd, buffer, i);
-		}
-		else
-		{
-			Request	request;
-			request.parseRequest(buffer);
-			std::cout << "\033[33mRequest: \033[0m" << buffer;
-			Configuration conf = check_server(&request, config);
-			std::cout << "conf: " << conf << std::endl;
-			Response response(fd);
-			response.make_response(&request, &conf);
-			close(fd);				///???
-			pfds.erase(pfds.begin() + i);		///???
-			std::cout << response;
-		}
-	}
-	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+	if(!check_client(fd, clients))
+		clients.push_back(Client(fd));
+	check_ready(fd, buffer, message);
+	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{	
 		if(it->chunk_ready)
 		{
 			it->chunk_ready = false;
-			char *buf = strdup(it->msg.c_str());		
 			Request	request;
-			request.parseRequest(buf);
-			std::cout << "\033[33mRequest: \033[0m" << buf;
-			Configuration conf = check_server(&request, config);
+			request.parseRequest(it->msg);
+			// std::cout << "\033[33mRequest: \033[0m" << it->msg;
+			std::cout << request;
+			Configuration conf;
+			if(!check_server(&request, config, &conf))
+				request.setCode(400);
 			Response response(fd);
 			response.make_response(&request, &conf);
+			std::cout << response;
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
 			// clients.erase(it);
+			// it->~Client();
 			it->msg.clear();
-			std::cout << response;
-			delete [] buf;
 		}	
 	}
 	delete[] buffer;
@@ -191,13 +180,18 @@ void Server::communication(int fd, int i)
 
 void	sig_handler(int signal)
 {
-	server->~Server();
-	std::cout << "Exiting the server " << std::endl;
+	if(signal == SIGINT)
+	{
+		server->~Server();
+		std::cout << "Exiting the server " << std::endl;
+		exit(0);
+	}
 }
 
 void	Server::main_cycle()
 {
-	server = this;
+	if(!server)
+		server = this;
 	signal(SIGINT, sig_handler);	
 	try
 	{
@@ -217,7 +211,7 @@ void	Server::main_cycle()
 					if (check_fd(this->pfds[i].fd))		// проверяем в каком сокете произошло событие
 						accept_connection(this->pfds[i].fd);
 					else
-						communication(this->pfds[i].fd, i);	 // добавить какой конфиг
+						communication(this->pfds[i].fd, i);	
 				}
 			}
 		}

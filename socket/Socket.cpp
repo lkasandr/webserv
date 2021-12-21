@@ -59,7 +59,7 @@ int Socket::accept_socket()
     if (this->accept_socket_fd == -1)
     {
         std::cerr << "Connection error." << std::endl;
-		std::exit(EXIT_FAILURE);
+		exit(1);
     }
     return (this->accept_socket_fd);
 }

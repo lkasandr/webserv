@@ -5,6 +5,7 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <cstdlib>
 
 class Socket
 {

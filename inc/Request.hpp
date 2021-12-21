@@ -22,11 +22,12 @@ class Request
 		Request& operator=(const Request& other);
 		~Request();
 		int getCode() const;
-		void parseRequest(char *buffer);
+		void parseRequest(std::string line);
 		void parse_first_line(std::string line);
 		void add_headers(std::string line);
 		void setHTTPversion(std::string line);
 		void setBody(std::string line);
+		void setCode(int code);
 		bool getCGI() const;
 		bool getPostFile() const;
 		std::string	getMethod() const;
@@ -39,5 +40,7 @@ class Request
 		std::string check_content_type();
 		std::string	boundary;
 };
+
+std::ostream& operator<<(std::ostream& out, const Request& request);
 
 #endif

@@ -47,23 +47,18 @@ std::map<std::string, std::string> Request::getHeaders() const
 
 void Request::setBody(std::string line)
 {
-	size_t pos = 0;
 	if (line.length() == 0 || (line[0] != '\r' && line[1] != '\n'))
 	{
 		this->code = 204;
 		this->body = line;
 		return ;
 	}
-	// if (this->post_file == true)
-	// 	pos = line.find(this->boundary + "--");
-	// else
-	pos = line.find("0\r\n\r\n");
-	this->body = line.substr(0, pos);
+	this->body = line;
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
 		this->code = 204;
 	}
-	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
+	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)
@@ -95,6 +90,11 @@ std::string Request::setURI(std::string line)
 		}
 	}
 	return temp;
+}
+
+void Request::setCode(int code)
+{
+	this->code = code;
 }
 
 std::string		Request::setMethod(std::string line)
@@ -156,9 +156,9 @@ void Request::add_headers(std::string line)
 	}
 }
 
-void		Request::parseRequest(char *buffer)
+void		Request::parseRequest(std::string line)
 {
-    std::string		line(buffer);
+    // std::string		line(buffer);
 	std::string		temp;
 	size_t prev = 0, pos = 0;
     while(pos != line.find("\n", prev))
@@ -224,3 +224,17 @@ bool Request::getPostFile() const
 
 
 
+std::ostream& operator<<(std::ostream& out, const Request& request)
+{
+	out << "\033[33mRequest: \033[0m";
+	out << request.getMethod() << " " << request.getUri() << request.getHTTP_version() << std::endl;
+	out << "Host: " << request.getHeaders().find("Host")->second << std::endl;
+	// if (request.getHeaders().find("Content-Length") != request.getHeaders().end())
+	// 	out << "Content-Length: " << request.getHeaders().find("Content-Length")->second << std::endl;
+	// if (request.getHeaders().find("Content-Type") != request.getHeaders().end())
+	// 	out << "Content-Type: " << request.getHeaders().find("Content-Length")->second << std::endl;
+	// if (request.getHeaders().find("Cookie") != request.getHeaders().end())
+	// 	out << "Cookie: " << request.getHeaders().find("Cookie")->second << std::endl;
+	
+	return (out);
+}

@@ -16,6 +16,7 @@
 #include "Client.hpp"
 #include <signal.h>
 #include "CGI.hpp"
+#include <list>
 
 class Client;
 class Response;
@@ -26,7 +27,7 @@ private:
 	std::vector<Socket>			sockets;
 	std::vector<struct pollfd> 	pfds;  //структура для создания очереди сокетов
 	std::vector<Configuration>  config;
-	std::vector<Client>			clients;
+	std::list<Client>			clients;
 public:
 	Server(std::vector<Configuration> configs);
 	~Server();
@@ -36,7 +37,8 @@ public:
 	int 	check_fd(int fd);
 	void 	accept_connection(int fd);
 	void	communication(int fd, int i);
-	bool 	check_client(int fd, char* buffer, int i);
+	void 	check_ready(int fd, char* buffer, int i);
+
 
 	class ClientCloseConnection: public std::exception 
 	{

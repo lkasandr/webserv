@@ -100,7 +100,7 @@ void Response::make_response(Request *request, Configuration *config)
 	if (request->getMethod() == "GET")
 	{
 		std::ifstream	file;
-		file.open(this->content_path);
+		file.open(this->content_path.c_str());
 		if (!file.is_open())
 		{
 			this->status_code = 404;
@@ -128,24 +128,24 @@ void Response::make_response(Request *request, Configuration *config)
 	}
 }
 
-int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
-{
-	std::map<std::string, std::string>::const_iterator it;
-	for (it=path.begin(); it!=path.end(); it++)
-	{
-		if (uri_str.find(it->first) != std::string::npos)
-		{
+// int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
+// {
+// 	std::map<std::string, std::string>::const_iterator it;
+// 	for (it=path.begin(); it!=path.end(); it++)
+// 	{
+// 		if (uri_str.find(it->first) != std::string::npos)
+// 		{
 			
-		}
-	}
-	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
-}
+// 		}
+// 	}
+// 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
+// }
 
-std::string Response::getContentPath(Configuration conf, std::string uri)
-{
-	if (uri == "/home ")
-		return ("./rss/home/index.html");
-}
+// std::string Response::getContentPath(Configuration conf, std::string uri)
+// {
+// 	if (uri == "/home ")
+// 		return ("./rss/home/index.html");
+// }
 
 void Response::check_method(Configuration *configs, Request *request)
 {
@@ -195,17 +195,14 @@ void Response::check_method(Configuration *configs, Request *request)
 					content = content.substr(pos_beg, pos_end - pos_beg);
 				
 					std::ofstream newfile;
-					newfile.open(filename, /*, std::ios_base::out | */std::ios_base::binary);
+					newfile.open(filename.c_str(),  std::ios_base::out | std::ios_base::binary);
 					if (!newfile.is_open())
 					{
 						this->status_code = 500;
 						break;
 					}
-
-					// const char *buf = content.c_str();
-
-					newfile.write(content.c_str(), content.size());
-					// newfile << content;
+					// newfile.write(content.c_str(), content.size());
+					newfile << content;
 					newfile.close();
 					this->status_code = 201;
 					this->code_description = " Created.\r\n";

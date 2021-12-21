@@ -21,25 +21,16 @@ class Client
 private:
 	int		fd;
 	int		content_len;
-	int		file_fd;
-	FILE*	stream;
-	// Request	request;
+	
 public:
 	Client(int fd);
-	Client(int file_fd, bool file );
 	~Client();
 
-	int 	getClientFd() const;
-	void	setContentLen(int len);
-	int		getContentLen() const;
-	int		getFileFd() const;
-	FILE*	getStream();
+	int 		getClientFd() const;
+	void		setContentLen(int len);
+	int			getContentLen() const;
+	bool		chunk_ready;
 	std::string msg;
-	bool	chunk_ready;
-	bool	rec_file;
-	std::string bound;
 };
-
-
 
 #endif

@@ -85,14 +85,13 @@ void Response::check_errors(int code)
 	}
 }
 
-std::string Response::makeAutoindexPage(const char *path, std::string const &host, int port) {
+std::string Response::makeAutoindexPage(const char *path, std::string const &host) {
     std::string dirName(path);
     size_t pos_index = dirName.rfind("index.");
     if (pos_index != std::string::npos)
 	{
         dirName.erase(pos_index, dirName.length() - pos_index);
 	}
-	std::cout << "dirname: " << dirName << "  path:" << path << std::endl;
     DIR *dir = opendir(dirName.c_str());
     std::string page =\
     "<!DOCTYPE html>\n\
@@ -115,8 +114,7 @@ std::string Response::makeAutoindexPage(const char *path, std::string const &hos
         std::stringstream   ss;
         struct stat vStat;
         stat(dirEntry->d_name, &vStat);
-        ss << "\t\t<p><a href=\"http://" + host + ":" <<\
-        port << dirName + "/" + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
+        ss << "\t\t<p><a href=\"http://" + host + dirName + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
         page += ss.str();
     }
     page +="\
@@ -150,7 +148,7 @@ void Response::make_response(Request *request, Configuration *config)
 			if (config->getAutoindex())
 			{
 				std::string ret;
-				ret = makeAutoindexPage(this->content_path.c_str(), config->getHost(), config->getPort());
+				ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
 				content << ret;
 			}
 			else

@@ -46,7 +46,7 @@ public:
 	void get_method(int fd, Configuration & conf);
 	int	 find_config(std::vector<Configuration> configs, std::string URI);
 	void check_errors(int code);
-	std::string makeAutoindexPage(const char *path, std::string const &host, int port);
+	std::string makeAutoindexPage(const char *path, std::string const &host);
 
 	//getters
 	int getStatus_code() const;

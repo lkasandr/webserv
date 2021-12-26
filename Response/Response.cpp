@@ -85,6 +85,46 @@ void Response::check_errors(int code)
 	}
 }
 
+std::string Response::makeAutoindexPage(const char *path, std::string const &host) {
+    std::string dirName(path);
+    size_t pos_index = dirName.rfind("index.");
+    if (pos_index != std::string::npos)
+	{
+        dirName.erase(pos_index, dirName.length() - pos_index);
+	}
+    DIR *dir = opendir(dirName.c_str());
+    std::string page =\
+    "<!DOCTYPE html>\n\
+    <html>\n\
+    <head>\n\
+            <title>" + dirName + "</title>\n\
+    </head>\n\
+    <body>\n\
+    <h1>INDEX</h1>\n\
+    <p>\n";
+    if (dir == NULL) 
+	{
+        std::cerr << "Error: could not open [" << path << "]" << std::endl;
+        return "";
+    }
+    if (dirName[0] != '/')
+        dirName = "/" + dirName;
+    for (struct dirent *dirEntry = readdir(dir); dirEntry; dirEntry = readdir(dir)) 
+	{
+        std::stringstream   ss;
+        struct stat vStat;
+        stat(dirEntry->d_name, &vStat);
+        ss << "\t\t<p><a href=\"http://" + host + dirName + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
+        page += ss.str();
+    }
+    page +="\
+    </p>\n\
+    </body>\n\
+    </html>\n";
+    closedir(dir);
+    return page;
+}
+
 void Response::make_response(Request *request, Configuration *config)
 {
 	this->date = get_date() + "\r\n";
@@ -117,17 +157,26 @@ void Response::make_response(Request *request, Configuration *config)
 	else /*if (request->getMethod() == "GET")*/
 	{
 		std::ifstream	file;
+		std:: stringstream response;
+		std::stringstream content;
 		file.open(this->content_path.c_str());
 		if (!file.is_open())
 		{
-			this->status_code = 404;
-			this->code_description = " Not Found\r\n";
-			this->connection = "Connection: Close\r\n";
-			file.open("./rss/error/404.html");
+			if (config->getAutoindex())
+			{
+				std::string ret;
+				ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
+				content << ret;
+			}
+			else
+			{
+				this->status_code = 404;
+				this->code_description = " Not Found\r\n";
+				this->connection = "Connection: Close\r\n";
+				file.open("./rss/error/404.html");
+			}
 		}
-		std::stringstream content;
 		content << file.rdbuf();
-		std:: stringstream response;
 		response << this->version << this->status_code << this->code_description
 		<< this->date << this->server << this->connection << this->allow_method
 		<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"

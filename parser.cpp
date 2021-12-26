@@ -40,6 +40,8 @@ void add_config(std::string line, Configuration& conf)
 		conf.setHost(get_key(line));
 	else if (line.find("Port ", 0) != std::string::npos)
 		conf.setPort(get_key(line));
+	else if (line.find("autoindex on", 0) != std::string::npos)
+		conf.setAutoindexOn();
 	else if (line.find("server_name ", 0) != std::string::npos)
 		conf.setServerName(get_key(line));
 	else if (line.find("location ", 0) != std::string::npos)

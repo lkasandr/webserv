@@ -14,6 +14,7 @@ Configuration::Configuration()
 	this->location = "home";
 	this->index = "./rss/home/index.html";
 	this->path.clear();
+	this->autoindex = 0;
 }
 
 Configuration::Configuration(const Configuration & copy)
@@ -36,6 +37,7 @@ Configuration& Configuration::operator=(const Configuration& other)
 	this->method_delete = other.getDelete();
 	this->location = other.getLocation();
 	this->index = other.getIndex();
+	this->autoindex = other.getAutoindex();
 	return *this;
 }
 
@@ -75,6 +77,11 @@ int 		Configuration::getClientBodySize() const
 std::string Configuration::getHttpMethod() const
 {
 	return this->http_method;
+}
+
+int Configuration::getAutoindex() const
+{
+	return this->autoindex;
 }
 
 bool	Configuration::getGet() const
@@ -179,6 +186,16 @@ void		Configuration::setRoot(std::string value)
 {
 	// this->root.push_back(value);
 	this->root = value;
+}
+
+void Configuration::setAutoindexOff(void)
+{
+	this->autoindex = 0;
+}
+
+void Configuration::setAutoindexOn(void)
+{
+	this->autoindex = 1;
 }
 
 void	Configuration::setPath(std::string location, std::string root)

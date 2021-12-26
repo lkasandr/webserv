@@ -26,6 +26,7 @@ private:
 	std::map<std::string, std::string> path;
 	std::string		index;
 	std::string		CGI_pass;
+	int				autoindex;
 public:
 	Configuration();
 	Configuration(char *conf_path);
@@ -44,6 +45,7 @@ public:
 	bool		getDelete() const;
 	std::string getLocation() const;
 	std::string getRoot() const;
+	int			getAutoindex() const;
 	std::map<std::string, std::string> getPath() const;
 	// std::string getLocation() const;
 	std::string	getIndex() const;
@@ -60,6 +62,8 @@ public:
 	void		setCGI(std::string value);
 	void		setRoot(std::string value);
 	void		setPath(std::string location, std::string root);
+	void		setAutoindexOn(void);
+	void		setAutoindexOff(void);
 	bool		checkGet();
 	bool		checkPost();
 	bool		checkDelete();

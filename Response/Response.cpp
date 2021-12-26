@@ -97,7 +97,24 @@ void Response::make_response(Request *request, Configuration *config)
 		check_errors(this->status_code);
 	}
 	// формируем ответ
-	if (request->getMethod() == "GET")
+	if (request->getCGI())
+	{
+		std:: stringstream response;
+		getContentPath(request->getUri());
+		std::cout << "getContentPath(request->getUri())" << getContentPath(request->getUri()) << std::endl;
+		CgiHandler cgi(*request, *this);
+		cgi.execScript("./CGI/php-cgi");
+		std::ifstream	file;
+		file.open("./rss/tmp/cgi_file");
+		std::stringstream content;
+		content << file.rdbuf();
+		// std::cout << "cgi.getBody().c_str();" << cgi.getBody();
+		response << this->version << this->status_code << this->code_description
+		<< this->date << this->server << this->connection << this->allow_method
+		<<  content.str();
+		send(fd, response.str().c_str(), response.str().length(), 0);
+	}
+	else /*if (request->getMethod() == "GET")*/
 	{
 		std::ifstream	file;
 		file.open(this->content_path.c_str());
@@ -118,14 +135,14 @@ void Response::make_response(Request *request, Configuration *config)
 		send(fd, response.str().c_str(), response.str().length(), 0);
 		file.close();
 	}
-	else
-	{
-		std:: stringstream response;
-		response << this->version << this->status_code << this->code_description
-		<< this->date << this->server << this->connection << this->allow_method
-		<< "\r\n\r\n" << " " << this->status_code << this->code_description;
-		send(fd, response.str().c_str(), response.str().length(), 0);
-	}
+	// else
+	// {
+	// 	std:: stringstream response;
+	// 	response << this->version << this->status_code << this->code_description
+	// 	<< this->date << this->server << this->connection << this->allow_method
+	// 	<< "\r\n\r\n" << " " << this->status_code << this->code_description;
+	// 	send(fd, response.str().c_str(), response.str().length(), 0);
+	// }
 }
 
 // int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
@@ -141,11 +158,14 @@ void Response::make_response(Request *request, Configuration *config)
 // 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 // }
 
-// std::string Response::getContentPath(Configuration conf, std::string uri)
-// {
-// 	if (uri == "/home ")
-// 		return ("./rss/home/index.html");
-// }
+std::string Response::getContentPath(std::string uri) const
+{
+	if (uri == "/home ")
+		return ("./rss/home/index.html");
+	if (uri.find("cgi") != std::string::npos)
+		return ("./CGI/php-cgi");
+	return("./rss/home/index.html");
+}
 
 void Response::check_method(Configuration *configs, Request *request)
 {
@@ -164,6 +184,8 @@ void Response::check_method(Configuration *configs, Request *request)
 		if (configs->checkGet())
 		{
 			this->server = "Server: " + configs->getServerName() + "\r\n";
+			if(request->getCGI())
+				break;
 			this->content_path = configs->getIndex();
 			// this->content_path = getContentPath(*configs, uri_str);
 			// std::cout << "CONTENT_PATH: " << this->content_path << std::endl;
@@ -185,6 +207,8 @@ void Response::check_method(Configuration *configs, Request *request)
 					this->status_code = 413;
 					break;
 				}
+				if(request->getCGI())
+					break;
 				if(request->getPostFile() == true)
 				{
 					std::string content = request->getBody();

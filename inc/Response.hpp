@@ -9,6 +9,7 @@
 #include "Socket.hpp"
 #include "Configuration.hpp"
 #include "webserv.hpp"
+#include "CGI.hpp"
 #include <fstream>
 #include <sstream>
 #include <cstdio>
@@ -53,7 +54,7 @@ public:
 	std::string getDate() const;
 	std::string getAllow_method() const;
 
-	std::string getContentPath(Configuration conf, std::string uri);
+	std::string getContentPath(std::string uri) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Response& response);

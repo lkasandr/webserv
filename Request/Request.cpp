@@ -15,6 +15,11 @@ std::string	Request::getMethod() const
 	return this->method;
 }
 
+std::string	Request::getQueryString() const
+{
+	return this->query_string;
+}
+
 std::string	Request::getUri() const
 {
 	return this->uri;
@@ -28,6 +33,16 @@ std::string	Request::getHTTP_version() const
 std::string Request::getBody() const
 {
 	return this->body;
+}
+
+std::string Request::getScriptPath() const
+{
+	return this->script_path;
+}
+
+std::string Request::getPort() const
+{
+	return this->port;
 }
 
 int Request::getCode() const
@@ -49,14 +64,14 @@ void Request::setBody(std::string line)
 {
 	if (line.length() == 0 || (line[0] != '\r' && line[1] != '\n'))
 	{
-		this->code = 204;
+		this->code = 400;
 		this->body = line;
 		return ;
 	}
 	this->body = line;
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
-		this->code = 204;
+		this->code = 400;
 	}
 	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
@@ -84,9 +99,19 @@ std::string Request::setURI(std::string line)
 		this->uri = line.substr(1, pos);
 		temp = line.substr(pos + 1, line.length() - pos);
 		cgi_indicator = this->uri.substr(0, 9);
-		if (cgi_indicator == "/cgi-bin/")
+		std:: cout << "CGI INDICATOR " << cgi_indicator << std::endl;
+		if (cgi_indicator.find("/cgi/") != std::string::npos || cgi_indicator.find(".php") != std::string::npos)
 		{
 			this->cgi = 1;
+			size_t pos_cgi = 0;
+			pos_cgi = this->uri.find("/cgi/");
+			if ( pos_cgi != std::string::npos)
+			{
+				this->script_path = this->uri.substr((pos_cgi + 1), this->uri.find('?'));
+			}	
+			pos_cgi = this->uri.find('?');
+			if ( pos_cgi != std::string::npos)
+				this->query_string = this->uri.substr(pos_cgi + 1);
 		}
 	}
 	return temp;
@@ -152,6 +177,13 @@ void Request::add_headers(std::string line)
 			size_t pos1 = value.find("boundary=") + 9;
 			size_t pos2 = value.find("\r\n");
 			this->boundary = value.substr(pos1, pos2 - pos1);
+		}
+		if(key == "Host")
+		{
+			size_t pos1 = value.find(":") + 1;
+			size_t pos2 = value.find("\r\n");
+			this->port = value.substr(pos1, pos2 - pos1);
+			std::cout << "PORT - " << port << "\n";
 		}
 	}
 }
@@ -229,6 +261,8 @@ std::ostream& operator<<(std::ostream& out, const Request& request)
 	out << "\033[33mRequest: \033[0m";
 	out << request.getMethod() << " " << request.getUri() << request.getHTTP_version() << std::endl;
 	out << "Host: " << request.getHeaders().find("Host")->second << std::endl;
+	if(request.getBody().size() < 5000)
+		out << request.getBody() << std::endl;
 	// if (request.getHeaders().find("Content-Length") != request.getHeaders().end())
 	// 	out << "Content-Length: " << request.getHeaders().find("Content-Length")->second << std::endl;
 	// if (request.getHeaders().find("Content-Type") != request.getHeaders().end())

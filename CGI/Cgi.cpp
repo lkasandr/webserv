@@ -1,180 +1,166 @@
 #include "CGI.hpp"
 
-CGI::CGI(Request req)
+CgiProcess::CgiProcess(Request const& req, Response const& res) :
+env_array(NULL), request(req), response(res)
 {
-    // REQUEST_METHOD +
-    // REQUEST_URI +
-    // QUERY_STRING +
-    // REMOTE_ADDR
-    // SCRIPT_NAME
-    // HTTP_COOKIE
-    // HTTP_REFERER
-
-    //content-type = chunk (content-lenght) - раз
-    
-    this->env["REQUEST_METHOD"] = req.getMethod();
-    this->env["REQUEST_URI"] = req.getUri();
-    this->env["QUERY_STRING"] = getQueryString(this->env["REQUEST_URI"]);
-    this->env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    
-
-    // char **env = map_to_array();
-
+	this->initEnv();
 }
 
-std::string CGI::getQueryString(std::string URI)
-{
-    size_t pos = 0;
-    std::string QueryString;
+CgiProcess::CgiProcess(CgiProcess const & copy) :
+env_array(copy.env_array), request(copy.request), response(copy.response),
+body(copy.body), status(copy.status)
+{}
 
-    while(pos != URI.find("?", 0))
-			pos++;
-    QueryString = URI.substr(pos, URI.length() - pos);
-    return QueryString;
+CgiProcess::~CgiProcess()
+{
+	for (size_t i = 0; i < this->env_map.size(); ++i)
+		delete[] this->env_array[i];
+	delete[] this->env_array;
 }
 
-CGI::~CGI()
+CgiProcess& CgiProcess::operator=(CgiProcess const & other)
 {
+	this->env_array = other.env_array;
+	// this->request = other.request;
+	// this->response = other.response;
+	this->body = other.body;
+	this->status = other.status;
 
+	return *this;
 }
 
-char** CGI::map_to_array()
+std::map<std::string, std::string> CgiProcess::change_headers(std::map<std::string, std::string> &headers)
 {
-    char** env;
+	std::map<std::string, std::string> http_headers;
+	std::map<std::string, std::string>::const_iterator it = headers.begin();
+	std::map<std::string, std::string>::const_iterator end = headers.end();
+	std::string key;
+	
+	while (it != end)
+	{
+		key = "HTTP_";
+		transform(it->first.begin(), it->first.end(), std::back_inserter(key), toupper);
+		std::replace(key.begin(), key.end(), '-', '_');
+		http_headers[key] = it->second;
+		++it;
+	}
 
-    env = new char*[this->env.size() + 1];
-    int i = 0;
-    std::map<std::string, std::string> :: iterator it;
-    for (it = this->env.begin(); it != this->env.end(); it++)
+	return (http_headers);
+}
+
+std::string	CgiProcess::get_cwd(void)
+{
+	char cwd[256];
+
+    if (getcwd(cwd, sizeof(cwd)) == NULL)
+      return (std::string("./"));
+    else
+      return (std::string(cwd));  
+}
+
+std::string to_string(size_t size)
+{
+    std::stringstream ss;
+    ss << size;
+
+    return (ss.str());
+}
+
+void	CgiProcess::initEnv(void)
+{
+	std::map<std::string, std::string> headers = this->request.getHeaders();
+	std::map<std::string, std::string> http_headers = this->change_headers(headers);
+	this->env_map["REDIRECT_STATUS"]	=	"200";
+	this->env_map["CONTENT_LENGTH"]		=	to_string(this->request.getBody().size());
+	this->env_map["CONTENT_TYPE"]		=	headers["content-type"];
+	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
+	this->env_map["PATH_INFO"]			=	"/";	// rfc3875  4.1.5.
+	this->env_map["PATH_TRANSLATED"]	=	this->request.getScriptPath(); //
+	this->env_map["QUERY_STRING"]		=	this->request.getQueryString();	// после "?" В URL
+	this->env_map["REMOTE_ADDR"]		=	/*"127.0.0.1";	*/this->request.getHeaders().find("Host")->second;
+	this->env_map["REQUEST_METHOD"]		=	this->request.getMethod();
+	this->env_map["SCRIPT_NAME"]		=	this->request.getScriptPath();	//  variable MUST be set to a URI path
+	this->env_map["SCRIPT_FILENAME"]	=	this->request.getScriptPath();	//  variable MUST be set to a URI path
+	this->env_map["SERVER_NAME"]		=	this->request.getHeaders().find("Host")->second;	// hostname
+	this->env_map["SERVER_PORT"]		=	this->request.getPort();	// variable MUST be set
+	this->env_map["SERVER_PROTOCOL"]	=	this->request.getHTTP_version();
+	this->env_map["SERVER_SOFTWARE"]	=	"webserv";
+	this->env_map["UPLOAD_DIR"]			=	"/rss/upload";
+	this->env_map["DOCUMENT_ROOT"]		=	this->get_cwd(); 
+	this->env_map.insert(http_headers.begin(), http_headers.end());
+}
+
+void	CgiProcess::fillEnv(void)
+{
+	this->env_array = new char*[this->env_map.size() + 1];
+	
+	std::map<std::string, std::string>::const_iterator it = this->env_map.begin();
+
+	std::string str;
+	size_t i = 0;
+	while(i < this->env_map.size())
+	{
+		str = it->first + '=' + it->second;
+		this->env_array[i] = new char[str.size() + 1];
+		strcpy(this->env_array[i], str.c_str());
+		str.clear();
+		++it;
+		++i;
+	}
+	this->env_array[i] = NULL;
+}
+
+int	CgiProcess::execCGI(std::string const& cgi_path)
+{
+	int fd[2][2];
+    char buf[30000];
+    int len = -1;
+	this->fillEnv();
+
+    bzero(buf, 1000);
+    pipe(fd[0]);
+    pipe(fd[1]);
+    write(fd[0][1], (char *)this->body.c_str(), this->body.length());
+    close(fd[0][1]);
+    if(fork() == 0)
     {
-        std::string ValueAndKey = it->first + "=" + it->second;
-        env[i] = new char[ValueAndKey.size() + 1];
-        env[i] = strcpy(env[i], ValueAndKey.c_str());
-        i++;
+        dup2(fd[0][0], 0);
+        close(fd[0][0]);
+        dup2(fd[1][1], 1);
+        close(fd[1][1]);
+		char * argv[3] = {
+			const_cast<char*>(cgi_path.c_str()),
+			const_cast<char*>(cgi_path.c_str()),
+			(char *)0 };
+        int i = execve(argv[0], &argv[0], this->env_array);
+        std::cout << "“Error execve “" << i << std::endl;
     }
-    env[i] = nullptr;
+    wait(0);
+    close(fd[1][1]);
 
-    // std::cout << "CHECK THAT YOUR ENV IS GOOD ^_^" << std::endl;
-    // i = 0;
-    // while(env[i])
-    // {
-    //     std::cout << env[i] << std::endl;
-    //     i++;
-    // }
-
-    return env;
-}
-
-
-void CGI::cgi_main(void)
-{
-    pid_t pid;
-    int status;
-    char **env;
-
-    env = map_to_array();
-    switch(pid=fork())
+    while((len = read(fd[1][0], buf, 30000)) != 0)
     {
-        case -1: 
-        {
-            std::cerr << "Process creation failed" << std::endl;
-        }
-        case 0 : 
-        {
-            
-            execve("Script", NULL, env); // - выполнение скрипта cgi
-            
-            std::cout << "ZAPUSK SCRIPTA" << std::endl;
-        }
-        default : 
-        {
-            waitpid(pid, &status, 0);
-        }
+        if (len == -1)
+            std::cout << "“Read error CGI”" << std::endl;
+        // this->body.clear();
+        for(int i = 0;i < len; i++)
+            this->body.push_back(buf[i]);
+        bzero(buf, 30000);
     }
+    close(fd[0][0]);
+    close(fd[1][0]);
+	// std::cout << "259 BODY " << this->body << std::endl;
+	return 0;
 }
 
 
-// this->env["REQUEST_METHOD"] = req.getMethod();
-    // //здесь нужна map для заголовоков из запроса
-    // std::map<std::string, std::string> headers;
-    // if (headers.find("Authorization") != headers.end())
-    // {
-    //     this->env["AUTH_TYPE"] = headers["Authorization"];
-    //     // if (this->env["AUTH_TYPE"] != "Basic" && this->env["AUTH_TYPE"] != "Digest"
-    //     //     && this->env["AUTH_TYPE"] != "NTLM" && this->env["AUTH_TYPE"] != "Negotiate")
-    //     // {
-    //     //     std::cout << "You have an errors AUTH_TYPE!";
-    //     // }                                                    // нужна ли проверка  AUTH_TYPE ????
-    // }
 
-    // this->env["CONTENT_LENGTH"] = std::to_string(this->body.length());
+std::string CgiProcess::getBody(void)
+{
+	return this->body;
+}
 
-    // if (this->env["REQUEST_METHOD"] == "POST")
-    //     this->env["CONTENT_TYPE"] = headers["Content-type"];
-    
-    // this->env["GATEWAY_INTERFACE"] = "CGI/1.1";
-
-    // // this->env["PATH_INFO"] =        //взять из request
-
-    // // пример PATH_INFO:
-    // // http://somehost.com/cgi-bin/somescript/this%2eis%2epath%3binfo
-
-    // // /this.is.the.path;info
-
-
-    // // this->env["PATH_TRANSLATED"] =     //взять из request
-
-
-    // // this->env["QUERY_STRING"] =            //взять из request
-
-    // this->env["REMOTE_ADDR"] = headers["HTTP_X_FORWARDED_FOR"];
-
-    // this->env["REMOTE_HOST"] = req.getHost();                  //под вопросом 
-
-    // this->env["REMOTE_IDENT"] = ;
-
-    // this->env["REMOTE_USER"] = ;
-
-    
-
-
-    // this->env["SERVER_SOFTWARE"] = ; // из конфига
-    // this->env["SERVER_NAME"] = ; //из конфига
-    // this->env["SERVER_PORT"] = ; //из конфига
-    
-    
-//    SERVER_SOFTWARE = Apache/2.0.28 (Win32) 
-//    SERVER_NAME = localhost
-//    SERVER_PROTOCOL = HTTP/1.1 
-//    SERVER_PORT = 80 
-
-
-//    SERVER_ADMIN = mike@home 
-//    GATEWAY_INTERFACE = CGI/1.1 
-//    DOCUMENT_ROOT = C:/Apache2/htdocs 
-   
-//    REQUEST_METHOD = GET 
-//    SCRIPT_FILENAME = C:/Apache2/htdocs/App/showEnv.exe 
-//    SCRIPT_NAME = /app/showEnv.exe 
-//    CONTENT_TYPE = 
-//    CONTENT_LENGTH = 
-//    QUERY_STRING = 
-//    REQUEST_URI = /app/showEnv.exe 
-//    PATH_INFO = 
-//    PATH_TRANSLATED = 
-    
-//    AUTH_TYPE = 
-//    REMOTE_HOST = 
-//    REMOTE_ADDR = 127.0.0.1 
-//    REMOTE_USER = 
-   
-//    HTTP_HOST = localhost 
-//    HTTP_ACCEPT_CHARSET = 
-//    HTTP_ACCEPT_LANGUAGE = en-us 
-//    HTTP_CONNECTION = Keep-Alive 
-//    HTTP_REFERER = 
-//    HTTP_USER_AGENT = Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0; DigExt)
-    
-    // std::cout << this->env["REQUEST_METHOD"] << std::endl;
-    // std::cout << this->env["QUERY_STRING"] << std::endl;
-    // std::cout << this->env["SERVER_PROTOCOL"] << std::endl;
+std::string				CgiProcess::getStatus(void)
+{
+	return this->status;
+}

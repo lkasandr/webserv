@@ -9,10 +9,13 @@ class Request
 	private:
 		int			code;
 		bool		cgi;
+		std::string port;
 		std::string	method;
 		std::string uri;
 		std::string http_version;
 		std::string	body;
+		std::string	query_string;
+		std::string script_path;
 		std::map<std::string, std::string> headers;
 		bool		post_file;
 
@@ -34,6 +37,9 @@ class Request
 		std::string	getUri() const;
 		std::string getHTTP_version() const;
 		std::string getBody() const;
+		std::string getPort() const;
+		std::string	getQueryString() const;
+		std::string getScriptPath() const;
 		std::string setMethod(std::string line);
 		std::string setURI(std::string line);
 		std::map<std::string, std::string> getHeaders() const;

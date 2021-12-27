@@ -159,7 +159,7 @@ void Server::communication(int fd, int i)
 			it->chunk_ready = false;
 			Request	request;
 			request.parseRequest(it->msg);
-			// std::cout << "\033[33mRequest: \033[0m" << it->msg;
+			std::cout << "\033[33mRequest: \033[0m" << it->msg;
 			std::cout << request;
 			Configuration conf;
 			if(!check_server(&request, config, &conf))

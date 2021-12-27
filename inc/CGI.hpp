@@ -1,26 +1,58 @@
 #ifndef CGI_HPP
-#define CGI_HPP
-
-// #include "webserv.hpp"
+# define CGI_HPP
 
 #include "webserv.hpp"
-// #include "Request.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
+#include <sys/wait.h>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <sys/stat.h> 
+#include <sys/types.h> 
+#include <fcntl.h>
+#include <fstream> 
 #include <map>
+#include <list>
+#include <sstream>
+#include <bitset>
+#include <cstring> 
+#include <cstdlib> 
+#include <unistd.h>
+#include <algorithm> 
 
+# define CGI_BUF_SIZE 65536
+
+class Response;
 class Request;
 
-class CGI
+class CgiProcess 
 {
-    private:
-        std::map<std::string, std::string> env;
-        std::string body;
-    public:
-        CGI(Request req);
-        ~CGI();
-        void cgi_main(void);
-        char** map_to_array();
-        std::string getQueryString(std::string URI);
+	private:
+		std::map<std::string, std::string>	env_map;
+		char								**env_array;
+		const Request&						request;
+		const Response&						response;
+		std::string							body;
+		std::string							status;
+
+		CgiProcess();
+		void		initEnv();
+		void		fillEnv();
+		std::map<std::string, std::string>	change_headers(std::map<std::string, std::string> &headers);
+
+	public:
+		CgiProcess(Request const& req, Response const& res);
+		CgiProcess(CgiProcess const & copy);
+		~CgiProcess();
+		CgiProcess& operator=(CgiProcess const & other);
+		int	execCGI(std::string const& cgi_path);
+		std::string getBody(void);
+		std::string getStatus();
+		std::string	get_cwd();
+
 };
 
+std::ostream & operator<<(std::ostream & out, CgiProcess const & cgi_proc);
 
-#endif
+#endif 

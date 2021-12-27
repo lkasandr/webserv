@@ -140,18 +140,14 @@ void Response::make_response(Request *request, Configuration *config)
 	if (request->getCGI())
 	{
 		std:: stringstream response;
-		getContentPath(request->getUri());
-		std::cout << "getContentPath(request->getUri())" << getContentPath(request->getUri()) << std::endl;
-		CgiHandler cgi(*request, *this);
-		cgi.execScript("./CGI/php-cgi");
-		std::ifstream	file;
-		file.open("./rss/tmp/cgi_file");
-		std::stringstream content;
-		content << file.rdbuf();
-		// std::cout << "cgi.getBody().c_str();" << cgi.getBody();
+		CgiProcess cgi(*request, *this);
+		cgi.execCGI(getContentPath(request->getUri()));
+		std::cout << "cgi.getBody().c_str();" << cgi.getBody();
 		response << this->version << this->status_code << this->code_description
-		<< this->date << this->server << this->connection << this->allow_method
-		<<  content.str();
+		<< this->date << this->server << this->connection << this->allow_method  //<< "Content-type: text/html, text/css \r\n"
+		// << this->contentType << "Content-Length: " << cgi.getBody().length() << "\r\n"
+		// << this->setCookie << "\r\n\r\n" 
+		<< cgi.getBody();  //content.str();
 		send(fd, response.str().c_str(), response.str().length(), 0);
 	}
 	else /*if (request->getMethod() == "GET")*/
@@ -184,14 +180,6 @@ void Response::make_response(Request *request, Configuration *config)
 		send(fd, response.str().c_str(), response.str().length(), 0);
 		file.close();
 	}
-	// else
-	// {
-	// 	std:: stringstream response;
-	// 	response << this->version << this->status_code << this->code_description
-	// 	<< this->date << this->server << this->connection << this->allow_method
-	// 	<< "\r\n\r\n" << " " << this->status_code << this->code_description;
-	// 	send(fd, response.str().c_str(), response.str().length(), 0);
-	// }
 }
 
 // int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
@@ -211,8 +199,10 @@ std::string Response::getContentPath(std::string uri) const
 {
 	if (uri == "/home ")
 		return ("./rss/home/index.html");
-	if (uri.find("cgi") != std::string::npos)
-		return ("./CGI/php-cgi");
+	if (uri.find("php") != std::string::npos)
+		return ("./cgi/phpinfo.php");
+	if (uri.find("cpp") != std::string::npos)
+		return ("./cgi/print_env");
 	return("./rss/home/index.html");
 }
 

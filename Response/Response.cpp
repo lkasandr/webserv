@@ -142,10 +142,10 @@ void Response::make_response(Request *request, Configuration *config)
 		std:: stringstream response;
 		CgiProcess cgi(*request, *this);
 		cgi.execCGI(getContentPath(request->getUri()));
-		std::cout << "cgi.getBody().c_str();" << cgi.getBody();
+		// std::cout << "cgi.getBody().c_str();" << cgi.getBody();
 		response << this->version << this->status_code << this->code_description
-		<< this->date << this->server << this->connection << this->allow_method  //<< "Content-type: text/html, text/css \r\n"
-		// << this->contentType << "Content-Length: " << cgi.getBody().length() << "\r\n"
+		<< this->date << this->server << this->connection << this->allow_method  << "Content-type: text/html"
+		/*<< this->contentType*/ << "Content-Length: " << cgi.getBody().length() << "\r\n"
 		// << this->setCookie << "\r\n\r\n" 
 		<< cgi.getBody();  //content.str();
 		send(fd, response.str().c_str(), response.str().length(), 0);
@@ -203,6 +203,8 @@ std::string Response::getContentPath(std::string uri) const
 		return ("./cgi/phpinfo.php");
 	if (uri.find("cpp") != std::string::npos)
 		return ("./cgi/print_env");
+	if (uri.find(".py") != std::string::npos)
+		return ("./cgi/print_env.py");
 	return("./rss/home/index.html");
 }
 
@@ -256,7 +258,6 @@ void Response::check_method(Configuration *configs, Request *request)
 					size_t pos_beg = content.find("\r\n\r\n") + 4;
 					size_t pos_end = content.find(request->boundary + "--\r\n") - 2;
 					content = content.substr(pos_beg, pos_end - pos_beg);
-				
 					std::ofstream newfile;
 					newfile.open(filename.c_str(),  std::ios_base::out | std::ios_base::binary);
 					if (!newfile.is_open())
@@ -264,7 +265,6 @@ void Response::check_method(Configuration *configs, Request *request)
 						this->status_code = 500;
 						break;
 					}
-					// newfile.write(content.c_str(), content.size());
 					newfile << content;
 					newfile.close();
 					this->status_code = 201;
@@ -321,8 +321,7 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
-	default:
-		std::cout << "Uncknown method" << std::endl;	//501 not implemented
+	default: //std::cout << "Uncknown method" << std::endl;	//501 not implemented
 		this->status_code = 501;
 		break;
 	}	

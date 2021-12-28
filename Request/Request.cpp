@@ -107,7 +107,7 @@ std::string Request::setURI(std::string line)
 			pos_cgi = this->uri.find("/cgi/");
 			if ( pos_cgi != std::string::npos)
 			{
-				this->script_path = this->uri.substr((pos_cgi + 1), this->uri.find('?'));
+				this->script_path = this->uri.substr((pos_cgi + 1));
 			}	
 			pos_cgi = this->uri.find('?');
 			if ( pos_cgi != std::string::npos)

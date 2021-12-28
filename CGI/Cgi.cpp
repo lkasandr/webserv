@@ -116,8 +116,13 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
     char buf[30000];
     int len = -1;
 	this->fillEnv();
-
-    bzero(buf, 1000);
+	int i = 0;
+	while (this->env_array[i])
+	{
+		std::cout << "ENV: " << this->env_array[i] << std::endl;
+		i++;
+	}
+    bzero(buf, 30000);
     pipe(fd[0]);
     pipe(fd[1]);
     write(fd[0][1], (char *)this->body.c_str(), this->body.length());
@@ -132,7 +137,12 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			const_cast<char*>(cgi_path.c_str()),
 			const_cast<char*>(cgi_path.c_str()),
 			(char *)0 };
-        int i = execve(argv[0], &argv[0], this->env_array);
+		if (cgi_path.find(".py") != std::string::npos)
+		{
+				// argv[0] = (char *)"python3";
+			int i = execve("python3", &argv[0], this->env_array);
+		}
+        int i = execve(argv[1], &argv[0], this->env_array);
         std::cout << "“Error execve “" << i << std::endl;
     }
     wait(0);

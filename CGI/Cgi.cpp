@@ -74,7 +74,7 @@ void	CgiProcess::initEnv(void)
 	this->env_map["CONTENT_LENGTH"]		=	to_string(this->request.getBody().size());
 	this->env_map["CONTENT_TYPE"]		=	headers["content-type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
-	this->env_map["PATH_INFO"]			=	"/";	// rfc3875  4.1.5.
+	this->env_map["PATH_INFO"]			=	this->request.getScriptPath();	// rfc3875  4.1.5.
 	this->env_map["PATH_TRANSLATED"]	=	this->request.getScriptPath(); //
 	this->env_map["QUERY_STRING"]		=	this->request.getQueryString();	// после "?" В URL
 	this->env_map["REMOTE_ADDR"]		=	/*"127.0.0.1";	*/this->request.getHeaders().find("Host")->second;
@@ -113,8 +113,12 @@ void	CgiProcess::fillEnv(void)
 int	CgiProcess::execCGI(std::string const& cgi_path)
 {
 	int fd[2][2];
-    char buf[30000];
+    char buf[100000];
     int len = -1;
+
+	std::string path;  
+  	std::string script;
+
 	this->fillEnv();
 	int i = 0;
 	while (this->env_array[i])
@@ -122,7 +126,7 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 		std::cout << "ENV: " << this->env_array[i] << std::endl;
 		i++;
 	}
-    bzero(buf, 30000);
+    bzero(buf, 100000);
     pipe(fd[0]);
     pipe(fd[1]);
     write(fd[0][1], (char *)this->body.c_str(), this->body.length());
@@ -133,30 +137,57 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
         close(fd[0][0]);
         dup2(fd[1][1], 1);
         close(fd[1][1]);
-		char * argv[3] = {
-			const_cast<char*>(cgi_path.c_str()),
-			const_cast<char*>(cgi_path.c_str()),
-			(char *)0 };
+		
 		if (cgi_path.find(".py") != std::string::npos)
 		{
-				// argv[0] = (char *)"python3";
-			int i = execve("python3", &argv[0], this->env_array);
-		}
-        int i = execve(argv[1], &argv[0], this->env_array);
-        std::cout << "“Error execve “" << i << std::endl;
-    }
-    wait(0);
-    close(fd[1][1]);
+			path = "/usr/bin/python3";  
+  			script = "./cgi/print_env.py";  
+ 			
+ 			char * a[3] = {
+			const_cast<char*>(script.c_str()),
+			const_cast<char*>(script.c_str()),
+			(char *)0 };
 
-    while((len = read(fd[1][0], buf, 30000)) != 0)
+			execve(path.c_str(), &a[0], this->env_array);
+			exit(0);
+		}
+
+		if (cgi_path.find("php") != std::string::npos)
+		{
+			path = "/usr/bin/php-cgi7.4";  
+  			script = "./cgi/phpinfo.php"; 
+
+ 			// char * a[3] = {
+			// const_cast<char*>(path.c_str()),
+			// const_cast<char*>(script.c_str()),
+			// (char *)0 };
+			// execve(path.c_str(), &a[0], this->env_array);
+			// exit(0);
+		}
+		else
+			path = cgi_path;
+
+		std::cout << "PATH " << path << std::endl;
+		std::cout << "SCRIPT " << script << std::endl;
+		char * argv[3] = {
+		const_cast<char*>(script.c_str()),
+		const_cast<char*>(script.c_str()),
+		(char *)0 };
+		execve(path.c_str(), &argv[0], this->env_array);
+		exit(0);
+    }
+    close(fd[1][1]);
+	// this->body.clear();
+    while((len = read(fd[1][0], buf, 100000)) != 0)
     {
         if (len == -1)
             std::cout << "“Read error CGI”" << std::endl;
         // this->body.clear();
         for(int i = 0;i < len; i++)
             this->body.push_back(buf[i]);
-        bzero(buf, 30000);
+        bzero(buf, 100000);
     }
+	wait(0);
     close(fd[0][0]);
     close(fd[1][0]);
 	// std::cout << "259 BODY " << this->body << std::endl;

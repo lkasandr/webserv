@@ -234,26 +234,31 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 		if (uri_part.find(it->first) != std::string::npos)
 		{
 			contentPath = "." + it->second + uri;
-			std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
+			// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
 			// if (contentPath[contentPath.length() - 1] == ' ')
 			contentPath = contentPath.substr(0, contentPath.length() - 1);
-			int checkOpen = open(contentPath.c_str(), O_DIRECTORY);
-			std::cout << "checkOpen: " << checkOpen << std::endl;
-			if (checkOpen != -1)
+			int checkDir = open(contentPath.c_str(), O_DIRECTORY);
+			// std::cout << "checkOpen: " << checkDir << std::endl;
+			if (checkDir != -1)
 			{
 				contentPath = contentPath + "/index.html";
-				close(checkOpen);
+				close(checkDir);
 			}
-			// else
-			// {
-
-			// }
+			else
+			{
+				int checkFile = open(contentPath.c_str(), O_RDONLY);
+				if (checkFile == -1)
+				{
+					this->status_code = 404;
+				}
+			}
+			
 		}
 		it++;
 	}
 	if (it == map.end() && contentPath.empty()) 
 		this->status_code = 404;
-	std::cout << "contentPath: " << contentPath << std::endl;
+	// std::cout << "contentPath: " << contentPath << std::endl;
 	return contentPath;
 }
 

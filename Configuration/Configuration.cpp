@@ -38,6 +38,7 @@ Configuration& Configuration::operator=(const Configuration& other)
 	this->location = other.getLocation();
 	this->index = other.getIndex();
 	this->autoindex = other.getAutoindex();
+	this->path = other.getPath();
 	return *this;
 }
 
@@ -241,13 +242,13 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	out << "client body size: " << config.getClientBodySize() << std::endl;
 	out << "HTTP methods: " << config.getHttpMethod() << std::endl;
 	// out << "Location: " << config.getLocation() << std::endl;
-	//вывод map Path:
+	// вывод map Path:
 	// std::map<std::string, std::string> path;
 	// path = config.getPath();
 	// std::map<std::string, std::string>::iterator it;
 	// std::cout << "Location + root: " << std::endl;
 	// for (it=path.begin(); it!=path.end(); it++)
-		// std::cout << "\033[35m" << config.getPath()["/"] << "\033[0m" << std::endl;
+	// 	std::cout << "\033[35m" << config.getPath()["/"] << "\033[0m" << std::endl;
 	
 	out << "Index: " << config.getIndex() << std::endl;
 	return (out);

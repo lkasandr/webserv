@@ -141,8 +141,8 @@ void Response::make_response(Request *request, Configuration *config)
 	{
 		std:: stringstream response;
 		CgiProcess cgi(*request, *this);
-		cgi.execCGI(getContentPath(request->getUri()));
-		// std::cout << "cgi.getBody().c_str();" << cgi.getBody();
+		cgi.execCGI(getContentPath(*config, request->getUri()));
+		std::cout << "cgi.getBody().c_str();" << cgi.getBody();
 		response << this->version << this->status_code << this->code_description
 		<< this->date << this->server << this->connection << this->allow_method  << "Content-type: text/html"
 		/*<< this->contentType*/ << "Content-Length: " << cgi.getBody().length() << "\r\n"
@@ -195,17 +195,76 @@ void Response::make_response(Request *request, Configuration *config)
 // 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
 // }
 
-std::string Response::getContentPath(std::string uri) const
+// std::string Response::getContentPath(std::string uri) const
+// {
+// 	if (uri == "/home ")
+// 		return ("./rss/home/index.html");
+// 	if (uri.find("php") != std::string::npos)
+// 		return ("./cgi/phpinfo.php");
+// 	if (uri.find("cpp") != std::string::npos)
+// 		return ("./cgi/print_env");
+// 	return("./rss/home/index.html");
+// }
+
+std::string Response::getContentPath(Configuration conf, std::string uri)
 {
+	std::string contentPath;
+	std::string uri_part;
+
 	if (uri == "/home ")
-		return ("./rss/home/index.html");
-	if (uri.find("php") != std::string::npos)
-		return ("./cgi/phpinfo.php");
-	if (uri.find("cpp") != std::string::npos)
-		return ("./cgi/print_env");
-	if (uri.find(".py") != std::string::npos)
-		return ("./cgi/print_env.py");
-	return("./rss/home/index.html");
+	{
+		contentPath = "./rss/home/index.html";
+		// std::cout << "contentPath: " << contentPath << std::endl;
+		return (contentPath);
+	}
+
+	int pos = uri.find_first_of('/', 1);
+	uri_part = uri.substr(0, pos);
+	if (uri_part == "/home")
+	{
+		// std::cout << 123 << std::endl;
+		uri_part = "/ ";
+	}
+	if (uri_part == "/rss")
+	{
+		uri = uri.substr(4, uri.length() - 4);
+		contentPath = getContentPath(conf, uri);
+		return contentPath;
+	}
+	std::cout << "URI_PART: " << uri_part << std::endl;
+	std::map<std::string, std::string> map = conf.getPath();
+
+	std::map<std::string, std::string>::const_iterator it = map.begin();
+
+	std::cout << "URI: " << uri << std::endl;
+
+	while(it != map.end())
+	{
+		if (uri_part.find(it->first) != std::string::npos)
+		{
+			contentPath = "." + it->second + uri;
+			std::cout << "contentPath befor open: " << contentPath << std::endl;
+			// DIR *dir = opendir("./rss/home");
+			int checkOpen = open(contentPath.c_str(), O_DIRECTORY);
+			// std::cout << "DIR: " << dir << std::endl;
+			if (checkOpen != -1)
+			{
+				// std::cout << 123 << std::endl;
+				contentPath = contentPath.substr(0, contentPath.length() - 1) + "/index.html";
+			}
+			// if (checkOpen != -1)
+			// {
+			// 	contentPath = contentPath.substr(0, contentPath.length() - 1) + "/index.html";
+			// }
+			// else 
+			// 	close(checkOpen);
+			// return contentPath;
+		}
+		it++;
+	}
+	std::cout << "contentPath: " << contentPath << std::endl;
+
+	return contentPath;
 }
 
 void Response::check_method(Configuration *configs, Request *request)
@@ -227,8 +286,8 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->server = "Server: " + configs->getServerName() + "\r\n";
 			if(request->getCGI())
 				break;
-			this->content_path = configs->getIndex();
-			// this->content_path = getContentPath(*configs, uri_str);
+			// this->content_path = configs->getIndex();
+			this->content_path = getContentPath(*configs, uri_str);
 			// std::cout << "CONTENT_PATH: " << this->content_path << std::endl;
 			if (this->setCookie == "")
 				this->setCookie = "Set-Cookie: name=" + configs->getServerName() + "\r\n";
@@ -300,15 +359,16 @@ void Response::check_method(Configuration *configs, Request *request)
 		if (configs->checkDelete())
 		{
 			this->server = "Server: " + configs->getServerName() + "\r\n";
-			this->content_path = uri_str.insert(0, std::string("./rss"));
-			for(size_t i = 0; i < this->content_path.length(); i++)
-			{
-				if(this->content_path[i] == ' ')
-				{
-					this->content_path.erase(i,1);
-					i--;
-				}
-			}
+			this->content_path = getContentPath(*configs, uri_str);
+			// this->content_path = uri_str.insert(0, std::string("./rss"));
+			// for(size_t i = 0; i < this->content_path.length(); i++)
+			// {
+			// 	if(this->content_path[i] == ' ')
+			// 	{
+			// 		this->content_path.erase(i,1);
+			// 		i--;
+			// 	}
+			// }
 			if (remove(this->content_path.c_str()))
 			{
 				this->status_code = 500;

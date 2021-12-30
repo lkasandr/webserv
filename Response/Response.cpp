@@ -232,18 +232,15 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	while(it != map.end())
 	{
 		if (uri_part.find(it->first) != std::string::npos)
-		{
 			contentPath = "." + it->second + uri;
-			std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
+			// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
 			contentPath = contentPath.substr(0, contentPath.length() - 1);
 			int checkOpen = open(contentPath.c_str(), O_DIRECTORY);
 			if (checkOpen != -1)
 				contentPath = contentPath + "/index.html";
-		}
 		it++;
 	}
 	std::cout << "contentPath: " << contentPath << std::endl;
-
 	return contentPath;
 }
 

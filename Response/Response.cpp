@@ -214,51 +214,31 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	if (uri == "/home ")
 	{
 		contentPath = "./rss/home/index.html";
-		// std::cout << "contentPath: " << contentPath << std::endl;
 		return (contentPath);
 	}
 
 	int pos = uri.find_first_of('/', 1);
 	uri_part = uri.substr(0, pos);
 	if (uri_part == "/home")
-	{
-		// std::cout << 123 << std::endl;
 		uri_part = "/ ";
-	}
 	if (uri_part == "/rss")
 	{
 		uri = uri.substr(4, uri.length() - 4);
 		contentPath = getContentPath(conf, uri);
 		return contentPath;
 	}
-	std::cout << "URI_PART: " << uri_part << std::endl;
 	std::map<std::string, std::string> map = conf.getPath();
-
 	std::map<std::string, std::string>::const_iterator it = map.begin();
-
-	std::cout << "URI: " << uri << std::endl;
-
 	while(it != map.end())
 	{
 		if (uri_part.find(it->first) != std::string::npos)
 		{
 			contentPath = "." + it->second + uri;
-			std::cout << "contentPath befor open: " << contentPath << std::endl;
-			// DIR *dir = opendir("./rss/home");
+			std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
+			contentPath = contentPath.substr(0, contentPath.length() - 1);
 			int checkOpen = open(contentPath.c_str(), O_DIRECTORY);
-			// std::cout << "DIR: " << dir << std::endl;
 			if (checkOpen != -1)
-			{
-				// std::cout << 123 << std::endl;
-				contentPath = contentPath.substr(0, contentPath.length() - 1) + "/index.html";
-			}
-			// if (checkOpen != -1)
-			// {
-			// 	contentPath = contentPath.substr(0, contentPath.length() - 1) + "/index.html";
-			// }
-			// else 
-			// 	close(checkOpen);
-			// return contentPath;
+				contentPath = contentPath + "/index.html";
 		}
 		it++;
 	}

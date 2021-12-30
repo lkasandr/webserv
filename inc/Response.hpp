@@ -18,6 +18,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <sys/types.h>
+#include <fcntl.h>
+
 class Request;
 class Configuration;
 
@@ -57,7 +60,8 @@ public:
 	std::string getDate() const;
 	std::string getAllow_method() const;
 
-	std::string getContentPath(std::string uri) const;
+	// std::string getContentPath(std::string uri) const;
+	std::string getContentPath(Configuration conf, std::string uri);
 };
 
 std::ostream& operator<<(std::ostream& out, const Response& response);

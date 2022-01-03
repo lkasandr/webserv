@@ -137,24 +137,22 @@ void Response::make_response(Request *request, Configuration *config)
 		check_errors(this->status_code);
 	}
 	// формируем ответ
+
+	std:: stringstream response;
+	std::stringstream content;
 	if (request->getCGI())
 	{
-		std:: stringstream response;
+		// std:: stringstream response;
 		CgiProcess cgi(*request, *this);
 		cgi.execCGI(getContentPath(*config, request->getUri()));
-		std::cout << "cgi.getBody().c_str();" << cgi.getBody();
-		response << this->version << this->status_code << this->code_description
-		<< this->date << this->server << this->connection << this->allow_method  << "Content-type: text/html"
-		/*<< this->contentType*/ << "Content-Length: " << cgi.getBody().length() << "\r\n"
-		// << this->setCookie << "\r\n\r\n" 
-		<< cgi.getBody();  //content.str();
-		send(fd, response.str().c_str(), response.str().length(), 0);
+		check_errors(cgi.getStatus());
+		content << cgi.getBody();
 	}
 	else /*if (request->getMethod() == "GET")*/
 	{
 		std::ifstream	file;
-		std:: stringstream response;
-		std::stringstream content;
+		// std:: stringstream response;
+		// std::stringstream content;
 		file.open(this->content_path.c_str());
 		if (!file.is_open())
 		{
@@ -173,13 +171,20 @@ void Response::make_response(Request *request, Configuration *config)
 			}
 		}
 		content << file.rdbuf();
-		response << this->version << this->status_code << this->code_description
-		<< this->date << this->server << this->connection << this->allow_method
-		<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
-		<< this->setCookie << "\r\n\r\n" << content.str();
-		send(fd, response.str().c_str(), response.str().length(), 0);
 		file.close();
 	}
+	response << this->version << this->status_code << this->code_description
+	<< this->date << this->server << this->connection << this->allow_method
+	<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+	<< this->setCookie << "\r\n\r\n" << content.str();
+	int send_res = 0;
+
+	// while (!response.str().empty())
+	// {
+		send_res = send(fd, response.str().c_str(), response.str().length(), 0);
+	// 	response.str().substr(send_res);
+	// }
+	
 }
 
 // int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
@@ -235,8 +240,10 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 		{
 			contentPath = "." + it->second + uri;
 			// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-			// if (contentPath[contentPath.length() - 1] == ' ')
-			contentPath = contentPath.substr(0, contentPath.length() - 1);
+			if (contentPath[contentPath.length() - 1] == ' ')
+				contentPath = contentPath.substr(0, contentPath.length() - 1);
+			else
+				contentPath = contentPath.substr(0, contentPath.length());
 			int checkDir = open(contentPath.c_str(), O_DIRECTORY);
 			// std::cout << "checkOpen: " << checkDir << std::endl;
 			if (checkDir != -1)

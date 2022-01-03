@@ -22,6 +22,10 @@
 #include <algorithm> 
 
 # define CGI_BUF_SIZE 65536
+# define PY 0
+# define PHP 1
+# define DEFAULT 2
+
 
 class Response;
 class Request;
@@ -34,7 +38,7 @@ class CgiProcess
 		const Request&						request;
 		const Response&						response;
 		std::string							body;
-		std::string							status;
+		int							status;
 
 		CgiProcess();
 		void		initEnv();
@@ -48,7 +52,7 @@ class CgiProcess
 		CgiProcess& operator=(CgiProcess const & other);
 		int	execCGI(std::string const& cgi_path);
 		std::string getBody(void);
-		std::string getStatus();
+		int getStatus();
 		std::string	get_cwd();
 
 };

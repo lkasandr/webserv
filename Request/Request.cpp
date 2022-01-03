@@ -85,6 +85,13 @@ void Request::setHTTPversion(std::string line)
 	// std::cout << "CODE IS " << this->code << std::endl;
 }
 
+size_t find_pos_end(std::string &uri, size_t pos_cgi)
+{
+	size_t pos1 = uri.find(" ", pos_cgi);
+	size_t pos2 = uri.find("?", pos_cgi);
+	return ((pos1 < pos2) ? pos1 : pos2);
+}
+
 std::string Request::setURI(std::string line)
 {
 	size_t pos = 0;
@@ -107,11 +114,16 @@ std::string Request::setURI(std::string line)
 			pos_cgi = this->uri.find("/cgi/");
 			if ( pos_cgi != std::string::npos)
 			{
-				this->script_path = this->uri.substr((pos_cgi + 1));
+				size_t pos_end = find_pos_end(this->uri, pos_cgi);
+				this->script_path = this->uri.substr((pos_cgi + 5), (pos_end - (pos_cgi + 5)));
+				std::cout << "SCRIPT_PATH " << script_path << "III\n";
 			}	
 			pos_cgi = this->uri.find('?');
 			if ( pos_cgi != std::string::npos)
+			{
 				this->query_string = this->uri.substr(pos_cgi + 1);
+				this->uri = this->uri.substr(0, pos_cgi);
+			}
 		}
 	}
 	return temp;

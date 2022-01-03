@@ -70,18 +70,26 @@ void	CgiProcess::initEnv(void)
 {
 	std::map<std::string, std::string> headers = this->request.getHeaders();
 	std::map<std::string, std::string> http_headers = this->change_headers(headers);
+
+	// AUTH_TYPE, CONTENT_LENGTH, CONTENT_TYPE, GATEWAY_INTERFACE, PATH_INFO, PATH_TRANSLATED, QUERY_STRING,
+	// REMOTE_ADDR, REMOTE_HOST, REMOTE_IDENT, REMOTE_USER, REQUEST_METHOD, SCRIPT_NAME, SERVER_NAME, SERVER_PORT, 
+	// SERVER_PROTOCOL и SERVER_SOFTWARE.
+	this->env_map["AUTH_TYPE"]			=	"";
 	this->env_map["REDIRECT_STATUS"]	=	"200";
-	this->env_map["CONTENT_LENGTH"]		=	to_string(this->request.getBody().size());
-	this->env_map["CONTENT_TYPE"]		=	headers["content-type"];
+	this->env_map["CONTENT_LENGTH"]		=	headers["Content-Length"];	//to_string(this->request.getBody().size());
+	this->env_map["CONTENT_TYPE"]		=	headers["Content-Type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
-	this->env_map["PATH_INFO"]			=	this->request.getScriptPath();	// rfc3875  4.1.5.
-	this->env_map["PATH_TRANSLATED"]	=	this->request.getScriptPath(); //
+	this->env_map["PATH_INFO"]			=	"/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
+	this->env_map["PATH_TRANSLATED"]	=	"cgi";		//this->request.getScriptPath(); //
 	this->env_map["QUERY_STRING"]		=	this->request.getQueryString();	// после "?" В URL
-	this->env_map["REMOTE_ADDR"]		=	/*"127.0.0.1";	*/this->request.getHeaders().find("Host")->second;
+	this->env_map["REMOTE_ADDR"]		=	"127.0.0.1";	//this->request.getHeaders().find("Host")->second;
+	this->env_map["REMOTE_HOST"]		=	"localhost";
+	this->env_map["REMOTE_IDENT"];
+	this->env_map["REMOTE_USER"];
 	this->env_map["REQUEST_METHOD"]		=	this->request.getMethod();
 	this->env_map["SCRIPT_NAME"]		=	this->request.getScriptPath();	//  variable MUST be set to a URI path
 	this->env_map["SCRIPT_FILENAME"]	=	this->request.getScriptPath();	//  variable MUST be set to a URI path
-	this->env_map["SERVER_NAME"]		=	this->request.getHeaders().find("Host")->second;	// hostname
+	this->env_map["SERVER_NAME"]		=	headers["Host"];	//this->request.getHeaders().find("Host")->second;	// hostname
 	this->env_map["SERVER_PORT"]		=	this->request.getPort();	// variable MUST be set
 	this->env_map["SERVER_PROTOCOL"]	=	this->request.getHTTP_version();
 	this->env_map["SERVER_SOFTWARE"]	=	"webserv";
@@ -110,6 +118,16 @@ void	CgiProcess::fillEnv(void)
 	this->env_array[i] = NULL;
 }
 
+int check_extension(std::string const& cgi_path)
+{
+	if(cgi_path.find(".py") != std::string::npos)
+		return PY;
+	else if (cgi_path.find(".php") != std::string::npos)
+		return PHP;
+	else
+		return DEFAULT;
+}
+
 int	CgiProcess::execCGI(std::string const& cgi_path)
 {
 	int fd[2][2];
@@ -118,6 +136,7 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 
 	std::string path;  
   	std::string script;
+	std::string root_directory;
 
 	this->fillEnv();
 	int i = 0;
@@ -129,44 +148,34 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
     bzero(buf, 100000);
     pipe(fd[0]);
     pipe(fd[1]);
-    write(fd[0][1], (char *)this->body.c_str(), this->body.length());
+    write(fd[0][1], const_cast<char*>(this->request.getBody().c_str()), this->request.getBody().length());
     close(fd[0][1]);
     if(fork() == 0)
     {
-        dup2(fd[0][0], 0);
+		dup2(fd[0][0], 0);
         close(fd[0][0]);
         dup2(fd[1][1], 1);
         close(fd[1][1]);
 		
-		if (cgi_path.find(".py") != std::string::npos)
+		int m = check_extension(cgi_path);
+		switch (m)
 		{
+		case PY:
 			path = "/usr/bin/python3";  
-  			script = "./cgi/print_env.py";  
- 			
- 			char * a[3] = {
-			const_cast<char*>(script.c_str()),
-			const_cast<char*>(script.c_str()),
-			(char *)0 };
-
-			execve(path.c_str(), &a[0], this->env_array);
-			exit(0);
-		}
-
-		if (cgi_path.find("php") != std::string::npos)
-		{
-			path = "/usr/bin/php-cgi7.4";  
-  			script = "./cgi/phpinfo.php"; 
-
- 			// char * a[3] = {
-			// const_cast<char*>(path.c_str()),
-			// const_cast<char*>(script.c_str()),
-			// (char *)0 };
-			// execve(path.c_str(), &a[0], this->env_array);
-			// exit(0);
-		}
-		else
+  			script = cgi_path;
+			break;
+		case PHP:
+			path = "/usr/bin/php-cgi";  
+  			script = this->request.getScriptPath();; 
+			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
+			std::cout << "ROOT DIR " << root_directory << "\n";
+			chdir(root_directory.c_str());
+			break;
+		default:
 			path = cgi_path;
-
+			script = cgi_path;
+			break;
+		}
 		std::cout << "PATH " << path << std::endl;
 		std::cout << "SCRIPT " << script << std::endl;
 		char * argv[3] = {
@@ -180,9 +189,8 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	// this->body.clear();
     while((len = read(fd[1][0], buf, 100000)) != 0)
     {
-        if (len == -1)
-            std::cout << "“Read error CGI”" << std::endl;
-        // this->body.clear();
+		if (len == -1)
+            std::cout << "CGI ERROR" << std::endl;
         for(int i = 0;i < len; i++)
             this->body.push_back(buf[i]);
         bzero(buf, 100000);
@@ -190,7 +198,6 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	wait(0);
     close(fd[0][0]);
     close(fd[1][0]);
-	// std::cout << "259 BODY " << this->body << std::endl;
 	return 0;
 }
 
@@ -201,7 +208,7 @@ std::string CgiProcess::getBody(void)
 	return this->body;
 }
 
-std::string				CgiProcess::getStatus(void)
+int			CgiProcess::getStatus(void)
 {
 	return this->status;
 }

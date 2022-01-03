@@ -61,7 +61,7 @@ public:
 	std::string getAllow_method() const;
 
 	// std::string getContentPath(std::string uri) const;
-	std::string getContentPath(Configuration conf, std::string uri);
+	std::string getContentPath(Configuration conf, std::string uri) ;
 };
 
 std::ostream& operator<<(std::ostream& out, const Response& response);

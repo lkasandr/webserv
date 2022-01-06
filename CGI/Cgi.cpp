@@ -76,7 +76,7 @@ void	CgiProcess::initEnv(void)
 	// SERVER_PROTOCOL и SERVER_SOFTWARE.
 	this->env_map["AUTH_TYPE"]			=	"";
 	this->env_map["REDIRECT_STATUS"]	=	"200";
-	this->env_map["CONTENT_LENGTH"]		=	headers["Content-Length"];	//to_string(this->request.getBody().size());
+	this->env_map["CONTENT_LENGTH"]		=	/*headers["Content-Length"];	*/to_string(this->request.getBody().size());
 	this->env_map["CONTENT_TYPE"]		=	headers["Content-Type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
 	this->env_map["PATH_INFO"]			=	"/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
@@ -139,12 +139,12 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	std::string root_directory;
 
 	this->fillEnv();
-	int i = 0;
-	while (this->env_array[i])
-	{
-		std::cout << "ENV: " << this->env_array[i] << std::endl;
-		i++;
-	}
+	// int i = 0;
+	// while (this->env_array[i])
+	// {
+	// 	std::cout << "ENV: " << this->env_array[i] << std::endl;
+	// 	i++;
+	// }
     bzero(buf, 100000);
     pipe(fd[0]);
     pipe(fd[1]);
@@ -162,7 +162,11 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 		{
 		case PY:
 			path = "/usr/bin/python3";  
-  			script = cgi_path;
+  			// script = cgi_path;
+			script = this->request.getScriptPath();; 
+			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
+			// std::cout << "ROOT DIR " << root_directory << "\n";
+			chdir(root_directory.c_str());
 			break;
 		case PHP:
 			path = "/usr/bin/php-cgi";  

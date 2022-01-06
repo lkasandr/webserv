@@ -9,3 +9,8 @@
 
 
 fname=NNNNN&lname=NNNNN
+param1=test1&param2=test2
+param1=test1&param2=test2
+param1=test1&param2=test2
+
+

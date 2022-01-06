@@ -64,14 +64,14 @@ void Request::setBody(std::string line)
 {
 	if (line.length() == 0 || (line[0] != '\r' && line[1] != '\n'))
 	{
-		this->code = 400;
+		this->code = 404;
 		this->body = line;
 		return ;
 	}
 	this->body = line;
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
-		this->code = 400;
+		this->code = 404;
 	}
 	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }

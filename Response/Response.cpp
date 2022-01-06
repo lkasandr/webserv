@@ -87,6 +87,7 @@ void Response::check_errors(int code)
 
 std::string Response::makeAutoindexPage(const char *path, std::string const &host) {
     std::string dirName(path);
+	std::cout << "dirName: " << dirName << std::endl;
     size_t pos_index = dirName.rfind("index.");
     if (pos_index != std::string::npos)
 	{
@@ -211,54 +212,54 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	std::string contentPath;
 	std::string uri_part;
 
-	if (uri == "/home ")
-	{
-		contentPath = "./rss/home/index.html";
-		return (contentPath);
-	}
-
+	// std::cout << "URI: " << uri << std::endl;
 	int pos = uri.find_first_of('/', 1);
 	uri_part = uri.substr(0, pos);
-	if (uri_part == "/home")
-		uri_part = "/ ";
+	// if (uri_part == "/home")
+	// 	uri_part = "/ ";
 	if (uri_part == "/rss")
 	{
 		uri = uri.substr(4, uri.length() - 4);
 		contentPath = getContentPath(conf, uri);
 		return contentPath;
 	}
-	std::map<std::string, std::string> map = conf.getPath();
-	std::map<std::string, std::string>::const_iterator it = map.begin();
-	while(it != map.end())
+	// std::cout << "URI_PART: " << uri_part << std::endl;
+	std::vector<location> array = conf.getArray();
+
+	std::vector<location>::const_iterator it = array.begin();
+	while(it != array.end())
 	{
-		if (uri_part.find(it->first) != std::string::npos)
+		// std::cout << "IT: " << it->location << std::endl;
+		if (uri_part.find(it->location) != std::string::npos)
 		{
-			contentPath = "." + it->second + uri;
+			
+			contentPath = "." + it->root + uri;
 			// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-			// if (contentPath[contentPath.length() - 1] == ' ')
-			contentPath = contentPath.substr(0, contentPath.length() - 1);
+			if (contentPath[contentPath.length() - 1] == ' ')
+				contentPath = contentPath.substr(0, contentPath.length() - 1);
 			int checkDir = open(contentPath.c_str(), O_DIRECTORY);
 			// std::cout << "checkOpen: " << checkDir << std::endl;
 			if (checkDir != -1)
 			{
-				contentPath = contentPath + "/index.html";
+				if (it->location == "/")
+					contentPath = contentPath + "/index.html";
+				else
+					contentPath = it->index;
 				close(checkDir);
 			}
 			else
 			{
 				int checkFile = open(contentPath.c_str(), O_RDONLY);
 				if (checkFile == -1)
-				{
 					this->status_code = 404;
-				}
+				else
+					close(checkFile);
 			}
-			
 		}
 		it++;
 	}
-	if (it == map.end() && contentPath.empty()) 
+	if (it == array.end() && contentPath.empty()) 
 		this->status_code = 404;
-	// std::cout << "contentPath: " << contentPath << std::endl;
 	return contentPath;
 }
 
@@ -323,7 +324,7 @@ void Response::check_method(Configuration *configs, Request *request)
 					newfile.close();
 					this->status_code = 201;
 					this->code_description = " Created.\r\n";
-					this->location = "./rss/upload";
+					this->_location = "./rss/upload";
 					this->connection = "Connection: Close\r\n";
 				}
 				else
@@ -338,7 +339,7 @@ void Response::check_method(Configuration *configs, Request *request)
 					newfile << request->getBody();
 					this->status_code = 201;
 					this->code_description = " Created.\r\n";
-					this->location = "./rss/post/test_post.txt";
+					this->_location = "./rss/post/test_post.txt";
 					this->connection = "Connection: Close\r\n";
 					newfile.close();
 				}

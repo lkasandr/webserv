@@ -21,6 +21,15 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+// typedef struct {
+// 	std::string location;
+// 	std::string root;
+// 	std::string index;
+// 	// std::string default_error_page;
+// 	// std::string client_body_size;
+// 	// std::string http_method;
+// } location;
+
 class Request;
 class Configuration;
 
@@ -36,7 +45,7 @@ private:
 	std::string			date;
 	std::string			contentType;
 	std::string			allow_method;
-	std::string			location;
+	std::string			_location;
 	std::string			connection;
 	std::string			setCookie;
 public:

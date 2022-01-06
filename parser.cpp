@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+#include <ctype.h>
+
 std::vector<std::string> split_line(std::string line)
 {
     std::vector<std::string> servers;
@@ -44,15 +46,15 @@ void add_config(std::string line, Configuration& conf)
 		conf.setAutoindexOn();
 	else if (line.find("server_name ", 0) != std::string::npos)
 		conf.setServerName(get_key(line));
-	else if (line.find("location ", 0) != std::string::npos)
-		conf.setLocation(get_key(line));
-	else if (line.find("root ", 0) != std::string::npos)
-	{
-		conf.setRoot(get_key(line));
-		conf.setPath(conf.getLocation(), conf.getRoot());
-	}
-	else if (line.find("index ", 0) != std::string::npos)
-		conf.setIndex(get_key(line));
+	// else if (line.find("location ", 0) != std::string::npos)
+	// 	conf.setLocation(get_key(line));
+	// else if (line.find("root ", 0) != std::string::npos)
+	// {
+	// 	conf.setRoot(get_key(line));
+	// 	conf.setPath(conf.getLocation(), conf.getRoot());
+	// }
+	// else if (line.find("index ", 0) != std::string::npos)
+	// 	conf.setIndex(get_key(line));
 	else if (line.find("default_error_pages ", 0) != std::string::npos)
 		conf.setDefaultErrorPages(get_key(line));
 	else if (line.find("client_body_size ", 0) != std::string::npos)
@@ -61,6 +63,58 @@ void add_config(std::string line, Configuration& conf)
 		conf.setHttpMethod(get_key(line));
 	else if (line.find("cgi_pass ", 0) != std::string::npos)
 		conf.setCGI(get_key(line));
+}
+
+//Добавляет location в структуру
+void add_location(std::string line, Configuration& conf)
+{
+	std::string location;
+	std::string root;
+	std::string index;
+	size_t pos = 0;
+	size_t pos_temp = 0;
+
+	while(pos != line.length())
+	{
+		if (pos == line.find("location ", 0))
+		{
+			pos = pos + 9;
+			pos_temp = pos;
+			while ((pos != line.find(' ', 11)) && (pos != line.find('\n', 11)) && (pos != line.find('{', 11)))
+				pos++;
+			location = line.substr(pos_temp, pos - pos_temp);
+			line = line.substr(pos, line.length() - pos);
+			// std::cout << "LOcATION: " << location << std::endl;
+			// std::cout << "LINE: " << line << std::endl;
+			pos = -1;
+		}
+		else if (pos == line.find("root ", 0))
+		{
+			pos = pos + 5;
+			pos_temp = pos;
+			// std::cout << "POS: " << pos << std::endl;
+			// std::cout << "LINE: " << line << std::endl;
+			while (pos != line.find(';', pos_temp))
+				pos++;
+			root = line.substr(pos_temp, pos - pos_temp);
+			// std::cout << "root: " << root << std::endl;
+			line = line.substr(pos, line.length() - pos);
+			pos = -1;
+		}
+		else if (pos == line.find("index ", 0))
+		{
+			pos = pos + 6;
+			pos_temp = pos;
+			while (pos != line.find(';', pos_temp))
+				pos++;
+			index = line.substr(pos_temp, pos - pos_temp);
+			// std::cout << "index: " << index << std::endl;
+			line = line.substr(pos, line.length() - pos);
+			pos = -1;
+		}
+		pos++;
+	}
+	conf.setArray(location, root, index);
 }
 
 int	read_conf(const char *path , std::vector<Configuration> &config)
@@ -84,8 +138,20 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 		Configuration	conf;
 		size_t pos = 0;
 		std::string temp;
+
+		std::string location;
+
 		while(pos < line.length())
 		{
+			if (pos == line.find("location "))
+			{
+				while (pos != line.find("}"))
+					pos++;
+				location = line.substr(0, pos);
+				line = line.substr(pos + 1, line.length());
+				add_location(location, conf);
+				pos = 0;
+			}
 			if (pos == line.find("\n"))
 			{
 				temp = line.substr(0, pos);
@@ -95,7 +161,7 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 			}
 			pos++;
 		}
-		conf.getPath();
+		// conf.getPath();
 		config.push_back(conf);
 		serv_count++;
 	}

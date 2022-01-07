@@ -62,16 +62,16 @@ std::map<std::string, std::string> Request::getHeaders() const
 
 void Request::setBody(std::string line)
 {
-	if (line.length() == 0 || (line[0] != '\r' && line[1] != '\n'))
+	if (line.length() == 0 /*|| (line[0] != '\r' && line[1] != '\n')*/)
 	{
-		this->code = 404;
+		this->code = 204;
 		this->body = line;
 		return ;
 	}
 	this->body = line;
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
-		this->code = 404;
+		this->code = 204;
 	}
 	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
@@ -116,7 +116,7 @@ std::string Request::setURI(std::string line)
 			{
 				size_t pos_end = find_pos_end(this->uri, pos_cgi);
 				this->script_path = this->uri.substr((pos_cgi + 5), (pos_end - (pos_cgi + 5)));
-				std::cout << "SCRIPT_PATH " << script_path << "III\n";
+				// std::cout << "SCRIPT_PATH " << script_path << "III\n";
 			}	
 			pos_cgi = this->uri.find('?');
 			if ( pos_cgi != std::string::npos)
@@ -233,7 +233,8 @@ void		Request::parseRequest(std::string line)
 		// std::cout << "\nLINE in post: " << line << std::endl;
 		// std::cout << "\nbuffer in post: " << line << std::endl;
 		// std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
-		setBody(line);
+		setBody(line.substr(line.find_first_of("\n") + 1));
+		// setBody(line);
 	}
 
 	

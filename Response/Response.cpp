@@ -126,6 +126,26 @@ std::string Response::makeAutoindexPage(const char *path, std::string const &hos
     return page;
 }
 
+std::string check_ext(Request *request)
+{
+	std::string ext;
+	std::string cont_type = "Content-Type: text/html;\r\n";
+	size_t pos = request->getUri().find_last_of(".");
+	if (pos != std::string::npos)
+		ext = request->getUri().substr(pos + 1);
+	std::cout << "EXT " << ext;
+	if (ext == "png " || ext == "ico " || ext == "jpeg " || ext == "gif "\
+		|| ext == "tiff " || ext == "x-icon " || ext == "svg+xml ")
+		cont_type = "Content-Type: image/" + ext + ";\r\n";
+	if (ext == "mpeg " || ext == "mp4 " || ext == "quicktime " || ext == "x-flv "\
+		|| ext == "x-ms-wmv " || ext == "webm ")
+		cont_type = "Content-Type: video/" + ext + ";\r\n";
+	if (ext == "css " || ext == "csv " || ext == "html " || ext == "plain " \
+		|| ext == "xml " /*|| ext == "php " || ext == "py "*/)
+		cont_type = "Content-Type: text/" + ext + ";\r\n";
+	return cont_type;
+}
+
 void Response::make_response(Request *request, Configuration *config)
 {
 	this->date = get_date() + "\r\n";
@@ -139,7 +159,8 @@ void Response::make_response(Request *request, Configuration *config)
 	}
 	// формируем ответ
 
-	std:: stringstream response;
+	this->contentType = check_ext(request);
+	std::stringstream response;
 	std::stringstream content;
 	if (request->getCGI())
 	{
@@ -148,13 +169,14 @@ void Response::make_response(Request *request, Configuration *config)
 		cgi.execCGI(getContentPath(*config, request->getUri()));
 		check_errors(cgi.getStatus());
 		content << cgi.getBody();
+		response << this->version << this->status_code << this->code_description
+			<< this->date << this->server << this->connection << this->allow_method
+			<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+			<< this->setCookie << "\r\n\r\n" << content.str();
 	}
-	else /*if (request->getMethod() == "GET")*/
+	else /*if (check_ext(request) == true)*/
 	{
-		std::ifstream	file;
-		// std:: stringstream response;
-		// std::stringstream content;
-		file.open(this->content_path.c_str());
+		std::ifstream file(this->content_path.c_str(), std::ios::in | std::ios::binary);
 		if (!file.is_open())
 		{
 			if (config->getAutoindex())
@@ -171,20 +193,59 @@ void Response::make_response(Request *request, Configuration *config)
 				file.open("./rss/error/404.html");
 			}
 		}
-		content << file.rdbuf();
+		std::vector<char> contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		response << this->version << this->status_code << this->code_description
+			<< this->date << this->server << this->connection << this->allow_method
+			<< this->contentType << "Content-Length: " << contents.size()
+			<< "\r\n\r\n"; 
+		response.write(contents.data(), contents.size()); // бинарник
 		file.close();
 	}
-	response << this->version << this->status_code << this->code_description
-	<< this->date << this->server << this->connection << this->allow_method
-	<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
-	<< this->setCookie << "\r\n\r\n" << content.str();
-	int send_res = 0;
-
-	// while (!response.str().empty())
+	// else /* if (check_ext(request) == false)*/
 	// {
-		send_res = send(fd, response.str().c_str(), response.str().length(), 0);
-	// 	response.str().substr(send_res);
+	// 	std::ifstream	file;
+
+
+	// 	// std:: stringstream response;
+	// 	// std::stringstream content;
+	// 	file.open(this->content_path.c_str());
+	// 	if (!file.is_open())
+	// 	{
+	// 		if (config->getAutoindex())
+	// 		{
+	// 			std::string ret;
+	// 			ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
+	// 			content << ret;
+	// 		}
+	// 		else
+	// 		{
+	// 			this->status_code = 404;
+	// 			this->code_description = " Not Found\r\n";
+	// 			this->connection = "Connection: Close\r\n";
+	// 			file.open("./rss/error/404.html");
+	// 		}
+	// 	}
+	// 	content << file.rdbuf();
+	// 	file.close();
 	// }
+	// response << this->version << this->status_code << this->code_description
+	// << this->date << this->server << this->connection << this->allow_method
+	// << this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+	// << this->setCookie << "\r\n\r\n" << content.str().c_str();
+
+	
+
+
+	int send_res = 1;
+	std::string resp = response.str();
+	while (send_res > 0)
+	{
+		std::cout << "SEND_RES " << send_res << std::endl;
+		send_res = send(fd, resp.c_str(), resp.size(), 0);
+		if(send_res < 0)
+			break;
+		resp = resp.substr(send_res);
+	}
 	
 }
 
@@ -331,6 +392,7 @@ void Response::check_method(Configuration *configs, Request *request)
 					this->code_description = " Created.\r\n";
 					this->_location = "./rss/upload";
 					this->connection = "Connection: Close\r\n";
+					this->content_path = "./rss/error/201.html";
 				}
 				else
 				{

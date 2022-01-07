@@ -270,6 +270,7 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 {
 	std::string contentPath;
 	std::string uri_part;
+	size_t lengthLocation = 0;
 
 	// std::cout << "URI: " << uri << std::endl;
 	int pos = uri.find_first_of('/', 1);
@@ -288,33 +289,36 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	std::vector<location>::const_iterator it = array.begin();
 	while(it != array.end())
 	{
-		// std::cout << "IT: " << it->location << std::endl;
+		
 		if (uri_part.find(it->location) != std::string::npos)
 		{
-			
-			contentPath = "." + it->root + uri;
-			// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-			if (contentPath[contentPath.length() - 1] == ' ')
-				contentPath = contentPath.substr(0, contentPath.length() - 1);
-			int checkDir = open(contentPath.c_str(), O_DIRECTORY);
-			// std::cout << "checkOpen: " << checkDir << std::endl;
-			if (checkDir != -1)
+			if (lengthLocation < it->location.length())
 			{
-				if (it->location == "/")
-					contentPath = contentPath + "/index.html";
-				else
-					contentPath = it->index;
-				close(checkDir);
+				contentPath = "." + it->root + uri;
+				// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
+				if (contentPath[contentPath.length() - 1] == ' ')
+					contentPath = contentPath.substr(0, contentPath.length() - 1);
+				int checkDir = open(contentPath.c_str(), O_DIRECTORY);
+				// std::cout << "checkOpen: " << checkDir << std::endl;
+				if (checkDir != -1)
+				{
+					if (it->location == "/")
+						contentPath = contentPath + "/index.html";
+					else
+						contentPath = it->index;
+					close(checkDir);
+				}
+				// else
+				// {
+				// 	int checkFile = open(contentPath.c_str(), O_RDONLY);
+				// 	if (checkFile == -1)
+				// 		this->status_code = 404;
+				// 	else
+				// 		close(checkFile);
+				// }
 			}
-			// else
-			// {
-			// 	int checkFile = open(contentPath.c_str(), O_RDONLY);
-			// 	if (checkFile == -1)
-			// 		this->status_code = 404;
-			// 	else
-			// 		close(checkFile);
-			// }
 		}
+		lengthLocation = it->location.length();
 		it++;
 	}
 	if (it == array.end() && contentPath.empty()) 

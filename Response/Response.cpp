@@ -181,6 +181,7 @@ void Response::make_response(Request *request, Configuration *config)
 		// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 		std::ifstream file(this->content_path.c_str(), std::ios::in | std::ios::binary);
 		// std::cout << "#################" << this->content_path << std::endl;
+		// std::cout << "file.is_open     " << file.is_open() << std::endl;
 		if (!file.is_open())
 		{
 			if (config->getAutoindex())
@@ -271,6 +272,7 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	std::string contentPath;
 	std::string uri_part;
 	size_t lengthLocation = 0;
+	int flag = 0;
 
 	// std::cout << "URI: " << uri << std::endl;
 	int pos = uri.find_first_of('/', 1);
@@ -289,9 +291,10 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	std::vector<location>::const_iterator it = array.begin();
 	while(it != array.end())
 	{
-		
 		if (uri_part.find(it->location) != std::string::npos)
 		{
+			if (it->location == "/")
+				flag = 1;
 			if (lengthLocation < it->location.length())
 			{
 				contentPath = "." + it->root + uri;
@@ -321,7 +324,40 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 		lengthLocation = it->location.length();
 		it++;
 	}
-	if (it == array.end() && contentPath.empty()) 
+	if (it == array.end() && contentPath.empty() && flag == 1)
+	{
+		it = array.begin();
+		while(it != array.end())
+		{
+			if (it->location == "/")
+			{
+				contentPath = "." + it->root + uri;
+				// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
+				if (contentPath[contentPath.length() - 1] == ' ')
+					contentPath = contentPath.substr(0, contentPath.length() - 1);
+				int checkDir = open(contentPath.c_str(), O_DIRECTORY);
+				// std::cout << "checkOpen: " << checkDir << std::endl;
+				if (checkDir != -1)
+				{
+					if (it->location == "/")
+						contentPath = contentPath + "/index.html";
+					else
+						contentPath = it->index;
+					close(checkDir);
+				}
+				// else
+				// {
+				// 	int checkFile = open(contentPath.c_str(), O_RDONLY);
+				// 	if (checkFile == -1)
+				// 		this->status_code = 404;
+				// 	else
+				// 		close(checkFile);
+				// }
+			}
+			it++;
+		}
+	} 
+	if (it == array.end() && contentPath.empty() && flag == 0) 
 		this->status_code = 404;
 	// int checkFile = open(contentPath.c_str(), O_RDONLY);
 	// if (checkFile == -1)

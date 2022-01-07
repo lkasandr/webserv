@@ -11,9 +11,9 @@ Configuration::Configuration()
 	this->method_get = 0;
 	this->method_post = 0;
 	this->method_delete = 0;
-	this->location = "home";
-	this->index = "./rss/home/index.html";
-	this->path.clear();
+	// this->location = "home";
+	// this->index = "./rss/home/index.html";
+	// this->path.clear();
 	this->autoindex = 0;
 }
 
@@ -35,10 +35,11 @@ Configuration& Configuration::operator=(const Configuration& other)
 	this->method_get = other.getGet();
 	this->method_post = other.getPost();
 	this->method_delete = other.getDelete();
-	this->location = other.getLocation();
-	this->index = other.getIndex();
+	// this->location = other.getLocation();
+	// this->index = other.getIndex();
 	this->autoindex = other.getAutoindex();
-	this->path = other.getPath();
+	// this->path = other.getPath();
+	this->array = other.getArray();
 	return *this;
 }
 
@@ -103,35 +104,45 @@ bool	Configuration::getDelete() const
 	return this->method_delete;
 }
 
-std::string Configuration::getLocation() const
-{
-	return this->location;
-}
+// std::string Configuration::getLocation() const
+// {
+// 	return this->location;
+// }
 
-std::string Configuration::getRoot() const
-{
-	return this->root;
-}
+// std::string Configuration::getRoot() const
+// {
+// 	return this->root;
+// }
 
-std::string Configuration::getIndex() const
-{
-	return this->index;
-}
+// std::string Configuration::getIndex() const
+// {
+// 	return this->index;
+// }
 
 std::string	Configuration::getCGI() const
 {
 	return this->CGI_pass;
 }
 
-std::map<std::string, std::string> Configuration::getPath() const
-{
+// std::map<std::string, std::string> Configuration::getPath() const
+// {
 	// вывод map Path:
 	// std::map<std::string, std::string>::const_iterator it;
 	// std::cout << "Location + root: " << std::endl;
 	// for (it=this->path.begin(); it!=this->path.end(); it++)
 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
-	return this->path;
+// 	return this->path;
+// }
+
+std::vector<location>	Configuration::getArray() const
+{
+	return this->array;
 }
+
+// struct location	Configuration::getLocationStruct() const
+// {
+// 	return this->location_struct;
+// }
 
 //////////////
 // Setters ///
@@ -167,27 +178,27 @@ void	Configuration::setHttpMethod(std::string value)
 	this->http_method = value;
 }
 
-void		Configuration::setLocation(std::string value) 
-{
-	this->location = value;
-	// this->location.push_back(value);
-}
+// void		Configuration::setLocation(std::string value) 
+// {
+// 	this->location = value;
+// 	// this->location.push_back(value);
+// }
 
-void		Configuration::setIndex(std::string value) 
-{
-	this->index = value;
-}
+// void		Configuration::setIndex(std::string value) 
+// {
+// 	this->index = value;
+// }
 
 void		Configuration::setCGI(std::string value)
 {
 	this->CGI_pass = value;
 }
 
-void		Configuration::setRoot(std::string value)
-{
-	// this->root.push_back(value);
-	this->root = value;
-}
+// void		Configuration::setRoot(std::string value)
+// {
+// 	// this->root.push_back(value);
+// 	this->root = value;
+// }
 
 void Configuration::setAutoindexOff(void)
 {
@@ -199,12 +210,30 @@ void Configuration::setAutoindexOn(void)
 	this->autoindex = 1;
 }
 
-void	Configuration::setPath(std::string location, std::string root)
-{
-	// std::cout << location << " " << root << std::endl;
-	this->path.insert(std::pair<std::string, std::string>(location, root));
-	// std::cout << this->path[location] << std::endl;
+// void	Configuration::setPath(std::string location, std::string root)
+// {
+// 	// std::cout << location << " " << root << std::endl;
+// 	this->path.insert(std::pair<std::string, std::string>(location, root));
+// 	// std::cout << this->path[location] << std::endl;
 
+// }
+
+void Configuration::setArray(std::string _location, std::string root, std::string index)
+{
+	location temp;
+
+	// this->location_struct.location = location;
+	// this->location_struct.root = root;
+	// this->location_struct.index = index;
+
+	temp.location = _location;
+	temp.root = root;
+	temp.index = index;
+	// temp.client_body_size = client_body_size;
+	// temp.default_error_page = default_error_pages;
+	// temp.http_method = http_method;
+
+	this->array.push_back(temp);
 }
 
 /////////////////
@@ -250,6 +279,6 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config)
 	// for (it=path.begin(); it!=path.end(); it++)
 	// 	std::cout << "\033[35m" << config.getPath()["/"] << "\033[0m" << std::endl;
 	
-	out << "Index: " << config.getIndex() << std::endl;
+	// out << "Index: " << config.getIndex() << std::endl;
 	return (out);
 }

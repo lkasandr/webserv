@@ -94,6 +94,8 @@ std::string Response::makeAutoindexPage(const char *path, std::string const &hos
         dirName.erase(pos_index, dirName.length() - pos_index);
 	}
     DIR *dir = opendir(dirName.c_str());
+	// std::cout << "dirName2: " << dirName << std::endl;
+	// std::cout << "dir: " << dir << std::endl;
     std::string page =\
     "<!DOCTYPE html>\n\
     <html>\n\
@@ -176,13 +178,17 @@ void Response::make_response(Request *request, Configuration *config)
 	}
 	else /*if (check_ext(request) == true)*/
 	{
+		// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 		std::ifstream file(this->content_path.c_str(), std::ios::in | std::ios::binary);
+		// std::cout << "#################" << this->content_path << std::endl;
 		if (!file.is_open())
 		{
 			if (config->getAutoindex())
 			{
+				// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 				std::string ret;
 				ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
+				// std::cout << "ret: " << ret << std::endl;
 				content << ret;
 			}
 			else
@@ -249,19 +255,6 @@ void Response::make_response(Request *request, Configuration *config)
 	
 }
 
-// int compare_uri_path(std::string uri_str, std::map<std::string, std::string> path)
-// {
-// 	std::map<std::string, std::string>::const_iterator it;
-// 	for (it=path.begin(); it!=path.end(); it++)
-// 	{
-// 		if (uri_str.find(it->first) != std::string::npos)
-// 		{
-			
-// 		}
-// 	}
-// 	// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;
-// }
-
 // std::string Response::getContentPath(std::string uri) const
 // {
 // 	if (uri == "/home ")
@@ -313,14 +306,14 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 					contentPath = it->index;
 				close(checkDir);
 			}
-			else
-			{
-				int checkFile = open(contentPath.c_str(), O_RDONLY);
-				if (checkFile == -1)
-					this->status_code = 404;
-				else
-					close(checkFile);
-			}
+			// else
+			// {
+			// 	int checkFile = open(contentPath.c_str(), O_RDONLY);
+			// 	if (checkFile == -1)
+			// 		this->status_code = 404;
+			// 	else
+			// 		close(checkFile);
+			// }
 		}
 		it++;
 	}
@@ -329,7 +322,7 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	// int checkFile = open(contentPath.c_str(), O_RDONLY);
 	// if (checkFile == -1)
 	// 	this->status_code = 404;
-	// std::cout << "contentPath: " << contentPath << std::endl;
+	std::cout << "contentPath: " << contentPath << std::endl;
 	return contentPath;
 }
 

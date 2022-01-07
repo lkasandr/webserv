@@ -326,6 +326,10 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	}
 	if (it == array.end() && contentPath.empty()) 
 		this->status_code = 404;
+	// int checkFile = open(contentPath.c_str(), O_RDONLY);
+	// if (checkFile == -1)
+	// 	this->status_code = 404;
+	// std::cout << "contentPath: " << contentPath << std::endl;
 	return contentPath;
 }
 

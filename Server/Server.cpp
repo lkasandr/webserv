@@ -73,17 +73,6 @@ int check_content_length(char *buffer)
 	return len;
 }
 
-// std::string check_file_end(std::string bound)
-// {
-// 	// std::string bound(buffer);
-// 	size_t pos1 = bound.find("boundary=") + 9;
-// 	size_t pos2 = bound.find("\r\n", pos1);
-// 	std::string boundary = bound.substr(pos1, pos2 - pos1);
-// 	boundary = boundary + "--";
-// 	std::cout << "BOUND " << boundary << std::endl;
-// 	return boundary;
-// }
-
 void Server::check_ready(int fd, char *buffer, int i)
 {
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
@@ -91,28 +80,34 @@ void Server::check_ready(int fd, char *buffer, int i)
 		if (it->getClientFd() == fd)
 		{
 			it->msg.append(buffer, i);
-			if(!it->getContentLen())
-				it->setContentLen(check_content_length(buffer));
-			if (it->msg.length() >= (size_t)it->getContentLen() || (!it->getContentLen() && (it->msg.find("0\r\n\r\n") != std::string::npos)))
-				it->chunk_ready = true;
+			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos || it->msg.find("Content-Length") != std::string::npos)
+			{
+				if(!it->getContentLen())
+				{
+					it->setContentLen(check_content_length(buffer));
+					if(!it->getContentLen() && (it->msg.find("0\r\n\r\n") != std::string::npos))
+					{
+						it->chunk_ready = true;
+						return;
+					}
+
+				}
+				else if (it->msg.length() >= (size_t)it->getContentLen())
+				{
+					it->chunk_ready = true;
+					return;
+				}
+			}
 			else 
-				it->chunk_ready = false;
+			{
+				it->chunk_ready = true;
+				return;
+			}
 			return;
 		}
 	}
 	return;
 }
-
-// Configuration &check_server(Request *request, std::vector<Configuration> configs)
-// {
-// 	std::string host = request->getHeaders().find("Host")->second;
-// 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
-// 	{
-// 		if(it->getHost() == host)
-// 			return ((*it));
-// 	}
-// 	// return ;
-// }
 
 bool check_server(Request *request, std::vector<Configuration> configs, Configuration *conf)
 {
@@ -169,9 +164,10 @@ void Server::communication(int fd, int i)
 			std::cout << response;
 			close(fd);				///???
 			pfds.erase(pfds.begin() + i);		///???
-			// clients.erase(it);
+			clients.erase(it);
+			break;
 			// it->~Client();
-			it->msg.clear();
+			// it->msg.clear();
 		}	
 	}
 	delete[] buffer;

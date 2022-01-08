@@ -208,41 +208,6 @@ void Response::make_response(Request *request, Configuration *config)
 		response.write(contents.data(), contents.size()); // бинарник
 		file.close();
 	}
-	// else /* if (check_ext(request) == false)*/
-	// {
-	// 	std::ifstream	file;
-
-
-	// 	// std:: stringstream response;
-	// 	// std::stringstream content;
-	// 	file.open(this->content_path.c_str());
-	// 	if (!file.is_open())
-	// 	{
-	// 		if (config->getAutoindex())
-	// 		{
-	// 			std::string ret;
-	// 			ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
-	// 			content << ret;
-	// 		}
-	// 		else
-	// 		{
-	// 			this->status_code = 404;
-	// 			this->code_description = " Not Found\r\n";
-	// 			this->connection = "Connection: Close\r\n";
-	// 			file.open("./rss/error/404.html");
-	// 		}
-	// 	}
-	// 	content << file.rdbuf();
-	// 	file.close();
-	// }
-	// response << this->version << this->status_code << this->code_description
-	// << this->date << this->server << this->connection << this->allow_method
-	// << this->contentType << "Content-Length: " << content.str().length() << "\r\n"
-	// << this->setCookie << "\r\n\r\n" << content.str().c_str();
-
-	
-
-
 	int send_res = 1;
 	std::string resp = response.str();
 	while (send_res > 0)
@@ -255,17 +220,6 @@ void Response::make_response(Request *request, Configuration *config)
 	}
 	
 }
-
-// std::string Response::getContentPath(std::string uri) const
-// {
-// 	if (uri == "/home ")
-// 		return ("./rss/home/index.html");
-// 	if (uri.find("php") != std::string::npos)
-// 		return ("./cgi/phpinfo.php");
-// 	if (uri.find("cpp") != std::string::npos)
-// 		return ("./cgi/print_env");
-// 	return("./rss/home/index.html");
-// }
 
 std::string Response::getContentPath(Configuration conf, std::string uri)
 {

@@ -62,9 +62,9 @@ std::map<std::string, std::string> Request::getHeaders() const
 
 void Request::setBody(std::string line)
 {
-	if (line.length() == 0 /*|| (line[0] != '\r' && line[1] != '\n')*/)
+	if (line.length() == 0 || line == "0\r\n\r\n")
 	{
-		this->code = 204;
+		this->code = 405;
 		this->body = line;
 		return ;
 	}
@@ -150,7 +150,7 @@ std::string		Request::setMethod(std::string line)
 			break;
 	}
 	if (i == 3)
-		this->code = 501;
+		this->code = 405;
 	temp = line.substr(pos, line.length() - pos);
 	return temp;
 }

@@ -75,33 +75,37 @@ int check_content_length(char *buffer)
 
 void Server::check_ready(int fd, char *buffer, int i)
 {
+	std::cout << "\033[33mBUFFER: \033[0m" << buffer << "\n";
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
 		if (it->getClientFd() == fd)
 		{
 			it->msg.append(buffer, i);
-			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos || it->msg.find("Content-Length") != std::string::npos)
+			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos /* || it->msg.find("Content-Length") != std::string::npos*/)
 			{
+				std::cout << "\033[33mMSG : \033[0m" << it->msg << "\n";
 				if(!it->getContentLen())
 				{
 					it->setContentLen(check_content_length(buffer));
 					if(!it->getContentLen() && (it->msg.find("0\r\n\r\n") != std::string::npos))
 					{
 						it->chunk_ready = true;
-						return;
+						// return;
 					}
-
 				}
-				else if (it->msg.length() >= (size_t)it->getContentLen())
+				else if(it->msg.length() >= (size_t)it->getContentLen())
 				{
+					std::cout << "IT_MSG" << it->msg << "\n";
 					it->chunk_ready = true;
-					return;
+					// return;
 				}
 			}
 			else 
 			{
+				std::cout << "\033[33mMSG : \033[0m" << it->msg << "\n";
 				it->chunk_ready = true;
-				return;
+				std::cout << "\033[33mCHUNK_READY : \033[0m" << it->chunk_ready << "\n";
+				// return;
 			}
 			return;
 		}
@@ -146,6 +150,7 @@ void Server::communication(int fd, int i)
 	}
 	if(!check_client(fd, clients))
 		clients.push_back(Client(fd));
+	// std::cout << "\033[33mBUFF 153 : \033[0m" << buffer << "\n";
 	check_ready(fd, buffer, message);
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{	

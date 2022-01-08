@@ -62,7 +62,9 @@ std::map<std::string, std::string> Request::getHeaders() const
 
 void Request::setBody(std::string line)
 {
-	if (line.length() == 0 || line == "0\r\n\r\n")
+	const char *buff = line.c_str();
+	std::cout << "\033[35mBODY: " << buff << "\033[0m" <<std::endl;
+	if (line.length() == 0 || (line == "0\r\n\r\n"))
 	{
 		this->code = 405;
 		this->body = line;
@@ -71,9 +73,9 @@ void Request::setBody(std::string line)
 	this->body = line;
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
-		this->code = 204;
+		this->code = 405;
 	}
-	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
+	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)

@@ -1,6 +1,3 @@
-<head>
-<meta charset="utf-8" />
-</head>
 <?php
 $name = "не определено";
 $age = "не определен";
@@ -16,6 +13,6 @@ echo "Проверяем PHP <br>";
 echo "Имя: $name <br> Возраст: $age";
 
 //debug
-// print_r($_REQUEST);
+print_r($_REQUEST);
 
 ?>

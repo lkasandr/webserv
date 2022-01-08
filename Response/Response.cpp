@@ -46,6 +46,11 @@ void Response::check_errors(int code)
 		this->content_path = "./rss/error/400.html";
 		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
 		break;
+	case 403: // Bad Request 
+		this->code_description = " Forbidden\r\n";
+		this->content_path = "./rss/error/403.html";
+		this->contentType = "Content-Type: text/html; charset=utf-8\r\n";
+		break;
 	case 404: // Not Found
 		this->code_description = " Not Found\r\n";
 		this->content_path = "./rss/error/404.html";
@@ -166,7 +171,6 @@ void Response::make_response(Request *request, Configuration *config)
 	std::stringstream content;
 	if (request->getCGI())
 	{
-		// std:: stringstream response;
 		CgiProcess cgi(*request, *this);
 		cgi.execCGI(getContentPath(*config, request->getUri()));
 		check_errors(cgi.getStatus());
@@ -176,7 +180,7 @@ void Response::make_response(Request *request, Configuration *config)
 			<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
 			<< this->setCookie << "\r\n\r\n" << content.str();
 	}
-	else /*if (check_ext(request) == true)*/
+	else
 	{
 		// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 		std::ifstream file(this->content_path.c_str(), std::ios::in | std::ios::binary);
@@ -436,7 +440,7 @@ void Response::check_method(Configuration *configs, Request *request)
 		}
 		break;
 	default: //std::cout << "Uncknown method" << std::endl;	//501 not implemented
-		this->status_code = 501;
+		this->status_code = 405;
 		break;
 	}	
 }

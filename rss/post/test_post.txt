@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 Content-Content-0
 
 say=Hi&to=MarkGET /post/php-example.html HTTP/1.1
@@ -17,3 +18,8 @@ Sec-Fetch-Dest: document
 Accept-Encoding: gzip, deflate, br
 Accept-Language: en-US,en;q=0.9
 
+=======
+Content-0
+
+Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Accept-Encoding: Content-Content-Content-Content-Content-Accept-Encoding: Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-Content-
+>>>>>>> Stashed changes

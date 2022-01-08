@@ -172,7 +172,7 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			path = "/usr/bin/php-cgi";  
   			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			std::cout << "ROOT DIR " << root_directory << "\n";
+			// std::cout << "ROOT DIR " << root_directory << "\n";
 			chdir(root_directory.c_str());
 			break;
 		default:
@@ -180,8 +180,8 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			script = cgi_path;
 			break;
 		}
-		std::cout << "PATH " << path << std::endl;
-		std::cout << "SCRIPT " << script << std::endl;
+		// std::cout << "PATH " << path << std::endl;
+		// std::cout << "SCRIPT " << script << std::endl;
 		char * argv[3] = {
 		const_cast<char*>(script.c_str()),
 		const_cast<char*>(script.c_str()),
@@ -212,7 +212,7 @@ std::string CgiProcess::getBody(void)
 	return this->body;
 }
 
-int			CgiProcess::getStatus(void)
+int	CgiProcess::getStatus(void)
 {
 	return this->status;
 }

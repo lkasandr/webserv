@@ -248,9 +248,19 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	size_t lengthLocation = 0;
 	int flag = 0;
 
-	// std::cout << "URI: " << uri << std::endl;
-	int pos = uri.find_first_of('/', 1);
-	uri_part = uri.substr(0, pos);
+	uri = uri.substr(0, uri.length() - 1);
+	std::string uri_dir = "./rss" + uri;
+	int ifUriDir = open(uri_dir.c_str(), O_DIRECTORY);
+	if (ifUriDir != -1)
+	{
+		uri_part = uri;
+		close(ifUriDir);
+	}
+	else
+	{
+		int pos = uri.find_first_of('/', 1);
+		uri_part = uri.substr(0, pos);
+	}
 	// if (uri_part == "/home")
 	// 	uri_part = "/ ";
 	if (uri_part == "/rss")
@@ -265,10 +275,11 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	std::vector<location>::const_iterator it = array.begin();
 	while(it != array.end())
 	{
-		if (uri_part.find(it->location) != std::string::npos)
+		if (it->location == "/")
+			flag = 1;
+		if (uri_part == it->location)
 		{
-			if (it->location == "/")
-				flag = 1;
+			
 			if (lengthLocation < it->location.length())
 			{
 				contentPath = "." + it->root + uri;

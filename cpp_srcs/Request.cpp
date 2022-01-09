@@ -62,8 +62,8 @@ std::map<std::string, std::string> Request::getHeaders() const
 
 void Request::setBody(std::string line)
 {
-	const char *buff = line.c_str();
-	std::cout << "\033[35mBODY: " << buff << "\033[0m" <<std::endl;
+	// const char *buff = line.c_str();
+	// std::cout << "\033[35mBODY: " << buff << "\033[0m" <<std::endl;
 	if (line.length() == 0 || (line == "0\r\n\r\n"))
 	{
 		this->code = 405;
@@ -75,7 +75,7 @@ void Request::setBody(std::string line)
     {
 		this->code = 405;
 	}
-	std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
+	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
 void Request::setHTTPversion(std::string line)
@@ -109,7 +109,8 @@ std::string Request::setURI(std::string line)
 		temp = line.substr(pos + 1, line.length() - pos);
 		cgi_indicator = this->uri.substr(0, 9);
 		std:: cout << "CGI INDICATOR " << cgi_indicator << std::endl;
-		if (cgi_indicator.find("/cgi/") != std::string::npos || cgi_indicator.find(".php") != std::string::npos)
+		if (cgi_indicator.find("/cgi/") != std::string::npos || cgi_indicator.find(".php") != std::string::npos\
+			|| cgi_indicator.find(".bla") != std::string::npos)
 		{
 			this->cgi = 1;
 			size_t pos_cgi = 0;
@@ -141,7 +142,7 @@ std::string		Request::setMethod(std::string line)
 	u_long i = 0;
 	size_t pos = 0;
 	std::string temp;
-	std::string	available_methods[3] = {"GET", "POST", "DELETE"};
+	std::string	available_methods[4] = {"GET", "POST", "DELETE", "PUT"};
 
 	while(pos != line.find(" ", 0) && (pos != line.length()))
 		pos++;
@@ -151,7 +152,7 @@ std::string		Request::setMethod(std::string line)
 		if (this->method == available_methods[i])
 			break;
 	}
-	if (i == 3)
+	if (i == 4)
 		this->code = 405;
 	temp = line.substr(pos, line.length() - pos);
 	return temp;
@@ -230,7 +231,7 @@ void		Request::parseRequest(std::string line)
 		}
 		pos++;
 	}
-	if (getMethod() == "POST")
+	if (getMethod() == "POST" || getMethod() == "PUT")
 	{
 		// std::cout << "\nLINE in post: " << line << std::endl;
 		// std::cout << "\nbuffer in post: " << line << std::endl;

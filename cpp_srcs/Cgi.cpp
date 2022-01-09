@@ -124,6 +124,8 @@ int check_extension(std::string const& cgi_path)
 		return PY;
 	else if (cgi_path.find(".php") != std::string::npos)
 		return PHP;
+	else if (cgi_path.find(".bla") != std::string::npos)
+		return BLA;
 	else
 		return DEFAULT;
 }
@@ -170,6 +172,13 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			break;
 		case PHP:
 			path = "/usr/bin/php-cgi";  
+  			script = this->request.getScriptPath();; 
+			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
+			std::cout << "ROOT DIR " << root_directory << "\n";
+			chdir(root_directory.c_str());
+			break;
+		case BLA:
+			path = "./cgi/ubuntu_cgi_tester";  
   			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
 			std::cout << "ROOT DIR " << root_directory << "\n";

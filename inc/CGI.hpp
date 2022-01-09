@@ -24,7 +24,8 @@
 # define CGI_BUF_SIZE 65536
 # define PY 0
 # define PHP 1
-# define DEFAULT 2
+# define BLA 2
+# define DEFAULT 3
 
 
 class Response;

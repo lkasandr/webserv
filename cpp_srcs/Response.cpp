@@ -360,9 +360,9 @@ void Response::check_method(Configuration *configs, Request *request)
 		uri_str = "/home ";
 	if (uri_str == "/redirect ")
 		this->status_code = 301;
-	std::string 	method[3] = {"GET", "POST", "DELETE"};
+	std::string 	method[4] = {"GET", "POST", "DELETE", "PUT"};
 	int m = 0;
-	while(m < 3 && request->getMethod().compare(method[m]) != 0 )
+	while(m < 4 && request->getMethod().compare(method[m]) != 0 )
 		m++;
 	switch (m)
 	{
@@ -466,6 +466,35 @@ void Response::check_method(Configuration *configs, Request *request)
 		{
 			this->status_code = 405;
 			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
+		}
+		break;
+	case 3:
+		{
+			std::string content = request->getBody();
+			std::string filename = "./rss/upload/" + request->getUri().substr(request->getUri().find_last_of("/") + 1);
+			filename = filename.substr(0, filename.find(" "));
+			std::cout << "FILENAME " << filename << "TTT" << std::endl;
+			size_t pos_beg = content.find("\r\n\r\n") + 4;
+			std::cout << "1 " << filename << "TTT" << std::endl;
+			size_t pos_end = content.find("0\r\n\r\n");
+			std::cout << "2 " << filename << "TTT" << std::endl;
+			// std::cout << "CONTENT " << content << "TTT" << std::endl;
+			content = content.substr(pos_beg, pos_end - pos_beg);
+			std::cout << "3 " << filename << "TTT" << std::endl;
+			std::ofstream newfile;
+			newfile.open(filename.c_str(),  std::ios_base::out | std::ios_base::binary);
+			if (!newfile.is_open())
+			{
+				this->status_code = 500;
+				break;
+			}
+			newfile << content;
+			newfile.close();
+			this->status_code = 201;
+			this->code_description = " Created.\r\n";
+			this->_location = "./rss/upload";
+			this->connection = "Connection: Close\r\n";
+			this->content_path = "./rss/error/201.html";
 		}
 		break;
 	default: //std::cout << "Uncknown method" << std::endl;	//501 not implemented

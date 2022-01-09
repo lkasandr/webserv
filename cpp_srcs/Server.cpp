@@ -81,7 +81,8 @@ void Server::check_ready(int fd, char *buffer, int i)
 		if (it->getClientFd() == fd)
 		{
 			it->msg.append(buffer, i);
-			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos  || it->msg.find("Content-Length") != std::string::npos)
+			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos  || it->msg.find("Content-Length") != std::string::npos\
+				|| it->msg.find(" PUT ") != std::string::npos || it->msg.find(" POST ") != std::string::npos)
 			{
 				// std::cout << "\033[33mMSG : \033[0m" << it->msg << "\n";
 				if(!it->getContentLen())
@@ -168,7 +169,7 @@ void Server::communication(int fd, int i)
 			Request	request;
 			// std::cout << "163\n";
 			request.parseRequest(it->msg);
-			std::cout << "\033[33mRequest: \033[0m" << it->msg;
+			// std::cout << "\033[33mRequest: \033[0m" << it->msg;
 			std::cout << request;
 			Configuration conf;
 			if(!check_server(&request, config, &conf))

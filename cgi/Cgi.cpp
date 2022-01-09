@@ -80,7 +80,7 @@ void	CgiProcess::initEnv(void)
 	this->env_map["CONTENT_TYPE"]		=	headers["Content-Type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
 	this->env_map["PATH_INFO"]			=	"/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
-	this->env_map["PATH_TRANSLATED"]	=	"cgi";		//this->request.getScriptPath(); //
+	this->env_map["PATH_TRANSLATED"]	=	"/rss/cgi";		//this->request.getScriptPath(); //
 	this->env_map["QUERY_STRING"]		=	this->request.getQueryString();	// после "?" В URL
 	this->env_map["REMOTE_ADDR"]		=	"127.0.0.1";	//this->request.getHeaders().find("Host")->second;
 	this->env_map["REMOTE_HOST"]		=	"localhost";
@@ -139,12 +139,12 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	std::string root_directory;
 
 	this->fillEnv();
-	// int i = 0;
-	// while (this->env_array[i])
-	// {
-	// 	std::cout << "ENV: " << this->env_array[i] << std::endl;
-	// 	i++;
-	// }
+	int i = 0;
+	while (this->env_array[i])
+	{
+		std::cout << "ENV: " << this->env_array[i] << std::endl;
+		i++;
+	}
     bzero(buf, 100000);
     pipe(fd[0]);
     pipe(fd[1]);
@@ -164,15 +164,15 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			path = "/usr/bin/python3";  
   			// script = cgi_path;
 			script = this->request.getScriptPath();; 
-			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
+			// root_directory = get_cwd() + "/rss" + request.getUri().substr(0, request.getUri().find_last_of("/"));
 			// std::cout << "ROOT DIR " << root_directory << "\n";
-			chdir(root_directory.c_str());
+			// chdir(root_directory.c_str());
 			break;
 		case PHP:
 			path = "/usr/bin/php-cgi";  
   			script = this->request.getScriptPath();; 
-			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			// std::cout << "ROOT DIR " << root_directory << "\n";
+			root_directory = get_cwd() + "/rss" + request.getUri().substr(0, request.getUri().find_last_of("/"));
+			std::cout << "ROOT DIR " << root_directory << "\n";
 			chdir(root_directory.c_str());
 			break;
 		default:
@@ -180,13 +180,15 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			script = cgi_path;
 			break;
 		}
-		// std::cout << "PATH " << path << std::endl;
-		// std::cout << "SCRIPT " << script << std::endl;
 		char * argv[3] = {
 		const_cast<char*>(script.c_str()),
 		const_cast<char*>(script.c_str()),
 		(char *)0 };
-		execve(path.c_str(), &argv[0], this->env_array);
+		if (execve(path.c_str(), &argv[0], this->env_array) < 0)
+		{
+			this->status = 502;
+			exit(1);
+		}
 		exit(0);
     }
     close(fd[1][1]);
@@ -194,7 +196,10 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
     while((len = read(fd[1][0], buf, 100000)) != 0)
     {
 		if (len == -1)
-            std::cout << "CGI ERROR" << std::endl;
+        {
+			std::cout << "CGI ERROR" << std::endl;
+			this->status = 502;
+		}
         for(int i = 0;i < len; i++)
             this->body.push_back(buf[i]);
         bzero(buf, 100000);

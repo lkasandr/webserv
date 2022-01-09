@@ -123,7 +123,11 @@ std::string Response::makeAutoindexPage(const char *path, std::string const &hos
         struct stat vStat;
         stat(dirEntry->d_name, &vStat);
         ss << "\t\t<p><a href=\"http://" + host + dirName + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
-        page += ss.str();
+        std::cout << "HREF host " << host << "\n";
+		std::cout << "HREF dirName " << dirName << "\n";
+		std::cout << "HREF dirEntry->d_name " << dirEntry->d_name << "\n";
+		std::cout << "HREF dirEntry->d_name " << dirEntry->d_name << "\n";
+	    page += ss.str();
     }
     page +="\
     </p>\n\
@@ -140,7 +144,6 @@ std::string check_ext(Request *request)
 	size_t pos = request->getUri().find_last_of(".");
 	if (pos != std::string::npos)
 		ext = request->getUri().substr(pos + 1);
-	std::cout << "EXT " << ext;
 	if (ext == "png " || ext == "ico " || ext == "jpeg " || ext == "gif "\
 		|| ext == "tiff " || ext == "x-icon " || ext == "svg+xml ")
 		cont_type = "Content-Type: image/" + ext + ";\r\n";
@@ -195,6 +198,11 @@ void Response::make_response(Request *request, Configuration *config)
 				ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
 				// std::cout << "ret: " << ret << std::endl;
 				content << ret;
+				response << this->version << this->status_code << this->code_description
+				<< this->date << this->server << this->connection << this->allow_method
+				<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+				<< this->setCookie << "\r\n\r\n" << content.str();
+
 			}
 			else
 			{
@@ -204,19 +212,21 @@ void Response::make_response(Request *request, Configuration *config)
 				file.open("./rss/error/404.html");
 			}
 		}
-		std::vector<char> contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		response << this->version << this->status_code << this->code_description
-			<< this->date << this->server << this->connection << this->allow_method
-			<< this->contentType << "Content-Length: " << contents.size()
-			<< "\r\n\r\n"; 
-		response.write(contents.data(), contents.size()); // бинарник
-		file.close();
+		else
+		{
+			std::vector<char> contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			response << this->version << this->status_code << this->code_description
+				<< this->date << this->server << this->connection << this->allow_method
+				<< this->contentType << "Content-Length: " << contents.size()
+				<< "\r\n\r\n"; 
+			response.write(contents.data(), contents.size()); // бинарник
+			file.close();
+		}
 	}
 	int send_res = 1;
 	std::string resp = response.str();
 	while (send_res > 0)
 	{
-		std::cout << "SEND_RES " << send_res << std::endl;
 		send_res = send(fd, resp.c_str(), resp.size(), 0);
 		if(send_res < 0)
 			break;

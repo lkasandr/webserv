@@ -261,6 +261,8 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 		int pos = uri.find_first_of('/', 1);
 		uri_part = uri.substr(0, pos);
 	}
+	if (uri_part[uri_part.length() - 1] == '/')
+		uri_part = uri_part.substr(0, uri_part.length() - 1);
 	// if (uri_part == "/home")
 	// 	uri_part = "/ ";
 	if (uri_part == "/rss")

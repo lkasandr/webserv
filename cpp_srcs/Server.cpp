@@ -166,6 +166,8 @@ void Server::communication(int fd, int i)
 		if(it->chunk_ready)
 		{
 			it->chunk_ready = false;
+
+
 			Request	request;
 			// std::cout << "163\n";
 			request.parseRequest(it->msg);
@@ -177,8 +179,8 @@ void Server::communication(int fd, int i)
 			Response response(fd);
 			response.make_response(&request, &conf);
 			std::cout << response;
-			close(fd);				///???
-			pfds.erase(pfds.begin() + i);		///???
+			// close(fd);				///???
+			// pfds.erase(pfds.begin() + i);		///???
 			clients.erase(it);
 			break;
 			// it->~Client();

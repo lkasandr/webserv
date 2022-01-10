@@ -468,19 +468,14 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
-	case 3:
+	case 3: /*PUT method*/
+		if (configs->checkPut())
 		{
 			std::string content = request->getBody();
 			std::string filename = "./rss/upload/" + request->getUri().substr(request->getUri().find_last_of("/") + 1);
 			filename = filename.substr(0, filename.find(" "));
-			std::cout << "FILENAME " << filename << "TTT" << std::endl;
-			size_t pos_beg = content.find("\r\n\r\n") + 4;
-			std::cout << "1 " << filename << "TTT" << std::endl;
 			size_t pos_end = content.find("0\r\n\r\n");
-			std::cout << "2 " << filename << "TTT" << std::endl;
-			// std::cout << "CONTENT " << content << "TTT" << std::endl;
-			content = content.substr(pos_beg, pos_end - pos_beg);
-			std::cout << "3 " << filename << "TTT" << std::endl;
+			content = content.substr(0, pos_end);
 			std::ofstream newfile;
 			newfile.open(filename.c_str(),  std::ios_base::out | std::ios_base::binary);
 			if (!newfile.is_open())
@@ -495,6 +490,11 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->_location = "./rss/upload";
 			this->connection = "Connection: Close\r\n";
 			this->content_path = "./rss/error/201.html";
+		}
+		else
+		{
+			this->status_code = 405;
+			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
 	default: //std::cout << "Uncknown method" << std::endl;	//501 not implemented

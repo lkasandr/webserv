@@ -31,6 +31,7 @@ private:
 	bool			method_get;
 	bool			method_post;
 	bool			method_delete;
+	bool			method_put;
 	// std::string		location;
 	// std::string location;
 	// std::string root;
@@ -61,6 +62,7 @@ public:
 	bool		getGet() const;
 	bool		getPost() const;
 	bool		getDelete() const;
+	bool		getPut() const;
 	// std::string getLocation() const;
 	// std::string getRoot() const;
 	int			getAutoindex() const;
@@ -91,6 +93,7 @@ public:
 	bool		checkGet();
 	bool		checkPost();
 	bool		checkDelete();
+	bool		checkPut();
 };
 
 std::ostream& operator<<(std::ostream& out, const Configuration& config);

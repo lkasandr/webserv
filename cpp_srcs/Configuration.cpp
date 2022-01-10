@@ -104,6 +104,11 @@ bool	Configuration::getDelete() const
 	return this->method_delete;
 }
 
+bool	Configuration::getPut() const
+{
+	return this->method_put;
+}
+
 // std::string Configuration::getLocation() const
 // {
 // 	return this->location;
@@ -259,6 +264,13 @@ bool Configuration::checkDelete()
 	if(this->http_method.find("DELETE") != std::string::npos)
 		this->method_delete = true;
 	return this->method_delete;
+}
+
+bool Configuration::checkPut()
+{
+	if(this->http_method.find("PUT") != std::string::npos)
+		this->method_put = true;
+	return this->method_put;
 }
 
 std::ostream& operator<<(std::ostream& out, const Configuration& config)

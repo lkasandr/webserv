@@ -76,11 +76,13 @@ int check_content_length(char *buffer)
 void Server::check_ready(int fd, char *buffer, int i)
 {
 	// std::cout << "\033[33mBUFFER: \033[0m" << buffer << "\n";
+	// std::string tmp(buffer);
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
 		if (it->getClientFd() == fd)
 		{
 			it->msg.append(buffer, i);
+			// std::cout << "\033[33mMSG_SIZE : \033[0m" << it->msg.size() << "\n";
 			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos  || it->msg.find("Content-Length") != std::string::npos\
 				|| it->msg.find(" PUT ") != std::string::npos || it->msg.find(" POST ") != std::string::npos)
 			{

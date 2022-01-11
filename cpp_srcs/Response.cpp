@@ -156,11 +156,13 @@ void Response::make_response(Request *request, Configuration *config)
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
+	std::cout << "159 this->status_code " << this->status_code << std::endl;
 	if (this->status_code != 200)
 		check_errors(this->status_code);
 	else
 	{
 		check_method(config, request);
+		std::cout << "165this->status_code" << this->status_code << std::endl;
 		check_errors(this->status_code);
 	}
 	// формируем ответ
@@ -171,8 +173,12 @@ void Response::make_response(Request *request, Configuration *config)
 	if (request->getCGI())
 	{
 		CgiProcess cgi(*request, *this);
+		std::cout << "this->status_code" << this->status_code << std::endl;
 		cgi.execCGI(getContentPath(*config, request->getUri()));
 		check_errors(cgi.getStatus());
+		std::cout << "this->status_code" << this->status_code << std::endl;
+		std::cout << "cgi.getStatus()" << cgi.getStatus() << std::endl;
+		// std::cout << "CGI BODY: " << cgi.getBody() << std::endl;
 		content << cgi.getBody();
 		response << this->version << this->status_code << this->code_description
 			<< this->date << this->server << this->connection << this->allow_method
@@ -248,7 +254,7 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 	size_t lengthLocation = 0;
 	int flag = 0;
 
-	uri = uri.substr(0, uri.length() - 1);
+	// uri = uri.substr(0, uri.length() - 1);
 	std::string uri_dir = "./rss" + uri;
 	int ifUriDir = open(uri_dir.c_str(), O_DIRECTORY);
 	if (ifUriDir != -1)
@@ -286,8 +292,8 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 			{
 				contentPath = "." + it->root + uri;
 				// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-				if (contentPath[contentPath.length() - 1] == ' ')
-					contentPath = contentPath.substr(0, contentPath.length() - 1);
+				// if (contentPath[contentPath.length() - 1] == ' ')
+				// 	contentPath = contentPath.substr(0, contentPath.length() - 1);
 				int checkDir = open(contentPath.c_str(), O_DIRECTORY);
 				// std::cout << "checkOpen: " << checkDir << std::endl;
 				if (checkDir != -1)
@@ -320,8 +326,8 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 			{
 				contentPath = "." + it->root + uri;
 				// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-				if (contentPath[contentPath.length() - 1] == ' ')
-					contentPath = contentPath.substr(0, contentPath.length() - 1);
+				// if (contentPath[contentPath.length() - 1] == ' ')
+				// 	contentPath = contentPath.substr(0, contentPath.length() - 1);
 				int checkDir = open(contentPath.c_str(), O_DIRECTORY);
 				// std::cout << "checkOpen: " << checkDir << std::endl;
 				if (checkDir != -1)
@@ -356,9 +362,9 @@ std::string Response::getContentPath(Configuration conf, std::string uri)
 void Response::check_method(Configuration *configs, Request *request)
 {
 	std::string uri_str = request->getUri();
-	if (uri_str == "/ ")
-		uri_str = "/home ";
-	if (uri_str == "/redirect ")
+	if (uri_str == "/")
+		uri_str = "/home";
+	if (uri_str == "/redirect")
 		this->status_code = 301;
 	std::string 	method[4] = {"GET", "POST", "DELETE", "PUT"};
 	int m = 0;
@@ -473,7 +479,7 @@ void Response::check_method(Configuration *configs, Request *request)
 		{
 			std::string content = request->getBody();
 			std::string filename = "./rss/upload/" + request->getUri().substr(request->getUri().find_last_of("/") + 1);
-			filename = filename.substr(0, filename.find(" "));
+			// filename = filename.substr(0, filename.find(" "));
 			size_t pos_end = content.find("0\r\n\r\n");
 			content = content.substr(0, pos_end);
 			std::ofstream newfile;

@@ -9,7 +9,7 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}", "./Socket.cpp" , "./Configuration.cpp ", "./Request.cpp", "./parser.cpp", "./Server.cpp", "./Response.cpp", "./Client.cpp", "./Cgi.cpp" ,"-I", "/home/scass/Desktop/hgfs/Ubuntu/projects/web/webserv/inc"
+                "${fileDirname}/${fileBasenameNoExtension}", "./cpp_srcs/Socket.cpp" , "./cpp_srcs/Configuration.cpp ", "./cpp_srcs/Request.cpp", "./cpp_srcs/parser.cpp", "./cpp_srcs/Server.cpp", "./cpp_srcs/Response.cpp", "./cpp_srcs/Client.cpp", "./cpp_srcs/Cgi.cpp" ,"-I", "/home/scass/Desktop/hgfs/Ubuntu/projects/web/webserv/inc"
             ],
             "options": {
                 "cwd": "${fileDirname}"

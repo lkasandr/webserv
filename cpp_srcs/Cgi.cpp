@@ -79,7 +79,7 @@ void	CgiProcess::initEnv(void)
 	this->env_map["CONTENT_LENGTH"]		=	/*headers["Content-Length"];	*/to_string(this->request.getBody().size());
 	this->env_map["CONTENT_TYPE"]		=	headers["Content-Type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
-	this->env_map["PATH_INFO"]			=	"/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
+	this->env_map["PATH_INFO"]			=	this->request.getUri();	// "/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
 	this->env_map["PATH_TRANSLATED"]	=	"/rss/cgi";		//this->request.getScriptPath(); //
 	this->env_map["QUERY_STRING"]		=	this->request.getQueryString();	// после "?" В URL
 	this->env_map["REMOTE_ADDR"]		=	"127.0.0.1";	//this->request.getHeaders().find("Host")->second;
@@ -87,6 +87,7 @@ void	CgiProcess::initEnv(void)
 	this->env_map["REMOTE_IDENT"];
 	this->env_map["REMOTE_USER"];
 	this->env_map["REQUEST_METHOD"]		=	this->request.getMethod();
+	this->env_map["REQUEST_URI"]		=	this->request.getUri();
 	this->env_map["SCRIPT_NAME"]		=	this->request.getScriptPath();	//  variable MUST be set to a URI path
 	this->env_map["SCRIPT_FILENAME"]	=	this->request.getScriptPath();	//  variable MUST be set to a URI path
 	this->env_map["SERVER_NAME"]		=	headers["Host"];	//this->request.getHeaders().find("Host")->second;	// hostname
@@ -132,7 +133,7 @@ int check_extension(std::string const& cgi_path)
 
 int	CgiProcess::execCGI(std::string const& cgi_path)
 {
-	int fd[2][2];
+	
     char buf[100000];
     int len = -1;
 
@@ -148,17 +149,30 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 		i++;
 	}
     bzero(buf, 100000);
-    pipe(fd[0]);
-    pipe(fd[1]);
-    write(fd[0][1], const_cast<char*>(this->request.getBody().c_str()), this->request.getBody().length());
-    close(fd[0][1]);
+    
+    
+	FILE *file_In = tmpfile();
+    FILE *file_Out = tmpfile();
+    long fdIn = fileno(fIn);
+    long fdOut = fileno(fOut);
+	
+	write(fdIn, const_cast<char*>(this->request.getBody().c_str()), this->request.getBody().length());
+	lseek(fdIn, 0, SEEK_SET);
+	// std::cout << "this->request.getBody() " << this->request.getBody() << "\n";
+	// while((len = read(fdIn, buf, 100000)) != 0)
+    // {
+	// 	std::cout << "buf fdin " << buf << "\n";
+	// }
     if(fork() == 0)
     {
-		dup2(fd[0][0], 0);
-        close(fd[0][0]);
-        dup2(fd[1][1], 1);
-        close(fd[1][1]);
+		// dup2(fd[0][0], 0);
+        // close(fd[0][0]);
+        // dup2(fd[1][1], 1);
+        // close(fd[1][1]);
 		
+		dup2(fdIn, STDIN_FILENO);
+        dup2(fdOut, STDOUT_FILENO);
+
 		int m = check_extension(cgi_path);
 		switch (m)
 		{
@@ -178,17 +192,19 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			chdir(root_directory.c_str());
 			break;
 		case BLA:
-			path = "ubuntu_cgi_tester";  
-  			script = this->request.getScriptPath();; 
-			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			std::cout << "ROOT DIR " << root_directory << "\n";
-			chdir(root_directory.c_str());
+			path = "./rss/directory/ubuntu_cgi_tester";  
+  			script = "./rss/directory/ubuntu_cgi_tester"; // this->request.getScriptPath();; 
+			// root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
+			// std::cout << "ROOT DIR " << root_directory << "\n";
+			// chdir(root_directory.c_str());
 			break;
 		default:
 			path = cgi_path;
 			script = cgi_path;
 			break;
 		}
+		std::cout << "PATH " << path << "\n";
+		std::cout << "SCRIPT " << script << "\n";
 		char * argv[3] = {
 		const_cast<char*>(script.c_str()),
 		const_cast<char*>(script.c_str()),
@@ -200,9 +216,11 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 		}
 		exit(0);
     }
-    close(fd[1][1]);
+    wait(0);
+    // close(fd[1][1]);
 	// this->body.clear();
-    while((len = read(fd[1][0], buf, 100000)) != 0)
+	lseek(fdOut, 0, SEEK_SET);
+    while((len = read(fdOut, buf, 100000)) != 0)
     {
 		if (len == -1)
         {
@@ -213,9 +231,13 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
             this->body.push_back(buf[i]);
         bzero(buf, 100000);
     }
-	wait(0);
-    close(fd[0][0]);
-    close(fd[1][0]);
+	// wait(0);
+    // close(fd[0][0]);
+    // close(fd[1][0]);
+	fclose(fIn);
+    fclose(fOut);
+    close(fdIn);
+    close(fdOut);
 	return 0;
 }
 

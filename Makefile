@@ -2,7 +2,7 @@ NAME		= webserv
 CXX			= clang++
 RM			= rm -f
 CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -g
-SRCS		= ./cpp_srcs/main.cpp ./cpp_srcs/Socket.cpp  ./cpp_srcs/Configuration.cpp  \
+SRCS		= ./main.cpp ./cpp_srcs/Socket.cpp  ./cpp_srcs/Configuration.cpp  \
 			  ./cpp_srcs/Request.cpp ./cpp_srcs/parser.cpp ./cpp_srcs/Server.cpp ./cpp_srcs/Response.cpp \
 			  ./cpp_srcs/Client.cpp ./cpp_srcs/Cgi.cpp
 OBJS		= $(SRCS:.cpp=.o)

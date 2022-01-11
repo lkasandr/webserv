@@ -63,10 +63,11 @@ std::map<std::string, std::string> Request::getHeaders() const
 void Request::setBody(std::string line)
 {
 	// const char *buff = line.c_str();
-	// std::cout << "\033[35mBODY: " << buff << "\033[0m" <<std::endl;
+	// std::cout << "\033[35mBODY: " << line << "\033[0m" <<std::endl;
 	if (line.length() == 0 || (line == "0\r\n\r\n"))
 	{
 		this->code = 405;
+		std::cout << "70 this->status_code" << this->code << std::endl;
 		this->body = line;
 		return ;
 	}
@@ -74,6 +75,7 @@ void Request::setBody(std::string line)
     if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     {
 		this->code = 405;
+		std::cout << "78 this->status_code" << this->code << std::endl;
 	}
 	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
@@ -98,35 +100,45 @@ std::string Request::setURI(std::string line)
 {
 	size_t pos = 0;
 	std::string temp;
-	std::string cgi_indicator;
+	// std::string cgi_indicator;
 
 	pos++;
 	if (line[pos] == '/')
 	{
 		while(pos != line.find(" ", 1))
 			pos++;
-		this->uri = line.substr(1, pos);
+		this->uri = line.substr(1, pos - 1);
 		temp = line.substr(pos + 1, line.length() - pos);
-		cgi_indicator = this->uri.substr(0, 9);
-		std:: cout << "CGI INDICATOR " << cgi_indicator << std::endl;
-		if (cgi_indicator.find("/cgi/") != std::string::npos || cgi_indicator.find(".php") != std::string::npos\
-			|| cgi_indicator.find(".bla") != std::string::npos)
+		// cgi_indicator = this->uri.substr(0, 9);
+		// std:: cout << "CGI INDICATOR " << cgi_indicator << std::endl;
+		if (this->uri.find("/cgi/") != std::string::npos || this->uri.find(".php") != std::string::npos	|| this->uri.find(".bla") != std::string::npos)
 		{
 			this->cgi = 1;
 			size_t pos_cgi = 0;
-			pos_cgi = this->uri.find("/cgi/");
-			if ( pos_cgi != std::string::npos)
-			{
-				size_t pos_end = find_pos_end(this->uri, pos_cgi);
-				this->script_path = this->uri.substr((pos_cgi + 5), (pos_end - (pos_cgi + 5)));
-				// std::cout << "SCRIPT_PATH " << script_path << "III\n";
-			}	
+			std::cout << "116URI " << this->uri << "III\n";
 			pos_cgi = this->uri.find('?');
 			if ( pos_cgi != std::string::npos)
 			{
 				this->query_string = this->uri.substr(pos_cgi + 1);
 				this->uri = this->uri.substr(0, pos_cgi);
 			}
+
+			std::cout << "124URI " << this->uri << "III\n";
+			
+			// pos_cgi = this->uri.find("/cgi/");
+			pos_cgi = this->uri.find_last_of("/");
+			if ( pos_cgi != std::string::npos)
+			{
+				size_t pos_end = find_pos_end(this->uri, pos_cgi);
+				this->script_path = this->uri.substr((pos_cgi + 1), (pos_end - (pos_cgi + 1)));
+				// std::cout << "SCRIPT_PATH " << script_path << "III\n";
+			}	
+			// pos_cgi = this->uri.find('?');
+			// if ( pos_cgi != std::string::npos)
+			// {
+			// 	this->query_string = this->uri.substr(pos_cgi + 1);
+			// 	this->uri = this->uri.substr(0, pos_cgi);
+			// }
 		}
 	}
 	return temp;
@@ -275,7 +287,7 @@ bool Request::getPostFile() const
 std::ostream& operator<<(std::ostream& out, const Request& request)
 {
 	out << "\033[33mRequest: \033[0m";
-	out << request.getMethod() << " " << request.getUri() << request.getHTTP_version() << std::endl;
+	out << request.getMethod() << " " << request.getUri() << " " << request.getHTTP_version() << std::endl;
 	out << "Host: " << request.getHeaders().find("Host")->second << std::endl;
 	if(request.getBody().size() < 5000)
 		out << request.getBody() << std::endl;

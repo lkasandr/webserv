@@ -10,7 +10,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${fileDirname}/${fileBasenameNoExtension}",
-			"args": ["../rss/test.conf"],
+			"args": ["./rss/test.conf"],
 			"stopAtEntry": false,
 			"cwd": "${fileDirname}",
 			"environment": [],

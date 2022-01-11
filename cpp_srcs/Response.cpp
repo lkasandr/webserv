@@ -99,8 +99,6 @@ std::string Response::makeAutoindexPage(const char *path, std::string const &hos
         dirName.erase(pos_index, dirName.length() - pos_index);
 	}
     DIR *dir = opendir(dirName.c_str());
-	// std::cout << "dirName2: " << dirName << std::endl;
-	// std::cout << "dir: " << dir << std::endl;
     std::string page =\
     "<!DOCTYPE html>\n\
     <html>\n\
@@ -120,8 +118,6 @@ std::string Response::makeAutoindexPage(const char *path, std::string const &hos
     for (struct dirent *dirEntry = readdir(dir); dirEntry; dirEntry = readdir(dir)) 
 	{
         std::stringstream   ss;
-        struct stat vStat;
-        stat(dirEntry->d_name, &vStat);
         ss << "\t\t<p><a href=\"http://" + host + dirName + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
 	    page += ss.str();
     }

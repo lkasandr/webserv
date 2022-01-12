@@ -1,7 +1,7 @@
 #include "CGI.hpp"
 
 CgiProcess::CgiProcess(Request const& req, Response const& res) :
-env_array(NULL), request(req), response(res)
+env_array(NULL), request(req), response(res), status(200)
 {
 	this->initEnv();
 }
@@ -153,8 +153,8 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
     
 	FILE *file_In = tmpfile();
     FILE *file_Out = tmpfile();
-    long fdIn = fileno(fIn);
-    long fdOut = fileno(fOut);
+    long fdIn = fileno(file_In);
+    long fdOut = fileno(file_Out);
 	
 	write(fdIn, const_cast<char*>(this->request.getBody().c_str()), this->request.getBody().length());
 	lseek(fdIn, 0, SEEK_SET);
@@ -234,8 +234,8 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	// wait(0);
     // close(fd[0][0]);
     // close(fd[1][0]);
-	fclose(fIn);
-    fclose(fOut);
+	fclose(file_In);
+    fclose(file_Out);
     close(fdIn);
     close(fdOut);
 	return 0;

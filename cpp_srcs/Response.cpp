@@ -172,8 +172,8 @@ void Response::make_response(Request *request, Configuration *config)
 		std::cout << "this->status_code" << this->status_code << std::endl;
 		cgi.execCGI(getContentPath(*config, request->getUri()));
 		check_errors(cgi.getStatus());
-		std::cout << "this->status_code" << this->status_code << std::endl;
-		std::cout << "cgi.getStatus()" << cgi.getStatus() << std::endl;
+		// std::cout << "this->status_code" << this->status_code << std::endl;
+		// std::cout << "cgi.getStatus()" << cgi.getStatus() << std::endl;
 		// std::cout << "CGI BODY: " << cgi.getBody() << std::endl;
 		content << cgi.getBody();
 		response << this->version << this->status_code << this->code_description

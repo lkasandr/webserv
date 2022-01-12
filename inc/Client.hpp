@@ -21,16 +21,20 @@ class Client
 private:
 	int		fd;
 	int		content_len;
-	
+	bool	chunked;
+	bool	need_body;
 public:
-	Client(int fd);
+	Client(int fd, char *buffer);
 	~Client();
 
 	int 		getClientFd() const;
 	void		setContentLen(int len);
 	int			getContentLen() const;
+	bool		get_chunked() const;
+	bool		check_need_body() const;
 	bool		chunk_ready;
 	std::string msg;
+	bool	chunk_part;
 };
 
 #endif

@@ -57,67 +57,84 @@ void Server::accept_connection(int fd)
 	}
 }
 
-int check_content_length(char *buffer)
+// int check_content_length(char *buffer)
+// {
+// 	std::string line(buffer);
+// 	int len = 0;
+// 	size_t pos;
+// 	pos = line.find("Content-Length: ");
+// 	if (/*(pos = line.find("Content-Length: ") + 16)*/ pos != std::string::npos)
+// 	{
+// 		pos = line.find("Content-Length: ") + 16;
+// 		size_t pos_end = line.find("\n", pos);
+// 		line = line.substr(pos, pos_end - pos);
+// 		len = atoi(line.c_str());
+// 	}
+// 	return len;
+// }
+
+size_t  get_chunk_size_lenght(char *buffer)
 {
-	std::string line(buffer);
-	int len = 0;
-	size_t pos;
-	pos = line.find("Content-Length: ");
-	if (/*(pos = line.find("Content-Length: ") + 16)*/ pos != std::string::npos)
-	{
-		pos = line.find("Content-Length: ") + 16;
-		size_t pos_end = line.find("\n", pos);
-		line = line.substr(pos, pos_end - pos);
-		len = atoi(line.c_str());
-	}
-	return len;
+    std::string buf(buffer);
+    size_t pos = 0;
+    size_t pos_end = 0;
+    pos = buf.find("\r\n");
+    pos_end = buf.find("0\r\n\r\n");
+    if (pos_end != std::string::npos)
+        if (pos_end < pos)
+            return 0;
+    if (pos != std::string::npos)
+    {
+        return (pos + 2);
+    }
+    return 0;
 }
 
 void Server::check_ready(int fd, char *buffer, int i)
 {
-	// std::cout << "\033[33mBUFFER: \033[0m" << buffer << "\n";
-	// std::string tmp(buffer);
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
 		if (it->getClientFd() == fd)
 		{
-			it->msg.append(buffer, i);
-			// std::cout << "\033[33mMSG_SIZE : \033[0m" << it->msg.size() << "\n";
-			if(it->msg.find("Transfer-Encoding: chunked") != std::string::npos  || it->msg.find("Content-Length") != std::string::npos\
-				|| it->msg.find(" PUT ") != std::string::npos || it->msg.find(" POST ") != std::string::npos)
+			if(it->get_chunked()  || it->getContentLen() || it->check_need_body())
 			{
-				// std::cout << "\033[33mMSG : \033[0m" << it->msg << "\n";
+				size_t pos = 0;
+				if(it->chunk_part == true)
+					pos = get_chunk_size_lenght(buffer);
+				it->msg.append(buffer + pos, i - pos);
+				std::string tmp = it->msg.substr(it->msg.length() - 6);
+				if(it->msg.find("\r\n\r\n") != std::string::npos)
+					it->chunk_part = true;
 				if(!it->getContentLen())
 				{
-					it->setContentLen(check_content_length(buffer));
-					if(!it->getContentLen() && (it->msg.find("0\r\n\r\n") != std::string::npos))
+					// it->setContentLen(check_content_length(buffer));
+					if(!it->getContentLen() && (tmp.find("0\r\n\r\n") != std::string::npos))
 					{
+						// std::cout << "1tmp " << tmp << "\n";
 						it->chunk_ready = true;
 						return;
 					}
-					else if(it->msg.length() >= (size_t)it->getContentLen() && it->msg.find("Transfer-Encoding: chunked") == std::string::npos)
-					{
-						// std::cout << "IT_MSG" << it->msg << "\n";
-						it->chunk_ready = true;
-						return;
-					}
+					// else if(it->msg.length() >= (size_t)it->getContentLen() && !it->get_chunked())
+					// {
+					// 	// std::cout << "IT_MSG" << it->msg << "\n";
+					// 	it->chunk_ready = true;
+					// 	return;
+					// }
 				}
-				else if(it->msg.length() >= (size_t)it->getContentLen())
+				else if(it->msg.length() >= (size_t)it->getContentLen() && !it->get_chunked())
 				{
-					// std::cout << "IT_MSG" << it->msg << "\n";
 					it->chunk_ready = true;
 					return;
 				}
 			}
-			else if(it->msg.find("\r\n\r\n") != std::string::npos)
-			{
-				// std::cout << "\033[33mMSG : \033[0m" << it->msg << "\n";
-				it->chunk_ready = true;
-				// std::cout << "\033[33mCHUNK_READY : \033[0m" << it->chunk_ready << "\n";
-				// return;
-			}
 			else
-				it->chunk_ready = false;
+			{
+				it->msg.append(buffer, i);
+				if(it->msg.find("\r\n\r\n") != std::string::npos)
+					it->chunk_ready = true;
+				else
+					it->chunk_ready = false;
+			}
 			return;
 		}
 	}
@@ -160,7 +177,7 @@ void Server::communication(int fd, int i)
 		throw ClientCloseConnection();
 	}
 	if(!check_client(fd, clients))
-		clients.push_back(Client(fd));
+		clients.push_back(Client(fd, buffer));
 	// std::cout << "\033[33mBUFF 153 : \033[0m" << buffer << "\n";
 	check_ready(fd, buffer, message);
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)

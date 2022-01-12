@@ -218,6 +218,7 @@ void Request::add_headers(std::string line)
 void		Request::parseRequest(std::string line)
 {
     // std::string		line(buffer);
+	// std::cout << "LINE " << line << "\n";
 	std::string		temp;
 	size_t prev = 0, pos = 0;
     while(pos != line.find("\n", prev))

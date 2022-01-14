@@ -5,6 +5,7 @@ Request::Request()
 	this->code = 200;
 	this->cgi = 0;
 	this->post_file = false;
+	this->chunked = false;
 }
 
 Request::~Request()
@@ -60,6 +61,55 @@ std::map<std::string, std::string> Request::getHeaders() const
 	return this->headers;
 }
 
+int hex_to_dec(std::string hex)
+{
+    int dec;
+
+    std::stringstream ss;
+    ss << hex;
+    ss >> std::hex >> dec;
+
+    return dec;
+}
+
+
+
+std::string chunk_handler(std::string body)
+{
+	size_t chunk_size;
+	std::string new_body;
+	// new_body.clear();
+	while(1)
+	{
+		size_t crlf_pos = body.find_first_of("\r\n");
+		chunk_size = hex_to_dec(body.substr(0, crlf_pos));
+
+		if (body.substr(crlf_pos + 2).length() < chunk_size)	
+		{
+			new_body += body.substr(crlf_pos + 2, body.substr(crlf_pos + 2).length());
+			// std::cout << "90NEW BODY UUU" << new_body << "UUU" << std::endl;
+			body.erase(0, crlf_pos + 2 + body.substr(crlf_pos + 2).length());
+		}
+		else
+		{
+			new_body += body.substr(crlf_pos + 2, chunk_size);
+			// std::cout << "body.substr UUU" << body.substr(crlf_pos + 2 + chunk_size + 2) << "UUU" << std::endl;
+			// std::cout << "96NEW BODY UUU" << new_body << "UUU" << std::endl;
+			body.erase(0, crlf_pos + 2 + chunk_size + 2);
+		}
+		// body.erase(0, 2);
+		// const char *gup = body.c_str();
+		// std::cout << "UUU" << gup << "UUU" << std::endl;
+		if(body == "0\r\n\r\n")
+		{
+			// new_body += body;
+			break;
+		}
+	}
+	// std::cout << "NEW BODY UUU" << new_body << "UUU" << std::endl;
+	return new_body;
+}
+
 void Request::setBody(std::string line)
 {
 	// const char *buff = line.c_str();
@@ -67,16 +117,18 @@ void Request::setBody(std::string line)
 	if (line.length() == 0 || (line == "0\r\n\r\n"))
 	{
 		this->code = 405;
-		std::cout << "70 this->status_code" << this->code << std::endl;
+		// std::cout << "70 this->status_code" << this->code << std::endl;
 		this->body = line;
 		return ;
 	}
 	this->body = line;
-    if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
-    {
-		this->code = 405;
-		std::cout << "78 this->status_code" << this->code << std::endl;
-	}
+	if(this->chunked)
+		this->body = chunk_handler(this->body);
+    // if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
+    // {
+	// 	this->code = 405;
+	// 	std::cout << "78 this->status_code" << this->code << std::endl;
+	// }
 	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
@@ -111,11 +163,12 @@ std::string Request::setURI(std::string line)
 		temp = line.substr(pos + 1, line.length() - pos);
 		// cgi_indicator = this->uri.substr(0, 9);
 		// std:: cout << "CGI INDICATOR " << cgi_indicator << std::endl;
-		if (this->uri.find("/cgi/") != std::string::npos || this->uri.find(".php") != std::string::npos	|| this->uri.find(".bla") != std::string::npos)
+		if (this->uri.find("/cgi/") != std::string::npos || this->uri.find(".php") != std::string::npos	||\
+			(this->method == "POST" && this->uri.find(".bla") != std::string::npos))
 		{
 			this->cgi = 1;
 			size_t pos_cgi = 0;
-			std::cout << "116URI " << this->uri << "III\n";
+			// std::cout << "116URI " << this->uri << "III\n";
 			pos_cgi = this->uri.find('?');
 			if ( pos_cgi != std::string::npos)
 			{
@@ -123,7 +176,7 @@ std::string Request::setURI(std::string line)
 				this->uri = this->uri.substr(0, pos_cgi);
 			}
 
-			std::cout << "124URI " << this->uri << "III\n";
+			// std::cout << "124URI " << this->uri << "III\n";
 			
 			// pos_cgi = this->uri.find("/cgi/");
 			pos_cgi = this->uri.find_last_of("/");
@@ -210,7 +263,11 @@ void Request::add_headers(std::string line)
 			size_t pos1 = value.find(":") + 1;
 			size_t pos2 = value.find("\r\n");
 			this->port = value.substr(pos1, pos2 - pos1);
-			std::cout << "PORT - " << port << "\n";
+			// std::cout << "PORT - " << port << "\n";
+		}
+		if(key == "Transfer-Encoding" && value.find("chunked") != std::string::npos)
+		{
+			this->chunked = true;
 		}
 	}
 }

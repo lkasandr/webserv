@@ -27,7 +27,11 @@ Client::Client(int fd, char *buffer):fd(fd)
 	if(tmp.find("Content-Length") != std::string::npos)
 		this->content_len = check_content_length(buffer);
 	if(tmp.find("Transfer-Encoding: chunked") != std::string::npos )
+	{
 		this->chunked = true;
+		// if(tmp.find("\r\n\r\n") != std::string::npos && tmp.find("0\r\n\r\n") == std::string::npos)
+		// 	this->chunk_part = true;
+	}
 	if(tmp.find("PUT ") != std::string::npos || tmp.find("POST ") != std::string::npos)
 		this->need_body = true;	
 	tmp.clear();
@@ -47,11 +51,6 @@ int Client::getContentLen() const
 int Client::getClientFd() const
 {
 	return this->fd;
-}
-
-bool	Client::get_chunked() const
-{
-	return this->chunked;
 }
 
 bool	Client::check_need_body() const

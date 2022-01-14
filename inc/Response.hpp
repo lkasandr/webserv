@@ -38,6 +38,7 @@ class Response
 private:
 	int					fd;
 	int					status_code;
+	size_t				contentLength;
 	std::string			code_description;
 	std::string 		content_path;
 	std::string			version;
@@ -68,7 +69,8 @@ public:
 	std::string getServer() const;
 	std::string getDate() const;
 	std::string getAllow_method() const;
-
+	std::string getContentType() const;
+	size_t		getContentLength() const;
 	// std::string getContentPath(std::string uri) const;
 	std::string getContentPath(Configuration conf, std::string uri) ;
 };

@@ -76,7 +76,7 @@ void	CgiProcess::initEnv(void)
 	// SERVER_PROTOCOL и SERVER_SOFTWARE.
 	this->env_map["AUTH_TYPE"]			=	"";
 	this->env_map["REDIRECT_STATUS"]	=	"200";
-	this->env_map["CONTENT_LENGTH"]		=	/*headers["Content-Length"];	*/to_string(this->request.getBody().size());
+	this->env_map["CONTENT_LENGTH"]		=	headers["Content-Length"];	//to_string(this->request.getBody().size());
 	this->env_map["CONTENT_TYPE"]		=	headers["Content-Type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
 	this->env_map["PATH_INFO"]			=	this->request.getUri();	// "/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
@@ -203,8 +203,8 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 			script = cgi_path;
 			break;
 		}
-		std::cout << "PATH " << path << "\n";
-		std::cout << "SCRIPT " << script << "\n";
+		// std::cout << "PATH " << path << "\n";
+		// std::cout << "SCRIPT " << script << "\n";
 		char * argv[3] = {
 		const_cast<char*>(script.c_str()),
 		const_cast<char*>(script.c_str()),
@@ -218,7 +218,7 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
     }
     wait(0);
     // close(fd[1][1]);
-	// this->body.clear();
+	this->body.clear();
 	lseek(fdOut, 0, SEEK_SET);
     while((len = read(fdOut, buf, 100000)) != 0)
     {
@@ -245,6 +245,23 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 
 std::string CgiProcess::getBody(void)
 {
+	if(this->body.find("\r\n\r\n") != std::string::npos)	//remove headers
+	{
+		size_t pos_end = this->body.find("\r\n\r\n") + 4;
+		std::string headers = this->body.substr(0, pos_end);
+		this->body = this->body.erase(0, headers.length());
+		std::cout << "CGI HEADERS " << headers << std::endl;
+		// std::cout << "CGI BODY " << this->body.substr(0, 150) << std::endl;
+		std::ofstream newfile;
+		newfile.open("cgibody.txt",  std::ios_base::out | std::ios_base::binary);
+		if (!newfile.is_open())
+		{
+			std::cout << "CGI ERR 259 " << std::endl;
+			// break;
+		}
+		newfile << this->body;
+		newfile.close();
+	}
 	return this->body;
 }
 

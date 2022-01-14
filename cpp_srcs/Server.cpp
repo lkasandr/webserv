@@ -90,38 +90,41 @@ size_t  get_chunk_size_lenght(char *buffer)
     return 0;
 }
 
+std::string make_newbuff(std::string buff)
+{
+	if(isdigit(buff[0]) && buff[0] != '0')
+	{
+		int i = 0;
+		while(isdigit(buff[i]))
+			i++;
+		buff = buff.substr(i + 2);
+	}
+	return buff;
+}
+
 void Server::check_ready(int fd, char *buffer, int i)
 {
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
 		if (it->getClientFd() == fd)
 		{
-			if(it->get_chunked()  || it->getContentLen() || it->check_need_body())
+			it->msg.append(buffer, i);
+			if(it->chunked  || it->getContentLen() || it->check_need_body())
 			{
-				size_t pos = 0;
-				if(it->chunk_part == true)
-					pos = get_chunk_size_lenght(buffer);
-				it->msg.append(buffer + pos, i - pos);
-				std::string tmp = it->msg.substr(it->msg.length() - 6);
-				if(it->msg.find("\r\n\r\n") != std::string::npos)
-					it->chunk_part = true;
+				// if(!it->chunked && it->msg.find("Transfer-Encoding: chunked") != std::string::npos)
+				// 	it->chunked = true;
+				std::string tmp;
+				if(it->msg.length() > 6)
+					tmp = it->msg.substr(it->msg.length() - 6);
 				if(!it->getContentLen())
 				{
-					// it->setContentLen(check_content_length(buffer));
 					if(!it->getContentLen() && (tmp.find("0\r\n\r\n") != std::string::npos))
 					{
-						// std::cout << "1tmp " << tmp << "\n";
 						it->chunk_ready = true;
 						return;
 					}
-					// else if(it->msg.length() >= (size_t)it->getContentLen() && !it->get_chunked())
-					// {
-					// 	// std::cout << "IT_MSG" << it->msg << "\n";
-					// 	it->chunk_ready = true;
-					// 	return;
-					// }
 				}
-				else if(it->msg.length() >= (size_t)it->getContentLen() && !it->get_chunked())
+				else if(it->msg.length() >= (size_t)it->getContentLen() && !it->chunked)
 				{
 					it->chunk_ready = true;
 					return;
@@ -129,7 +132,6 @@ void Server::check_ready(int fd, char *buffer, int i)
 			}
 			else
 			{
-				it->msg.append(buffer, i);
 				if(it->msg.find("\r\n\r\n") != std::string::npos)
 					it->chunk_ready = true;
 				else
@@ -167,9 +169,9 @@ bool check_client(int fd, std::list<Client> clients)
 
 void Server::communication(int fd, int i)
 {
-	char *buffer = new char[4096];
-	memset((void *)buffer, 0, 4096);
-	int message = recv(fd, buffer, 4096, 0);  // считываем входящее сообщение
+	char *buffer = new char[65536];
+	// memset((void *)buffer, 0, 4096);
+	int message = recv(fd, buffer, 65536, 0);  // считываем входящее сообщение
 	if (message <= 0)
 	{
 		close(fd);
@@ -191,7 +193,7 @@ void Server::communication(int fd, int i)
 			// std::cout << "163\n";
 			request.parseRequest(it->msg);
 			// std::cout << "\033[33mRequest: \033[0m" << it->msg;
-			std::cout << request;
+			// std::cout << request;
 			Configuration conf;
 			if(!check_server(&request, config, &conf))
 				request.setCode(400);

@@ -17,6 +17,7 @@
 #include <signal.h>
 #include "CGI.hpp"
 #include <list>
+#include <cctype>
 
 class Client;
 class Response;

@@ -18,6 +18,7 @@ class Request
 		std::string script_path;
 		std::map<std::string, std::string> headers;
 		bool		post_file;
+		bool		chunked;
 
 	public:
 		Request();

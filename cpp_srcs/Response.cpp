@@ -152,13 +152,13 @@ void Response::make_response(Request *request, Configuration *config)
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
-	std::cout << "159 this->status_code " << this->status_code << std::endl;
+	// std::cout << "159 this->status_code " << this->status_code << std::endl;
 	if (this->status_code != 200)
 		check_errors(this->status_code);
 	else
 	{
 		check_method(config, request);
-		std::cout << "165this->status_code" << this->status_code << std::endl;
+		// std::cout << "165this->status_code" << this->status_code << std::endl;
 		check_errors(this->status_code);
 	}
 	// формируем ответ
@@ -169,17 +169,20 @@ void Response::make_response(Request *request, Configuration *config)
 	if (request->getCGI())
 	{
 		CgiProcess cgi(*request, *this);
-		std::cout << "this->status_code" << this->status_code << std::endl;
+		// std::cout << "this->status_code" << this->status_code << std::endl;
 		cgi.execCGI(getContentPath(*config, request->getUri()));
 		check_errors(cgi.getStatus());
 		// std::cout << "this->status_code" << this->status_code << std::endl;
 		// std::cout << "cgi.getStatus()" << cgi.getStatus() << std::endl;
 		// std::cout << "CGI BODY: " << cgi.getBody() << std::endl;
+		
 		content << cgi.getBody();
+		
+		this->contentLength = content.str().length();
 		response << this->version << this->status_code << this->code_description
-			<< this->date << this->server << this->connection << this->allow_method
-			<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
-			<< this->setCookie << "\r\n\r\n" << content.str();
+			/*<< this->date << this->server << this->connection << this->allow_method
+			*/<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+			/*<< this->setCookie */<< "\r\n\r\n" << content.str();
 	}
 	else
 	{
@@ -223,6 +226,7 @@ void Response::make_response(Request *request, Configuration *config)
 		if(file.is_open())
 		{
 			std::vector<char> contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			this->contentLength = contents.size();
 			response << this->version << this->status_code << this->code_description
 				<< this->date << this->server << this->connection << this->allow_method
 				<< this->contentType << "Content-Length: " << contents.size()
@@ -474,10 +478,12 @@ void Response::check_method(Configuration *configs, Request *request)
 		if (configs->checkPut())
 		{
 			std::string content = request->getBody();
+			// std::cout << "CONTENT 477 " << content << std::endl;
 			std::string filename = "./rss/upload/" + request->getUri().substr(request->getUri().find_last_of("/") + 1);
 			// filename = filename.substr(0, filename.find(" "));
-			size_t pos_end = content.find("0\r\n\r\n");
-			content = content.substr(0, pos_end);
+			// size_t pos_end = content.find("0\r\n\r\n");
+			// content = content.substr(0, pos_end);
+			// std::cout << "CONTENT 481 " << content << std::endl;
 			std::ofstream newfile;
 			newfile.open(filename.c_str(),  std::ios_base::out | std::ios_base::binary);
 			if (!newfile.is_open())
@@ -541,6 +547,15 @@ std::string Response::getAllow_method() const
 	return this->allow_method;
 }
 
+std::string Response::getContentType() const
+{
+	return this->contentType;
+}
+
+size_t Response::getContentLength() const
+{
+	return this->contentLength;
+}
 
 std::ostream& operator<<(std::ostream& out, const Response& resp)
 {
@@ -549,5 +564,7 @@ std::ostream& operator<<(std::ostream& out, const Response& resp)
 	out << "HTTP version: " << resp.getVersion() << std::endl;
 	out << resp.getServer();
 	out << "Date: " << resp.getDate();
+	out << resp.getContentType();
+	out << "Content_length: " << resp.getContentLength() << std::endl;
 	return (out);
 }

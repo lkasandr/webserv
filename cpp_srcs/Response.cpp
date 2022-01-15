@@ -181,14 +181,23 @@ void Response::make_response(Request *request, Configuration *config)
 		this->contentLength = content.str().length();
 		response << this->version << this->status_code << this->code_description
 			/*<< this->date << this->server << this->connection << this->allow_method
-			*/<< this->contentType << "Content-Length: " << content.str().length() << "\r\n"
+			*/<< this->contentType << "Content-Length: " << content.str().length()
 			/*<< this->setCookie */<< "\r\n\r\n" << content.str();
+		// std::ofstream newfile;
+		// newfile.open("cgirespons.txt",  std::ios_base::out);
+		// if (!newfile.is_open())
+		// {
+		// 	std::cout << "CGI ERR 259 " << std::endl;
+		// 	// break;
+		// }
+		// newfile << response.str();
+		// newfile.close();
 	}
 	else
 	{
 		// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 		std::ifstream file(this->content_path.c_str(), std::ios::in | std::ios::binary);
-		// std::cout << "#################" << this->content_path << std::endl;
+		std::cout << "#################" << this->content_path << std::endl;
 		// std::cout << "file.is_open     " << file.is_open() << std::endl;
 		if (!file.is_open())
 		{
@@ -438,6 +447,7 @@ void Response::check_method(Configuration *configs, Request *request)
 					this->code_description = " Created.\r\n";
 					this->_location = "./rss/post/test_post.txt";
 					this->connection = "Connection: Close\r\n";
+					this->content_path = "./rss/error/201.html";
 					newfile.close();
 				}
 				break;
@@ -565,6 +575,6 @@ std::ostream& operator<<(std::ostream& out, const Response& resp)
 	out << resp.getServer();
 	out << "Date: " << resp.getDate();
 	out << resp.getContentType();
-	out << "Content_length: " << resp.getContentLength() << std::endl;
+	out << "Content-length: " << resp.getContentLength() << std::endl;
 	return (out);
 }

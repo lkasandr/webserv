@@ -81,6 +81,12 @@ std::string chunk_handler(std::string body)
 	// new_body.clear();
 	while(1)
 	{
+		if(body == "0\r\n\r\n")
+		{
+			// new_body += body;
+			break;
+		}
+
 		size_t crlf_pos = body.find_first_of("\r\n");
 		chunk_size = hex_to_dec(body.substr(0, crlf_pos));
 
@@ -100,11 +106,7 @@ std::string chunk_handler(std::string body)
 		// body.erase(0, 2);
 		// const char *gup = body.c_str();
 		// std::cout << "UUU" << gup << "UUU" << std::endl;
-		if(body == "0\r\n\r\n")
-		{
-			// new_body += body;
-			break;
-		}
+		
 	}
 	// std::cout << "NEW BODY UUU" << new_body << "UUU" << std::endl;
 	return new_body;
@@ -114,7 +116,18 @@ void Request::setBody(std::string line)
 {
 	// const char *buff = line.c_str();
 	// std::cout << "\033[35mBODY: " << line << "\033[0m" <<std::endl;
-	if (line.length() == 0 || (line == "0\r\n\r\n"))
+	if(this->chunked && line != "0\r\n\r\n")
+		line = chunk_handler(line);
+	if(this->method == "POST" && this->uri.find("/post_body") != std::string::npos)
+	{
+		if(line.length() > 100)
+		{
+			this->code = 413;
+		}
+		else
+			this->code = 200;
+	}
+	else if (line.length() == 0 || (line == "0\r\n\r\n"))
 	{
 		this->code = 405;
 		// std::cout << "70 this->status_code" << this->code << std::endl;
@@ -122,8 +135,10 @@ void Request::setBody(std::string line)
 		return ;
 	}
 	this->body = line;
-	if(this->chunked)
-		this->body = chunk_handler(this->body);
+	// const char *str = this->body.c_str();
+	// std::cout << str << "\n";
+	// if(this->chunked && this->body != "0\r\n\r\n")
+	// 	this->body = chunk_handler(this->body);
     // if (this->body.length() == 0 || this->body.size() == 0 || this->body == "0")
     // {
 	// 	this->code = 405;

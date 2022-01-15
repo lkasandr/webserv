@@ -181,14 +181,14 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
   			// script = cgi_path;
 			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			std::cout << "ROOT DIR " << root_directory << "\n";
+			// std::cout << "ROOT DIR " << root_directory << "\n";
 			chdir(root_directory.c_str());
 			break;
 		case PHP:
 			path = "/usr/bin/php-cgi";  
   			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			std::cout << "ROOT DIR " << root_directory << "\n";
+			// std::cout << "ROOT DIR " << root_directory << "\n";
 			chdir(root_directory.c_str());
 			break;
 		case BLA:
@@ -247,20 +247,22 @@ std::string CgiProcess::getBody(void)
 {
 	if(this->body.find("\r\n\r\n") != std::string::npos)	//remove headers
 	{
-		size_t pos_end = this->body.find("\r\n\r\n") + 4;
-		std::string headers = this->body.substr(0, pos_end);
-		this->body = this->body.erase(0, headers.length());
-		std::cout << "CGI HEADERS " << headers << std::endl;
+		size_t pos= this->body.find("\r\n\r\n") + 4;
+		// std::string headers = this->body.substr(0, pos_end);
+		// this->body = this->body.erase(0, headers.length());
+		if (pos != std::string::npos)
+			this->body = this->body.substr(pos, this->body.length());
+		// std::cout << "CGI HEADERS " << headers << std::endl;
 		// std::cout << "CGI BODY " << this->body.substr(0, 150) << std::endl;
-		std::ofstream newfile;
-		newfile.open("cgibody.txt",  std::ios_base::out | std::ios_base::binary);
-		if (!newfile.is_open())
-		{
-			std::cout << "CGI ERR 259 " << std::endl;
-			// break;
-		}
-		newfile << this->body;
-		newfile.close();
+		// std::ofstream newfile;
+		// newfile.open("cgibody.txt",  std::ios_base::out | std::ios_base::binary);
+		// if (!newfile.is_open())
+		// {
+		// 	std::cout << "CGI ERR 259 " << std::endl;
+		// 	// break;
+		// }
+		// newfile << this->body;
+		// newfile.close();
 	}
 	return this->body;
 }

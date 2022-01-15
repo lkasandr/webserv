@@ -223,21 +223,22 @@ void Configuration::setAutoindexOn(void)
 
 // }
 
-void Configuration::setArray(std::string _location, std::string root, std::string index)
+void Configuration::setArray(std::string _location, std::string root, std::string index, std::string client_body_size, std::string http_method)
 {
 	location temp;
-
-	// this->location_struct.location = location;
-	// this->location_struct.root = root;
-	// this->location_struct.index = index;
 
 	temp.location = _location;
 	temp.root = root;
 	temp.index = index;
-	// temp.client_body_size = client_body_size;
-	// temp.default_error_page = default_error_pages;
-	// temp.http_method = http_method;
-
+	if (client_body_size.empty())
+		temp._client_body_size = getClientBodySize();
+	else
+		temp._client_body_size = atoi(client_body_size.c_str());
+	if (http_method.empty())
+		temp._http_method = getHttpMethod();
+	else
+		temp._http_method = http_method;
+	// std::cout << temp.location << " clien body size:" << temp._client_body_size << " http method: " <<  temp._http_method << std::endl;
 	this->array.push_back(temp);
 }
 

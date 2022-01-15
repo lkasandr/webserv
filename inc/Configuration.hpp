@@ -15,8 +15,8 @@ typedef struct {
 	std::string root;
 	std::string index;
 	// std::string default_error_page;
-	// std::string client_body_size;
-	// std::string http_method;
+	int _client_body_size;
+	std::string _http_method;
 } location;
 
 class Configuration
@@ -88,7 +88,7 @@ public:
 	void		setAutoindexOn(void);
 	void		setAutoindexOff(void);
 
-	void 		setArray(std::string location, std::string root, std::string index);
+	void 		setArray(std::string location, std::string root, std::string index, std::string client_body_size, std::string http_method);
 
 	bool		checkGet();
 	bool		checkPost();

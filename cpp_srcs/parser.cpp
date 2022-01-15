@@ -71,6 +71,8 @@ void add_location(std::string line, Configuration& conf)
 	std::string location;
 	std::string root;
 	std::string index;
+	std::string client_body_size;
+	std::string http_method;
 	size_t pos = 0;
 	size_t pos_temp = 0;
 
@@ -112,9 +114,31 @@ void add_location(std::string line, Configuration& conf)
 			line = line.substr(pos, line.length() - pos);
 			pos = -1;
 		}
+		else if (pos == line.find("client_body_size ", 0))
+		{
+			pos = pos + 17;
+			pos_temp = pos;
+			while (pos != line.find(';', pos_temp))
+				pos++;
+			client_body_size = line.substr(pos_temp, pos - pos_temp);
+			// std::cout << "client_body_size: " << client_body_size << std::endl;
+			line = line.substr(pos, line.length() - pos);
+			pos = -1;
+		}
+		else if (pos == line.find("http_method ", 0))
+		{
+			pos = pos + 12;
+			pos_temp = pos;
+			while (pos != line.find(';', pos_temp))
+				pos++;
+			http_method = line.substr(pos_temp, pos - pos_temp);
+			// std::cout << "http_method: " << http_method << std::endl;
+			line = line.substr(pos, line.length() - pos);
+			pos = -1;
+		}
 		pos++;
 	}
-	conf.setArray(location, root, index);
+	conf.setArray(location, root, index, client_body_size, http_method);
 }
 
 int	read_conf(const char *path , std::vector<Configuration> &config)

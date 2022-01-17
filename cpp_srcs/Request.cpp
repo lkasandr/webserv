@@ -11,37 +11,37 @@ Request::Request()
 Request::~Request()
 {}
 
-std::string	Request::getMethod() const
+const std::string	&Request::getMethod() const
 {
 	return this->method;
 }
 
-std::string	Request::getQueryString() const
+const std::string	&Request::getQueryString() const
 {
 	return this->query_string;
 }
 
-std::string	Request::getUri() const
+const std::string	&Request::getUri() const
 {
 	return this->uri;
 }
 
-std::string	Request::getHTTP_version() const
+const std::string	&Request::getHTTP_version() const
 {
 	return this->http_version;
 }
 
-std::string Request::getBody() const
+const std::string &Request::getBody() const
 {
 	return this->body;
 }
 
-std::string Request::getScriptPath() const
+const std::string &Request::getScriptPath() const
 {
 	return this->script_path;
 }
 
-std::string Request::getPort() const
+const std::string &Request::getPort() const
 {
 	return this->port;
 }
@@ -56,7 +56,7 @@ bool Request::getCGI() const
 	return this->cgi;
 }
 
-std::map<std::string, std::string> Request::getHeaders() const
+const std::map<std::string, std::string> &Request::getHeaders() const
 {
 	return this->headers;
 }
@@ -74,7 +74,7 @@ int hex_to_dec(std::string hex)
 
 
 
-std::string chunk_handler(std::string body)
+std::string chunk_handler(std::string &body)
 {
 	size_t chunk_size;
 	std::string new_body;
@@ -114,7 +114,7 @@ std::string chunk_handler(std::string body)
 	return new_body;
 }
 
-void Request::setBody(std::string line)
+void Request::setBody(std::string &line)
 {
 	// const char *buff = line.c_str();
 	// std::cout << "\033[35mBODY: " << line << "\033[0m" <<std::endl;
@@ -147,7 +147,7 @@ void Request::setBody(std::string line)
 	// std::cout << "\033[35mBODY: " << this->body << "\033[0m" <<std::endl;
 }
 
-void Request::setHTTPversion(std::string line)
+void Request::setHTTPversion(const std::string &line)
 {
 	this->http_version = line.substr(0, 8);
 	if (this->http_version != "HTTP/1.1")
@@ -318,10 +318,11 @@ void		Request::parseRequest(std::string line)
 	}
 	if (getMethod() == "POST" || getMethod() == "PUT")
 	{
+		std::string temp_line = line.substr(line.find_first_of("\n") + 1);
 		// std::cout << "\nLINE in post: " << line << std::endl;
 		// std::cout << "\nbuffer in post: " << line << std::endl;
 		// std::cout << "LINE_LENGHT in post: " << line.length() << std::endl;
-		setBody(line.substr(line.find_first_of("\n") + 1));
+		setBody(temp_line);
 		// setBody(line);
 	}
 

@@ -51,7 +51,7 @@ Configuration::~Configuration()
 // Getters//
 ////////////
 
-std::string Configuration::getHost() const
+const std::string &Configuration::getHost() const
 {
 	return this->host;
 }
@@ -61,12 +61,12 @@ u_int	Configuration::getPort() const
 	return this->port;
 }
 
-std::string Configuration::getServerName() const
+const std::string &Configuration::getServerName() const
 {
 	return this->server_name;
 }
 
-std::string Configuration::getDefaultErrorPages() const
+const std::string &Configuration::getDefaultErrorPages() const
 {
 	return this->default_error_pages;
 }
@@ -76,7 +76,7 @@ int 		Configuration::getClientBodySize() const
 	return this->client_body_size;
 }
 
-std::string Configuration::getHttpMethod() const
+const std::string &Configuration::getHttpMethod() const
 {
 	return this->http_method;
 }
@@ -124,7 +124,7 @@ bool	Configuration::getPut() const
 // 	return this->index;
 // }
 
-std::string	Configuration::getCGI() const
+const std::string	&Configuration::getCGI() const
 {
 	return this->CGI_pass;
 }
@@ -139,7 +139,7 @@ std::string	Configuration::getCGI() const
 // 	return this->path;
 // }
 
-std::vector<location>	Configuration::getArray() const
+const std::vector<location>	&Configuration::getArray() const
 {
 	return this->array;
 }
@@ -153,32 +153,32 @@ std::vector<location>	Configuration::getArray() const
 // Setters ///
 //////////////
 
-void	Configuration::setHost(std::string value) 
+void	Configuration::setHost(const std::string &value) 
 {
 	this->host = value;
 }
 
-void	Configuration::setPort(std::string value) 
+void	Configuration::setPort(const std::string &value) 
 {
 	this->port = atoi(value.c_str());
 }
 
-void		Configuration::setServerName(std::string value) 
+void		Configuration::setServerName(const std::string &value) 
 {
 	this->server_name = value;
 }
 
-void		Configuration::setDefaultErrorPages(std::string value) 
+void		Configuration::setDefaultErrorPages(const std::string &value) 
 {
 	this->default_error_pages = value;
 }
 
-void		Configuration::setClientBodySize(std::string value) 
+void		Configuration::setClientBodySize(const std::string &value) 
 {
 	this->client_body_size = atoi(value.c_str());
 }
 
-void	Configuration::setHttpMethod(std::string value)
+void	Configuration::setHttpMethod(const std::string &value)
 {
 	this->http_method = value;
 }
@@ -194,7 +194,7 @@ void	Configuration::setHttpMethod(std::string value)
 // 	this->index = value;
 // }
 
-void		Configuration::setCGI(std::string value)
+void		Configuration::setCGI(const std::string &value)
 {
 	this->CGI_pass = value;
 }
@@ -223,7 +223,7 @@ void Configuration::setAutoindexOn(void)
 
 // }
 
-void Configuration::setArray(std::string _location, std::string root, std::string index, std::string client_body_size, std::string http_method)
+void Configuration::setArray(const std::string &_location,const std::string &root,const std::string &index,const std::string &client_body_size,const std::string &http_method)
 {
 	location temp;
 

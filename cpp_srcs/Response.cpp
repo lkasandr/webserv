@@ -169,9 +169,10 @@ void Response::make_response(Request *request, Configuration *config)
 	std::stringstream content;
 	if (request->getCGI())
 	{
+		std::string request_URI = request->getUri();
 		CgiProcess cgi(*request, *this);
 		// std::cout << "this->status_code" << this->status_code << std::endl;
-		cgi.execCGI(getContentPath(*config, request->getUri()));
+		cgi.execCGI(getContentPath(*config, request_URI));
 		check_errors(cgi.getStatus());
 		// std::cout << "this->status_code" << this->status_code << std::endl;
 		// std::cout << "cgi.getStatus()" << cgi.getStatus() << std::endl;
@@ -257,7 +258,7 @@ void Response::make_response(Request *request, Configuration *config)
 	
 }
 
-std::string Response::getContentPath(Configuration conf, std::string uri)
+std::string Response::getContentPath(Configuration &conf,std::string &uri)
 {
 	std::string contentPath;
 	std::string uri_part;
@@ -524,32 +525,32 @@ int Response::getStatus_code() const
 	return this->status_code;
 }
 
-std::string Response::getCodeDescription() const
+const std::string &Response::getCodeDescription() const
 {
 	return this->code_description;
 }
 
-std::string Response::getVersion() const
+const std::string &Response::getVersion() const
 {
 	return this->version;
 }
 
-std::string Response::getServer() const
+const std::string &Response::getServer() const
 {
 	return this->server;
 }
 
-std::string Response::getDate() const
+const std::string &Response::getDate() const
 {
 	return this->date;
 }
 
-std::string Response::getAllow_method() const
+const std::string &Response::getAllow_method() const
 {
 	return this->allow_method;
 }
 
-std::string Response::getContentType() const
+const std::string &Response::getContentType() const
 {
 	return this->contentType;
 }

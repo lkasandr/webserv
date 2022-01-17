@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sys/stat.h> 
 #include <sys/types.h> 
+#include <unistd.h>
 #include <fcntl.h>
 #include <fstream> 
 #include <map>
@@ -51,8 +52,8 @@ class CgiProcess
 		CgiProcess(CgiProcess const & copy);
 		~CgiProcess();
 		CgiProcess& operator=(CgiProcess const & other);
-		int	execCGI(std::string const& cgi_path);
-		std::string getBody(void);
+		int	execCGI(const std::string & cgi_path);
+		const std::string &getBody(void);
 		int getStatus();
 		std::string	get_cwd();
 

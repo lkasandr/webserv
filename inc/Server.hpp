@@ -30,7 +30,7 @@ private:
 	std::vector<Configuration>  config;
 	std::list<Client>			clients;
 public:
-	Server(std::vector<Configuration> configs);
+	Server(std::vector<Configuration> &configs);
 	~Server();
 
 	void	main_cycle();

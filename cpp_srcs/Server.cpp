@@ -5,7 +5,7 @@
 
 Server	*server;
 
-Server::Server(std::vector<Configuration> configs)
+Server::Server(std::vector<Configuration> &configs)
 {
 	this->config = configs;
 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
@@ -96,7 +96,7 @@ void Server::check_ready(int fd, char *buffer, int i)
 	return;
 }
 
-bool check_server(Request *request, std::vector<Configuration> configs, Configuration *conf)
+bool check_server(Request *request, std::vector<Configuration> &configs, Configuration *conf)
 {
 	std::string host = request->getHeaders().find("Host")->second;
 	for (std::vector<Configuration>::iterator it = configs.begin(); it != configs.end(); ++it)
@@ -110,7 +110,7 @@ bool check_server(Request *request, std::vector<Configuration> configs, Configur
 	return 0;
 }
 
-bool check_client(int fd, std::list<Client> clients)
+bool check_client(int fd, std::list<Client> &clients)
 {
 	for (std::list<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{

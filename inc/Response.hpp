@@ -64,15 +64,15 @@ public:
 
 	//getters
 	int getStatus_code() const;
-	std::string getCodeDescription() const;
-	std::string getVersion() const;
-	std::string getServer() const;
-	std::string getDate() const;
-	std::string getAllow_method() const;
-	std::string getContentType() const;
+	const std::string &getCodeDescription() const;
+	const std::string &getVersion() const;
+	const std::string &getServer() const;
+	const std::string &getDate() const;
+	const std::string &getAllow_method() const;
+	const std::string &getContentType() const;
 	size_t		getContentLength() const;
 	// std::string getContentPath(std::string uri) const;
-	std::string getContentPath(Configuration conf, std::string uri) ;
+	std::string getContentPath(Configuration &conf, std::string &uri) ;
 };
 
 std::ostream& operator<<(std::ostream& out, const Response& response);

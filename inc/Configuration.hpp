@@ -53,12 +53,12 @@ public:
 	Configuration& operator=(const Configuration& other);
 	~Configuration();
 
-	std::string getHost() const;
+	const std::string &getHost() const;
 	u_int		getPort() const;
-	std::string getServerName() const;
-	std::string getDefaultErrorPages() const;
+	const std::string &getServerName() const;
+	const std::string &getDefaultErrorPages() const;
 	int 		getClientBodySize() const;
-	std::string	getHttpMethod() const;
+	const std::string &getHttpMethod() const;
 	bool		getGet() const;
 	bool		getPost() const;
 	bool		getDelete() const;
@@ -69,26 +69,26 @@ public:
 	// std::map<std::string, std::string> getPath() const;
 	// std::string getLocation() const;
 	// std::string	getIndex() const;
-	std::string	getCGI() const;
+	const std::string &getCGI() const;
 
-	std::vector<location>	getArray() const;
+	const std::vector<location>	&getArray() const;
 	// struct location getLocationStruct() const;
 
-	void		setHost(std::string value) ;
-	void		setPort(std::string value);
-	void		setServerName(std::string value) ;
-	void		setDefaultErrorPages(std::string value) ;
-	void		setClientBodySize(std::string value) ;
-	void		setHttpMethod(std::string value);
-	void		setLocation(std::string value);
+	void		setHost(const std::string &value) ;
+	void		setPort(const std::string &value);
+	void		setServerName(const std::string &value) ;
+	void		setDefaultErrorPages(const std::string &value) ;
+	void		setClientBodySize(const std::string &value) ;
+	void		setHttpMethod(const std::string &value);
+	void		setLocation(const std::string &value);
 	// void		setIndex(std::string value);
-	void		setCGI(std::string value);
+	void		setCGI(const std::string &value);
 	// void		setRoot(std::string value);
 	// void		setPath(std::string location, std::string root);
 	void		setAutoindexOn(void);
 	void		setAutoindexOff(void);
 
-	void 		setArray(std::string location, std::string root, std::string index, std::string client_body_size, std::string http_method);
+	void 		setArray(const std::string &location,const std::string &root,const std::string &index,const std::string &client_body_size,const std::string &http_method);
 
 	bool		checkGet();
 	bool		checkPost();

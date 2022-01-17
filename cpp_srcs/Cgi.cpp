@@ -118,7 +118,7 @@ int check_extension(std::string const& cgi_path)
 		return DEFAULT;
 }
 
-int	CgiProcess::execCGI(std::string const& cgi_path)
+int	CgiProcess::execCGI(const std::string & cgi_path)
 {
     char buf[100000];
     int len = -1;
@@ -216,7 +216,7 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 
 
 
-std::string CgiProcess::getBody(void)
+const std::string &CgiProcess::getBody(void)
 {
 	if(this->body.find("\r\n\r\n") != std::string::npos)	//remove headers
 	{

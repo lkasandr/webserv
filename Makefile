@@ -5,12 +5,24 @@ CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -g
 SRCS		= ./main.cpp ./cpp_srcs/Socket.cpp  ./cpp_srcs/Configuration.cpp  \
 			  ./cpp_srcs/Request.cpp ./cpp_srcs/parser.cpp ./cpp_srcs/Server.cpp ./cpp_srcs/Response.cpp \
 			  ./cpp_srcs/Client.cpp ./cpp_srcs/Cgi.cpp
+
+UNAME := $(shell uname)
+
+OStype = 2
+
+ifeq ($(UNAME),Darwin)
+	OStype = 1
+endif
+ifeq ($(UNAME),Linux)
+	OStype = 2
+endif
+
 OBJS		= $(SRCS:.cpp=.o)
 HEADER		= ./inc/webserv.hpp ./inc/Socket.hpp ./inc/Configuration.hpp \
 			  ./inc/Request.hpp ./inc/Server.hpp ./inc/Response.hpp ./inc/Client.hpp ./inc/CGI.hpp
 INC			= inc
 %.o:		%.cpp $(HEADER)
-			$(CXX) $(CXXFLAGS) -c $<  -o $(<:.cpp=.o) -I inc
+			$(CXX) $(CXXFLAGS) -c $<  -o $(<:.cpp=.o) -I inc -D OStype=$(OStype)
 			
 all:		$(NAME) 
 			@echo "\033[32mWebserv ready\033[0m"

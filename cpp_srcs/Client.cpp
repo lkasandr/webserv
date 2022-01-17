@@ -6,7 +6,7 @@ int check_content_length(char *buffer)
 	int len = 0;
 	size_t pos;
 	pos = line.find("Content-Length: ");
-	if (/*(pos = line.find("Content-Length: ") + 16)*/ pos != std::string::npos)
+	if (pos != std::string::npos)
 	{
 		pos = line.find("Content-Length: ") + 16;
 		size_t pos_end = line.find("\n", pos);
@@ -23,15 +23,10 @@ Client::Client(int fd, char *buffer):fd(fd)
 	this->content_len = 0;
 	this->chunked = false;
 	this->need_body = false;
-	this->chunk_part = false;
 	if(tmp.find("Content-Length") != std::string::npos)
 		this->content_len = check_content_length(buffer);
 	if(tmp.find("Transfer-Encoding: chunked") != std::string::npos )
-	{
 		this->chunked = true;
-		// if(tmp.find("\r\n\r\n") != std::string::npos && tmp.find("0\r\n\r\n") == std::string::npos)
-		// 	this->chunk_part = true;
-	}
 	if(tmp.find("PUT ") != std::string::npos || tmp.find("POST ") != std::string::npos)
 		this->need_body = true;	
 	tmp.clear();

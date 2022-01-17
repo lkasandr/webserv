@@ -21,7 +21,6 @@ class Client
 private:
 	int		fd;
 	int		content_len;
-	
 	bool	need_body;
 public:
 	Client(int fd, char *buffer);
@@ -33,7 +32,6 @@ public:
 	bool		check_need_body() const;
 	bool		chunk_ready;
 	std::string msg;
-	bool		chunk_part;
 	bool		chunked;
 };
 

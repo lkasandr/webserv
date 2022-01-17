@@ -7,7 +7,7 @@ Configuration::Configuration()
 	this->server_name = "localhost";
 	this->default_error_pages = "./html/error.html";
 	this->client_body_size = 30000;
-	this->http_method = "GET POST DELETE";
+	this->http_method = "GET POST DELETE PUT";
 	this->method_get = 0;
 	this->method_post = 0;
 	this->method_delete = 0;

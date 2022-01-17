@@ -92,12 +92,14 @@ std::string chunk_handler(std::string body)
 
 		if (body.substr(crlf_pos + 2).length() < chunk_size)	
 		{
+			// std::cout << "95 " << std::endl;
 			new_body += body.substr(crlf_pos + 2, body.substr(crlf_pos + 2).length());
 			// std::cout << "90NEW BODY UUU" << new_body << "UUU" << std::endl;
 			body.erase(0, crlf_pos + 2 + body.substr(crlf_pos + 2).length());
 		}
 		else
 		{
+			// std::cout << "102 " << std::endl;
 			new_body += body.substr(crlf_pos + 2, chunk_size);
 			// std::cout << "body.substr UUU" << body.substr(crlf_pos + 2 + chunk_size + 2) << "UUU" << std::endl;
 			// std::cout << "96NEW BODY UUU" << new_body << "UUU" << std::endl;
@@ -121,9 +123,7 @@ void Request::setBody(std::string line)
 	if(this->method == "POST" && this->uri.find("/post_body") != std::string::npos)
 	{
 		if(line.length() > 100)
-		{
 			this->code = 413;
-		}
 		else
 			this->code = 200;
 	}

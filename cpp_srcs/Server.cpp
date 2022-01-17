@@ -123,10 +123,9 @@ bool check_client(int fd, std::list<Client> clients)
 void Server::communication(int fd, int i)
 {
 	char *buffer = new char[65536]; // 2 в 19
-	// memset((void *)buffer, 0, 4096);
 	bzero(buffer, 65536);
 	int message = recv(fd, buffer, 65536, 0);  // считываем входящее сообщение
-	if (message <= 0)
+	if (message < 0)
 	{
 		close(fd);
 		pfds.erase(pfds.begin() + i); 	// убираем fd из очереди
@@ -142,6 +141,7 @@ void Server::communication(int fd, int i)
 			it->chunk_ready = false;
 			Request	request;
 			request.parseRequest(it->msg);
+			std::cout << request;
 			Configuration conf;
 			if(!check_server(&request, config, &conf))
 				request.setCode(400);

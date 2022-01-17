@@ -136,14 +136,15 @@ std::string check_ext(Request *request)
 	size_t pos = request->getUri().find_last_of(".");
 	if (pos != std::string::npos)
 		ext = request->getUri().substr(pos + 1);
-	if (ext == "png " || ext == "ico " || ext == "jpeg " || ext == "gif "\
-		|| ext == "tiff " || ext == "x-icon " || ext == "svg+xml ")
+	std::cout << ext << "\n";
+	if (ext == "png" || ext == "ico" || ext == "jpeg" || ext == "gif"\
+		|| ext == "tiff" || ext == "x-icon" || ext == "svg+xml")
 		cont_type = "Content-Type: image/" + ext + ";\r\n";
-	if (ext == "mpeg " || ext == "mp4 " || ext == "quicktime " || ext == "x-flv "\
+	if (ext == "mpeg" || ext == "mp4" || ext == "quicktime" || ext == "x-flv"\
 		|| ext == "x-ms-wmv " || ext == "webm ")
 		cont_type = "Content-Type: video/" + ext + ";\r\n";
-	if (ext == "css " || ext == "csv " || ext == "html " || ext == "plain " \
-		|| ext == "xml " /*|| ext == "php " || ext == "py "*/)
+	if (ext == "css" || ext == "csv" || ext == "html" || ext == "plain" \
+		|| ext == "xml" /*|| ext == "php " || ext == "py "*/)
 		cont_type = "Content-Type: text/" + ext + ";\r\n";
 	return cont_type;
 }
@@ -463,19 +464,15 @@ void Response::check_method(Configuration *configs, Request *request)
 		{
 			this->server = "Server: " + configs->getServerName() + "\r\n";
 			this->content_path = getContentPath(*configs, uri_str);
-			// this->content_path = uri_str.insert(0, std::string("./rss"));
-			// for(size_t i = 0; i < this->content_path.length(); i++)
-			// {
-			// 	if(this->content_path[i] == ' ')
-			// 	{
-			// 		this->content_path.erase(i,1);
-			// 		i--;
-			// 	}
-			// }
 			if (remove(this->content_path.c_str()))
 			{
 				this->status_code = 500;
 				std::cout << "Error in remove DELETE method." << std::endl;
+			}
+			else
+			{
+				this->status_code = 200;
+				this->content_path = "./rss/test_delete/200.html";
 			}
 		}	
 		else
@@ -488,12 +485,7 @@ void Response::check_method(Configuration *configs, Request *request)
 		if (configs->checkPut())
 		{
 			std::string content = request->getBody();
-			// std::cout << "CONTENT 477 " << content << std::endl;
 			std::string filename = "./rss/upload/" + request->getUri().substr(request->getUri().find_last_of("/") + 1);
-			// filename = filename.substr(0, filename.find(" "));
-			// size_t pos_end = content.find("0\r\n\r\n");
-			// content = content.substr(0, pos_end);
-			// std::cout << "CONTENT 481 " << content << std::endl;
 			std::ofstream newfile;
 			newfile.open(filename.c_str(),  std::ios_base::out | std::ios_base::binary);
 			if (!newfile.is_open())
@@ -515,8 +507,8 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
-	default: //std::cout << "Uncknown method" << std::endl;	//501 not implemented
-		this->status_code = 405;
+	default:
+		this->status_code = 405; // метод не поддерживается
 		break;
 	}	
 }

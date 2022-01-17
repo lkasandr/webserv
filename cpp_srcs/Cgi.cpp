@@ -1,15 +1,12 @@
 #include "CGI.hpp"
 
-CgiProcess::CgiProcess(Request const& req, Response const& res) :
-env_array(NULL), request(req), response(res), status(200)
+CgiProcess::CgiProcess(Request const& req, Response const& res):env_array(NULL), request(req), response(res), status(200)
 {
 	this->initEnv();
 }
 
-CgiProcess::CgiProcess(CgiProcess const & copy) :
-env_array(copy.env_array), request(copy.request), response(copy.response),
-body(copy.body), status(copy.status)
-{}
+CgiProcess::CgiProcess(CgiProcess const & copy):env_array(copy.env_array), request(copy.request), response(copy.response),\
+body(copy.body), status(copy.status) {}
 
 CgiProcess::~CgiProcess()
 {
@@ -35,7 +32,6 @@ std::map<std::string, std::string> CgiProcess::change_headers(std::map<std::stri
 	std::map<std::string, std::string>::const_iterator it = headers.begin();
 	std::map<std::string, std::string>::const_iterator end = headers.end();
 	std::string key;
-	
 	while (it != end)
 	{
 		key = "HTTP_";
@@ -44,14 +40,12 @@ std::map<std::string, std::string> CgiProcess::change_headers(std::map<std::stri
 		http_headers[key] = it->second;
 		++it;
 	}
-
 	return (http_headers);
 }
 
 std::string	CgiProcess::get_cwd(void)
 {
 	char cwd[256];
-
     if (getcwd(cwd, sizeof(cwd)) == NULL)
       return (std::string("./"));
     else
@@ -62,7 +56,6 @@ std::string to_string(size_t size)
 {
     std::stringstream ss;
     ss << size;
-
     return (ss.str());
 }
 
@@ -70,10 +63,6 @@ void	CgiProcess::initEnv(void)
 {
 	std::map<std::string, std::string> headers = this->request.getHeaders();
 	std::map<std::string, std::string> http_headers = this->change_headers(headers);
-
-	// AUTH_TYPE, CONTENT_LENGTH, CONTENT_TYPE, GATEWAY_INTERFACE, PATH_INFO, PATH_TRANSLATED, QUERY_STRING,
-	// REMOTE_ADDR, REMOTE_HOST, REMOTE_IDENT, REMOTE_USER, REQUEST_METHOD, SCRIPT_NAME, SERVER_NAME, SERVER_PORT, 
-	// SERVER_PROTOCOL и SERVER_SOFTWARE.
 	this->env_map["AUTH_TYPE"]			=	"";
 	this->env_map["REDIRECT_STATUS"]	=	"200";
 	this->env_map["CONTENT_LENGTH"]		=	headers["Content-Length"];	//to_string(this->request.getBody().size());
@@ -102,9 +91,7 @@ void	CgiProcess::initEnv(void)
 void	CgiProcess::fillEnv(void)
 {
 	this->env_array = new char*[this->env_map.size() + 1];
-	
 	std::map<std::string, std::string>::const_iterator it = this->env_map.begin();
-
 	std::string str;
 	size_t i = 0;
 	while(i < this->env_map.size())
@@ -133,10 +120,8 @@ int check_extension(std::string const& cgi_path)
 
 int	CgiProcess::execCGI(std::string const& cgi_path)
 {
-	
     char buf[100000];
     int len = -1;
-
 	std::string path;  
   	std::string script;
 	std::string root_directory;
@@ -150,7 +135,6 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	}
     bzero(buf, 100000);
     
-    
 	FILE *file_In = tmpfile();
     FILE *file_Out = tmpfile();
     long fdIn = fileno(file_In);
@@ -158,18 +142,8 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 	
 	write(fdIn, const_cast<char*>(this->request.getBody().c_str()), this->request.getBody().length());
 	lseek(fdIn, 0, SEEK_SET);
-	// std::cout << "this->request.getBody() " << this->request.getBody() << "\n";
-	// while((len = read(fdIn, buf, 100000)) != 0)
-    // {
-	// 	std::cout << "buf fdin " << buf << "\n";
-	// }
     if(fork() == 0)
     {
-		// dup2(fd[0][0], 0);
-        // close(fd[0][0]);
-        // dup2(fd[1][1], 1);
-        // close(fd[1][1]);
-		
 		dup2(fdIn, STDIN_FILENO);
         dup2(fdOut, STDOUT_FILENO);
 
@@ -178,33 +152,25 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 		{
 		case PY:
 			path = "/usr/bin/python3";  
-  			// script = cgi_path;
 			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			// std::cout << "ROOT DIR " << root_directory << "\n";
 			chdir(root_directory.c_str());
 			break;
 		case PHP:
 			path = "/usr/bin/php-cgi";  
   			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			// std::cout << "ROOT DIR " << root_directory << "\n";
 			chdir(root_directory.c_str());
 			break;
 		case BLA:
 			path = "./rss/directory/ubuntu_cgi_tester";  
   			script = "./rss/directory/ubuntu_cgi_tester"; // this->request.getScriptPath();; 
-			// root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			// std::cout << "ROOT DIR " << root_directory << "\n";
-			// chdir(root_directory.c_str());
 			break;
 		default:
 			path = cgi_path;
 			script = cgi_path;
 			break;
 		}
-		// std::cout << "PATH " << path << "\n";
-		// std::cout << "SCRIPT " << script << "\n";
 		char * argv[3] = {
 		const_cast<char*>(script.c_str()),
 		const_cast<char*>(script.c_str()),
@@ -217,7 +183,6 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
 		exit(0);
     }
     wait(0);
-    // close(fd[1][1]);
 	this->body.clear();
 	lseek(fdOut, 0, SEEK_SET);
     while((len = read(fdOut, buf, 100000)) != 0)
@@ -231,9 +196,6 @@ int	CgiProcess::execCGI(std::string const& cgi_path)
             this->body.push_back(buf[i]);
         bzero(buf, 100000);
     }
-	// wait(0);
-    // close(fd[0][0]);
-    // close(fd[1][0]);
 	fclose(file_In);
     fclose(file_Out);
     close(fdIn);
@@ -248,21 +210,8 @@ std::string CgiProcess::getBody(void)
 	if(this->body.find("\r\n\r\n") != std::string::npos)	//remove headers
 	{
 		size_t pos= this->body.find("\r\n\r\n") + 4;
-		// std::string headers = this->body.substr(0, pos_end);
-		// this->body = this->body.erase(0, headers.length());
 		if (pos != std::string::npos)
 			this->body = this->body.substr(pos, this->body.length());
-		// std::cout << "CGI HEADERS " << headers << std::endl;
-		// std::cout << "CGI BODY " << this->body.substr(0, 150) << std::endl;
-		// std::ofstream newfile;
-		// newfile.open("cgibody.txt",  std::ios_base::out | std::ios_base::binary);
-		// if (!newfile.is_open())
-		// {
-		// 	std::cout << "CGI ERR 259 " << std::endl;
-		// 	// break;
-		// }
-		// newfile << this->body;
-		// newfile.close();
 	}
 	return this->body;
 }

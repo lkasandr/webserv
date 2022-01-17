@@ -72,47 +72,63 @@ int hex_to_dec(std::string hex)
     return dec;
 }
 
-
-
 std::string chunk_handler(std::string &body)
 {
-	size_t chunk_size;
-	std::string new_body;
-	// new_body.clear();
-	while(1)
+	std::string	chunk = body.substr(0, 100);
+	std::string	newbody = "";
+	int			chunk_size = strtol(chunk.c_str(), NULL, 16);
+	size_t		i = 0;
+
+	while (chunk_size)
 	{
-		if(body == "0\r\n\r\n")
-		{
-			// new_body += body;
-			break;
-		}
-
-		size_t crlf_pos = body.find_first_of("\r\n");
-		chunk_size = hex_to_dec(body.substr(0, crlf_pos));
-
-		if (body.substr(crlf_pos + 2).length() < chunk_size)	
-		{
-			// std::cout << "95 " << std::endl;
-			new_body += body.substr(crlf_pos + 2, body.substr(crlf_pos + 2).length());
-			// std::cout << "90NEW BODY UUU" << new_body << "UUU" << std::endl;
-			body.erase(0, crlf_pos + 2 + body.substr(crlf_pos + 2).length());
-		}
-		else
-		{
-			// std::cout << "102 " << std::endl;
-			new_body += body.substr(crlf_pos + 2, chunk_size);
-			// std::cout << "body.substr UUU" << body.substr(crlf_pos + 2 + chunk_size + 2) << "UUU" << std::endl;
-			// std::cout << "96NEW BODY UUU" << new_body << "UUU" << std::endl;
-			body.erase(0, crlf_pos + 2 + chunk_size + 2);
-		}
-		// body.erase(0, 2);
-		// const char *gup = body.c_str();
-		// std::cout << "UUU" << gup << "UUU" << std::endl;
-		
+		i = body.find("\r\n", i) + 2;
+		newbody += body.substr(i, chunk_size);
+		i += chunk_size + 2;
+		chunk = body.substr(i, 100);
+		chunk_size = strtol(chunk.c_str(), NULL, 16);
 	}
-	// std::cout << "NEW BODY UUU" << new_body << "UUU" << std::endl;
-	return new_body;
+	return newbody;
 }
+
+// std::string chunk_handler(std::string &body)
+// {
+// 	size_t chunk_size;
+// 	std::string newbody;
+// 	// newbody.clear();
+// 	while(1)
+// 	{
+// 		if(body == "0\r\n\r\n")
+// 		{
+// 			// newbody += body;
+// 			break;
+// 		}
+
+// 		size_t crlf_pos = body.find_first_of("\r\n");
+// 		chunk_size = hex_to_dec(body.substr(0, crlf_pos));
+
+// 		if (body.substr(crlf_pos + 2).length() < chunk_size)	
+// 		{
+// 			// std::cout << "95 " << std::endl;
+// 			newbody += body.substr(crlf_pos + 2, body.substr(crlf_pos + 2).length());
+// 			// std::cout << "90NEW BODY UUU" << newbody << "UUU" << std::endl;
+// 			body.erase(0, crlf_pos + 2 + body.substr(crlf_pos + 2).length());
+// 		}
+// 		else
+// 		{
+// 			// std::cout << "102 " << std::endl;
+// 			newbody += body.substr(crlf_pos + 2, chunk_size);
+// 			// std::cout << "body.substr UUU" << body.substr(crlf_pos + 2 + chunk_size + 2) << "UUU" << std::endl;
+// 			// std::cout << "96NEW BODY UUU" << newbody << "UUU" << std::endl;
+// 			body.erase(0, crlf_pos + 2 + chunk_size + 2);
+// 		}
+// 		// body.erase(0, 2);
+// 		// const char *gup = body.c_str();
+// 		// std::cout << "UUU" << gup << "UUU" << std::endl;
+		
+// 	}
+// 	// std::cout << "NEW BODY UUU" << newbody << "UUU" << std::endl;
+// 	return newbody;
+// }
 
 void Request::setBody(std::string &line)
 {

@@ -29,6 +29,7 @@
 #include <vector>
 #include <poll.h>
 #include <map>
+// #include <fcntl.h>
 
 std::vector<std::string> split_line(std::string line);
 int	read_conf(const char *path , std::vector<Configuration> &config);

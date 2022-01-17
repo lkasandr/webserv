@@ -122,8 +122,8 @@ bool check_client(int fd, std::list<Client> &clients)
 
 void Server::communication(int fd, int i)
 {
-	char *buffer = new char[65536]; // 2 в 19
-	bzero(buffer, 65536);
+	this->buffer = new char[65536]; // 2 в 19
+	// bzero(buffer, 65536);
 	int message = recv(fd, buffer, 65536, 0);  // считываем входящее сообщение
 	if (message < 0)
 	{
@@ -134,6 +134,7 @@ void Server::communication(int fd, int i)
 	if(!check_client(fd, clients))
 		clients.push_back(Client(fd, buffer));
 	check_ready(fd, buffer, message);
+	delete[] buffer;
 	for (std::list<Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 	{	
 		if(it->chunk_ready)
@@ -152,7 +153,7 @@ void Server::communication(int fd, int i)
 			break;
 		}	
 	}
-	delete[] buffer;
+	// delete[] buffer;
 }
 
 
@@ -170,11 +171,12 @@ void	Server::main_cycle()
 {
 	if(!server)
 		server = this;
-	signal(SIGINT, sig_handler);	
+	signal(SIGINT, sig_handler);
+	signal(SIGPIPE, SIG_IGN);	
 	try
 	{
 		struct pollfd* array = &this->pfds[0];
-		int ret = poll(array, this->pfds.size(), 1000);
+		int ret = poll(array, this->pfds.size(), -1);
 		if (ret == -1)
 		{
 			std::cerr << "Poll close\n";
@@ -184,6 +186,7 @@ void	Server::main_cycle()
 		{
 			for (size_t i = 0; i < this->pfds.size(); i++)
 			{
+				// fcntl(pfds[i].fd, F_SETFL, O_NONBLOCK);
 				if (this->pfds[i].revents & POLLIN)  // проверка входящего события
 				{
 					if (check_fd(this->pfds[i].fd))		// проверяем в каком сокете произошло событие
@@ -213,6 +216,8 @@ Server::~Server()
 		close(it->get_listening_socket_fd());
 		std::cout << "close sockets fd " << it->get_listening_socket_fd() << std::endl;
 	}
+	if(this->buffer)
+		delete[] buffer;
 	
 }
 

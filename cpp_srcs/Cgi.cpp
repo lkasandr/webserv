@@ -196,16 +196,15 @@ int	CgiProcess::execCGI(const std::string & cgi_path)
     wait(0);
 	this->body.clear();
 	lseek(fdOut, 0, SEEK_SET);
-    while((len = read(fdOut, buf, 100000)) != 0)
+    while((len = read(fdOut, buf, 10000)) != 0)
     {
 		if (len == -1)
         {
 			std::cout << "CGI ERROR" << std::endl;
 			this->status = 502;
 		}
-        for(int i = 0;i < len; i++)
-            this->body.push_back(buf[i]);
-        bzero(buf, 100000);
+		this->body.append(buf, len);
+        bzero(buf, 10000);
     }
 	fclose(file_In);
     fclose(file_Out);

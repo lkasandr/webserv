@@ -29,6 +29,7 @@ private:
 	std::vector<struct pollfd> 	pfds;  //структура для создания очереди сокетов
 	std::vector<Configuration>  config;
 	std::list<Client>			clients;
+	char *						buffer;
 public:
 	Server(std::vector<Configuration> &configs);
 	~Server();

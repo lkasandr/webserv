@@ -26,7 +26,7 @@ class Server
 {
 private:
 	std::vector<Socket>			sockets;
-	std::vector<struct pollfd> 	pfds;  //структура для создания очереди сокетов
+	std::vector<struct pollfd> 	pfds; 
 	std::vector<Configuration>  config;
 	std::list<Client>			clients;
 	char *						buffer;

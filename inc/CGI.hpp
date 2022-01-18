@@ -40,8 +40,8 @@ class CgiProcess
 		const Request&						request;
 		const Response&						response;
 		std::string							body;
-		int							status;
-
+		int									status;
+		bool								cookies;
 		CgiProcess();
 		void		initEnv();
 		void		fillEnv();
@@ -54,7 +54,8 @@ class CgiProcess
 		CgiProcess& operator=(CgiProcess const & other);
 		int	execCGI(const std::string & cgi_path);
 		const std::string &getBody(void);
-		int getStatus();
+		int 	getStatus();
+		bool	getCookies(void);
 		std::string	get_cwd();
 
 };

@@ -21,9 +21,6 @@ class Socket
     public:
         Socket(unsigned short int port);
         ~Socket();
-        // void create_socket();
-        // void bind_socket(unsigned short int port);
-        // void listen_socket();
         int accept_socket();
         int get_listening_socket_fd();
         int get_accept_socket_fd();

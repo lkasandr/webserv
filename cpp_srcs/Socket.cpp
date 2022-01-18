@@ -29,13 +29,11 @@ int Socket::bind_socket(unsigned short int port)
     if (setsockopt(this->listening_socket_fd, SOL_SOCKET, SO_REUSEADDR, &this->opt, sizeof(this->opt)) < 0)
     {
         std::cerr << "Error in setsockopt." << std::endl;
-		// std::exit(EXIT_FAILURE);
         return (-1);
     }
     if (bind(this->listening_socket_fd, (struct sockaddr*)&this->addr, sizeof(this->addr)) != 0)
     {
         std::cerr << "\033[31mError in getting socket address. \033[0m" << std::endl;
-		// std::exit(EXIT_FAILURE);
         return (-1);
     }
     return 0;
@@ -46,7 +44,6 @@ int Socket::listen_socket()
     if (listen(get_listening_socket_fd(), SOMAXCONN) == -1)
     {
         std::cerr << "Error in putting into listening mode." << std::endl;
-		// std::exit(EXIT_FAILURE);
         return (-1);
     }
     return 0;
@@ -69,16 +66,10 @@ int Socket::accept_socket()
 Socket::Socket(unsigned short int port) : port(port)
 {
         this->opt = 1;
-        // Socket::create_socket();
-        // Socket::bind_socket(port);
-        // Socket::listen_socket();
 }
 
 Socket::~Socket()
-{
-    // close(this->listening_socket_fd);
-    // close(this->accept_socket_fd);
-}
+{}
 
 int Socket::setting_socket()
 {

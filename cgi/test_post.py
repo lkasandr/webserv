@@ -3,16 +3,27 @@
 # Import modules for CGI handling 
 import cgi
 import cgitb 
-cgitb.enable()
+import os
+import http.cookies
 
-# Create instance of FieldStorage 
+cgitb.enable()
 form = cgi.FieldStorage() 
-# print (form.keys())
-# Get data from fields
 first_name = form.getvalue('first_name')
 last_name  = form.getvalue('last_name')
 
-# print ("Content-type:text/html\r\n\r\n")
+
+cookie = http.cookies.SimpleCookie(os.environ.get("HTTP_COOKIE"))
+
+if first_name is None:
+	first_name = cookie.get("first_name")
+	first_name = first_name.value
+if last_name is None:
+	last_name = cookie.get("last_name")
+	last_name = last_name.value
+
+print("Set-Cookie:first_name=%s;" % (first_name))
+print("Set-Cookie:last_name=%s;" % (last_name))
+print ("Content-type:text/html\r\n\r\n")
 print ("<html>")
 print ("<head>")
 print ("<title>Hello</title>")

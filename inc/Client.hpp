@@ -1,7 +1,6 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-
 #include "Socket.hpp"
 #include "Configuration.hpp"
 #include "webserv.hpp"

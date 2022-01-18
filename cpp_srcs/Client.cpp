@@ -32,7 +32,6 @@ Client::Client(int fd, char *buffer):fd(fd)
 	tmp.clear();
 }
 
-
 void Client::setContentLen(int len)
 {
 	this->content_len = len;

@@ -144,7 +144,7 @@ std::string check_ext(Request *request)
 		|| ext == "x-ms-wmv " || ext == "webm ")
 		cont_type = "Content-Type: video/" + ext + ";\r\n";
 	if (ext == "css" || ext == "csv" || ext == "html" || ext == "plain" \
-		|| ext == "xml" /*|| ext == "php " || ext == "py "*/)
+		|| ext == "xml")
 		cont_type = "Content-Type: text/" + ext + ";\r\n";
 	return cont_type;
 }
@@ -153,17 +153,14 @@ void Response::make_response(Request *request, Configuration *config)
 {
 	this->date = get_date() + "\r\n";
 	this->status_code = request->getCode();
-	// std::cout << "159 this->status_code " << this->status_code << std::endl;
 	if (this->status_code != 200)
 		check_errors(this->status_code);
 	else
 	{
 		check_method(config, request);
-		// std::cout << "165this->status_code" << this->status_code << std::endl;
 		check_errors(this->status_code);
 	}
 	// формируем ответ
-
 	this->contentType = check_ext(request);
 	std::stringstream response;
 	std::stringstream content;
@@ -171,44 +168,27 @@ void Response::make_response(Request *request, Configuration *config)
 	{
 		std::string request_URI = request->getUri();
 		CgiProcess cgi(*request, *this);
-		// std::cout << "this->status_code" << this->status_code << std::endl;
 		cgi.execCGI(getContentPath(*config, request_URI));
 		check_errors(cgi.getStatus());
-		// std::cout << "this->status_code" << this->status_code << std::endl;
-		// std::cout << "cgi.getStatus()" << cgi.getStatus() << std::endl;
-		// std::cout << "CGI BODY: " << cgi.getBody() << std::endl;
-		
 		content << cgi.getBody();
-		
 		this->contentLength = content.str().length();
 		response << this->version << this->status_code << this->code_description
-			/*<< this->date << this->server << this->connection << this->allow_method
-			*/<< this->contentType << "Content-Length: " << content.str().length()
-			/*<< this->setCookie */<< "\r\n\r\n" << content.str();
-		// std::ofstream newfile;
-		// newfile.open("cgirespons.txt",  std::ios_base::out);
-		// if (!newfile.is_open())
-		// {
-		// 	std::cout << "CGI ERR 259 " << std::endl;
-		// 	// break;
-		// }
-		// newfile << response.str();
-		// newfile.close();
+		<< this->date << this->server << this->connection << this->allow_method;
+		if(cgi.getCookies() == true)
+			response << content.str();
+		else
+			response << this->contentType << "Content-Length: " << content.str().length()
+			<< "\r\n\r\n" << content.str();
 	}
 	else
 	{
-		// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 		std::ifstream file(this->content_path.c_str(), std::ios::in | std::ios::binary);
-		std::cout << "#################" << this->content_path << std::endl;
-		// std::cout << "file.is_open     " << file.is_open() << std::endl;
 		if (!file.is_open())
 		{
 			if (config->getAutoindex())
 			{
-				// std::cout << "CONTENT PATH FOR AI: " << this->content_path << std::endl;
 				std::string ret;
 				ret = makeAutoindexPage(this->content_path.c_str(), config->getHost());
-				// std::cout << "ret: " << ret << std::endl;
 				if(ret == "")
 				{
 					this->status_code = 404;
@@ -265,7 +245,6 @@ std::string Response::getContentPath(Configuration &conf,std::string &uri)
 	size_t lengthLocation = 0;
 	int flag = 0;
 
-	// uri = uri.substr(0, uri.length() - 1);
 	std::string uri_dir = "./rss" + uri;
 	int ifUriDir = open(uri_dir.c_str(), O_DIRECTORY);
 	if (ifUriDir != -1)
@@ -383,15 +362,13 @@ void Response::check_method(Configuration *configs, Request *request)
 		m++;
 	switch (m)
 	{
-	case 0: 	//		std::cout << "Method GET" << std::endl;
+	case 0: 	//		"Method GET" 
 		if (configs->checkGet())
 		{
 			this->server = "Server: " + configs->getServerName() + "\r\n";
 			if(request->getCGI())
 				break;
-			// this->content_path = configs->getIndex();
 			this->content_path = getContentPath(*configs, uri_str);
-			// std::cout << "CONTENT_PATH: " << this->content_path << std::endl;
 			if (this->setCookie == "")
 				this->setCookie = "Set-Cookie: name=" + configs->getServerName() + "\r\n";
 		}	
@@ -401,7 +378,7 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
-	case 1:		//	std::cout << "Method POST" << std::endl;
+	case 1:		//	"Method POST" 
 			if (configs->checkPost())
 			{
 				this->server = "Server: " + configs->getServerName() + "\r\n";
@@ -412,7 +389,7 @@ void Response::check_method(Configuration *configs, Request *request)
 				}
 				if(request->getCGI())
 					break;
-				if(request->getPostFile() == true)
+				if(request->getPostFile() == true)	// UPLOAD FILE
 				{
 					std::string content = request->getBody();
 					std::string filename = "./rss/upload/" + content.substr((content.find("filename=\"") + 10));
@@ -460,7 +437,7 @@ void Response::check_method(Configuration *configs, Request *request)
 				this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 			}
 			break;
-	case 2: // std::cout << "Method DELETE" << std::endl;
+	case 2: // "Method DELETE"
 		if (configs->checkDelete())
 		{
 			this->server = "Server: " + configs->getServerName() + "\r\n";
@@ -482,7 +459,7 @@ void Response::check_method(Configuration *configs, Request *request)
 			this->allow_method = "Allow: " + configs->getHttpMethod() + "\r\n";
 		}
 		break;
-	case 3: /*PUT method*/
+	case 3: // Method PUT 
 		if (configs->checkPut())
 		{
 			std::string content = request->getBody();

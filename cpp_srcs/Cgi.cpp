@@ -1,12 +1,12 @@
 #include "CGI.hpp"
 
-CgiProcess::CgiProcess(Request const& req, Response const& res):env_array(NULL), request(req), response(res), status(200)
+CgiProcess::CgiProcess(Request const& req, Response const& res):env_array(NULL), request(req), response(res), status(200), cookies(false)
 {
 	this->initEnv();
 }
 
 CgiProcess::CgiProcess(CgiProcess const & copy):env_array(copy.env_array), request(copy.request), response(copy.response),\
-body(copy.body), status(copy.status) {}
+body(copy.body), status(copy.status), cookies(false) {}
 
 CgiProcess::~CgiProcess()
 {
@@ -18,8 +18,6 @@ CgiProcess::~CgiProcess()
 CgiProcess& CgiProcess::operator=(CgiProcess const & other)
 {
 	this->env_array = other.env_array;
-	// this->request = other.request;
-	// this->response = other.response;
 	this->body = other.body;
 	this->status = other.status;
 
@@ -65,11 +63,11 @@ void	CgiProcess::initEnv(void)
 	std::map<std::string, std::string> http_headers = this->change_headers(headers);
 	this->env_map["AUTH_TYPE"]			=	"";
 	this->env_map["REDIRECT_STATUS"]	=	"200";
-	this->env_map["CONTENT_LENGTH"]		=	headers["Content-Length"];	//to_string(this->request.getBody().size());
+	this->env_map["CONTENT_LENGTH"]		=	headers["Content-Length"];	
 	this->env_map["CONTENT_TYPE"]		=	headers["Content-Type"];
 	this->env_map["GATEWAY_INTERFACE"]	=	"CGI/1.1";
-	this->env_map["PATH_INFO"]			=	this->request.getUri();	// "/";	//this->request.getScriptPath();	// rfc3875  4.1.5.
-	this->env_map["PATH_TRANSLATED"]	=	"/rss/cgi";		//this->request.getScriptPath(); //
+	this->env_map["PATH_INFO"]			=	this->request.getUri();	// rfc3875  4.1.5.
+	this->env_map["PATH_TRANSLATED"]	=	"/rss/cgi";		//
 	this->env_map["QUERY_STRING"]		=	this->request.getQueryString();	// после "?" В URL
 	this->env_map["REMOTE_ADDR"]		=	"127.0.0.1";	//this->request.getHeaders().find("Host")->second;
 	this->env_map["REMOTE_HOST"]		=	"localhost";
@@ -79,7 +77,7 @@ void	CgiProcess::initEnv(void)
 	this->env_map["REQUEST_URI"]		=	this->request.getUri();
 	this->env_map["SCRIPT_NAME"]		=	this->request.getScriptPath();	//  variable MUST be set to a URI path
 	this->env_map["SCRIPT_FILENAME"]	=	this->request.getScriptPath();	//  variable MUST be set to a URI path
-	this->env_map["SERVER_NAME"]		=	headers["Host"];	//this->request.getHeaders().find("Host")->second;	// hostname
+	this->env_map["SERVER_NAME"]		=	headers["Host"];
 	this->env_map["SERVER_PORT"]		=	this->request.getPort();	// variable MUST be set
 	this->env_map["SERVER_PROTOCOL"]	=	this->request.getHTTP_version();
 	this->env_map["SERVER_SOFTWARE"]	=	"webserv";
@@ -127,12 +125,6 @@ int	CgiProcess::execCGI(const std::string & cgi_path)
 	std::string root_directory;
 
 	this->fillEnv();
-	int i = 0;
-	while (this->env_array[i])
-	{
-		std::cout << "ENV: " << this->env_array[i] << std::endl;
-		i++;
-	}
     bzero(buf, 100000);
     
 	FILE *file_In = tmpfile();
@@ -166,16 +158,13 @@ int	CgiProcess::execCGI(const std::string & cgi_path)
 			if (OStype == 2)
 			{
 				path = "./rss/directory/ubuntu_cgi_tester";  
-  				script = "./rss/directory/ubuntu_cgi_tester"; // this->request.getScriptPath();; 
+  				script = "./rss/directory/ubuntu_cgi_tester";
 			}
 			else
 			{
 				path = "./rss/directory/cgi_tester";  
   				script = "./rss/directory/cgi_tester";
 			}
-			// root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
-			// std::cout << "ROOT DIR " << root_directory << "\n";
-			// chdir(root_directory.c_str());
 			break;
 		default:
 			path = cgi_path;
@@ -213,15 +202,18 @@ int	CgiProcess::execCGI(const std::string & cgi_path)
 	return 0;
 }
 
-
-
 const std::string &CgiProcess::getBody(void)
 {
-	if(this->body.find("\r\n\r\n") != std::string::npos)	//remove headers
+	size_t pos= this->body.find("\r\n\r\n") + 4;
+	if (pos != std::string::npos)
 	{
-		size_t pos= this->body.find("\r\n\r\n") + 4;
-		if (pos != std::string::npos)
-			this->body = this->body.substr(pos, this->body.length());
+		if(this->body.substr(0, pos).find("Set-Cookie") != std::string::npos)
+		{
+			this->cookies = true;
+			return this->body;
+		}
+		else
+			this->body = this->body.substr(pos, this->body.length()); //remove headers
 	}
 	return this->body;
 }
@@ -229,4 +221,9 @@ const std::string &CgiProcess::getBody(void)
 int	CgiProcess::getStatus(void)
 {
 	return this->status;
+}
+
+bool	CgiProcess::getCookies(void)
+{
+	return this->cookies;
 }

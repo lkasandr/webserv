@@ -122,9 +122,9 @@ bool check_client(int fd, std::list<Client> &clients)
 
 void Server::communication(int fd, int i)
 {
-	this->buffer = new char[65536]; // 2 в 19
-	// bzero(buffer, 65536);
-	int message = recv(fd, buffer, 65536, 0);  // считываем входящее сообщение
+	this->buffer = new char[65535]; // 2 в 19 - 1
+	bzero(buffer, 65535);
+	int message = recv(fd, buffer, 65535, 0);  // считываем входящее сообщение
 	if (message < 0)
 	{
 		close(fd);
@@ -153,7 +153,6 @@ void Server::communication(int fd, int i)
 			break;
 		}	
 	}
-	// delete[] buffer;
 }
 
 
@@ -186,7 +185,6 @@ void	Server::main_cycle()
 		{
 			for (size_t i = 0; i < this->pfds.size(); i++)
 			{
-				// fcntl(pfds[i].fd, F_SETFL, O_NONBLOCK);
 				if (this->pfds[i].revents & POLLIN)  // проверка входящего события
 				{
 					if (check_fd(this->pfds[i].fd))		// проверяем в каком сокете произошло событие
@@ -215,10 +213,7 @@ Server::~Server()
 		close(it->get_accept_socket_fd());
 		close(it->get_listening_socket_fd());
 		std::cout << "close sockets fd " << it->get_listening_socket_fd() << std::endl;
-	}
-	if(this->buffer)
-		delete[] buffer;
-	
+	}	
 }
 
 const char* Server::SocketError::what(void) const throw()

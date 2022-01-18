@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 	if (argc == 2)
 		path = argv[1];
 	std::vector<Configuration>  configs;
-	int server_count;	//???
+	int server_count;
 	try
 	{
 		server_count = read_conf(path, configs);

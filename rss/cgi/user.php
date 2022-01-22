@@ -1,3 +1,6 @@
+<head>
+<meta charset="utf-8" />
+</head>
 <?php
 $name = "не определено";
 $age = "не определен";
@@ -9,10 +12,6 @@ if(isset($_REQUEST['age'])){
   
     $age = $_REQUEST['age'];
 }
-echo "Проверяем PHP <br>";
-echo "Имя: $name <br> Возраст: $age";
 
-//debug
-print_r($_REQUEST);
-
+echo "Name: $name <br> Age: $age";
 ?>

@@ -213,7 +213,7 @@ const std::string &CgiProcess::getBody(void)
 			return this->body;
 		}
 		else
-			this->body = this->body.substr(pos, this->body.length()); //remove headers
+			this->body = this->body.substr(pos); //remove headers
 	}
 	return this->body;
 }

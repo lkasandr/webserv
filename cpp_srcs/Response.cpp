@@ -136,7 +136,6 @@ std::string check_ext(Request *request)
 	size_t pos = request->getUri().find_last_of(".");
 	if (pos != std::string::npos)
 		ext = request->getUri().substr(pos + 1);
-	std::cout << ext << "\n";
 	if (ext == "png" || ext == "ico" || ext == "jpeg" || ext == "gif"\
 		|| ext == "tiff" || ext == "x-icon" || ext == "svg+xml")
 		cont_type = "Content-Type: image/" + ext + ";\r\n";

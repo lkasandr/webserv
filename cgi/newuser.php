@@ -6,46 +6,27 @@
 <body>
 <?php
 $name = "не определено";
-$age = "не определен";
-
 
 session_start();
-$_SESSION["name"] = $name;
-$_SESSION["age"] = $age;
-// $visit_count = 1;
-// $_SESSION["visit_count"] = $visit_count;
-// echo "Данные сохранены в сессии";
-
-// session_start();
- 
-if (isset($_SESSION["name"]) && isset($_SESSION["age"]) && isset($_SESSION["visit_count"]))
-{
-    $name = $_SESSION["name"];
-    $age = $_SESSION["age"];
-    $visit_count = $_SESSION["visit_count"] + 1;
-    echo "Name: $name <br> Age: $age <br>";
-    print("Количество посещений: " . $visit_count);
+$visit_count = 1;
+if(isset($_POST['name']) && $_POST['name'] != "") {
+    $_SESSION['name'] = $_POST['name'];
 }
-
-
-
-
-
-// session_start();
-// $visit_count = 1;
-
 if (isset($_SESSION["visit_count"])) {
     $visit_count = $_SESSION["visit_count"] + 1;
 }
-
+if (isset($_SESSION["name"])) {
+    $name = $_SESSION["name"];
+    echo "Hello $name <br> ";
+}
 $_SESSION["visit_count"] = $visit_count;
-
+$name = $_POST['name'];
+echo "Name: $name <br> ";
 print("Количество посещений: " . $visit_count);
 ?>
 <h3>Форма ввода данных</h3>
 <form method="POST">
     <p>Имя: <input type="text" name="name" /></p>
-    <p>Возраст: <input type="number" name="age" /></p>
     <input type="submit" value="Отправить">
 </form>
 </body>

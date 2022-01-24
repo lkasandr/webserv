@@ -4,12 +4,7 @@
 #include "Socket.hpp"
 #include "Configuration.hpp"
 #include <cstdlib>
-// #include <unistd.h>
 #include <cerrno>
-// #include <vector>
-
-// #include "Configuration.hpp"
-// #include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -22,14 +17,11 @@
 #include <cerrno>
 
 #include "Server.hpp"
-// #include "Configuration.hpp"
 #include "Request.hpp"
 #include "Socket.hpp"
-// #include "webserv.hpp"
 #include <vector>
 #include <poll.h>
 #include <map>
-// #include <fcntl.h>
 
 std::vector<std::string> split_line(std::string line);
 int	read_conf(const char *path , std::vector<Configuration> &config);

@@ -258,15 +258,12 @@ std::string Response::getContentPath(Configuration &conf,std::string &uri)
 	}
 	if (uri_part[uri_part.length() - 1] == '/')
 		uri_part = uri_part.substr(0, uri_part.length() - 1);
-	// if (uri_part == "/home")
-	// 	uri_part = "/ ";
 	if (uri_part == "/rss")
 	{
 		uri = uri.substr(4, uri.length() - 4);
 		contentPath = getContentPath(conf, uri);
 		return contentPath;
 	}
-	// std::cout << "URI_PART: " << uri_part << std::endl;
 	std::vector<location> array = conf.getArray();
 
 	std::vector<location>::const_iterator it = array.begin();
@@ -280,11 +277,7 @@ std::string Response::getContentPath(Configuration &conf,std::string &uri)
 			if (lengthLocation < it->location.length())
 			{
 				contentPath = "." + it->root + uri;
-				// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-				// if (contentPath[contentPath.length() - 1] == ' ')
-				// 	contentPath = contentPath.substr(0, contentPath.length() - 1);
 				int checkDir = open(contentPath.c_str(), O_DIRECTORY);
-				// std::cout << "checkOpen: " << checkDir << std::endl;
 				if (checkDir != -1)
 				{
 					if (it->location == "/")
@@ -293,14 +286,6 @@ std::string Response::getContentPath(Configuration &conf,std::string &uri)
 						contentPath = it->index;
 					close(checkDir);
 				}
-				// else
-				// {
-				// 	int checkFile = open(contentPath.c_str(), O_RDONLY);
-				// 	if (checkFile == -1)
-				// 		this->status_code = 404;
-				// 	else
-				// 		close(checkFile);
-				// }
 			}
 		}
 		lengthLocation = it->location.length();
@@ -314,11 +299,7 @@ std::string Response::getContentPath(Configuration &conf,std::string &uri)
 			if (it->location == "/")
 			{
 				contentPath = "." + it->root + uri;
-				// std::cout << "contentPath befor open: [" << contentPath << "]" << std::endl;
-				// if (contentPath[contentPath.length() - 1] == ' ')
-				// 	contentPath = contentPath.substr(0, contentPath.length() - 1);
 				int checkDir = open(contentPath.c_str(), O_DIRECTORY);
-				// std::cout << "checkOpen: " << checkDir << std::endl;
 				if (checkDir != -1)
 				{
 					if (it->location == "/")
@@ -327,24 +308,12 @@ std::string Response::getContentPath(Configuration &conf,std::string &uri)
 						contentPath = it->index;
 					close(checkDir);
 				}
-				// else
-				// {
-				// 	int checkFile = open(contentPath.c_str(), O_RDONLY);
-				// 	if (checkFile == -1)
-				// 		this->status_code = 404;
-				// 	else
-				// 		close(checkFile);
-				// }
 			}
 			it++;
 		}
 	} 
 	if (it == array.end() && contentPath.empty() && flag == 0) 
 		this->status_code = 404;
-	// int checkFile = open(contentPath.c_str(), O_RDONLY);
-	// if (checkFile == -1)
-	// 	this->status_code = 404;
-	std::cout << "contentPath: " << contentPath << std::endl;
 	return contentPath;
 }
 

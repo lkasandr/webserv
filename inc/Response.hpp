@@ -21,15 +21,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-// typedef struct {
-// 	std::string location;
-// 	std::string root;
-// 	std::string index;
-// 	// std::string default_error_page;
-// 	// std::string client_body_size;
-// 	// std::string http_method;
-// } location;
-
 class Request;
 class Configuration;
 
@@ -51,8 +42,6 @@ private:
 	std::string			setCookie;
 public:
 	Response(int fd);
-	// Response(const Response & copy);
-	// Response& operator=(const Response & other);
 	~Response();
 
 	void make_response(Request *request, Configuration *config);
@@ -71,7 +60,6 @@ public:
 	const std::string &getAllow_method() const;
 	const std::string &getContentType() const;
 	size_t		getContentLength() const;
-	// std::string getContentPath(std::string uri) const;
 	std::string getContentPath(Configuration &conf, std::string &uri) ;
 };
 

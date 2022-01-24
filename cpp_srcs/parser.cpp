@@ -46,15 +46,6 @@ void add_config(std::string line, Configuration& conf)
 		conf.setAutoindexOn();
 	else if (line.find("server_name ", 0) != std::string::npos)
 		conf.setServerName(get_key(line));
-	// else if (line.find("location ", 0) != std::string::npos)
-	// 	conf.setLocation(get_key(line));
-	// else if (line.find("root ", 0) != std::string::npos)
-	// {
-	// 	conf.setRoot(get_key(line));
-	// 	conf.setPath(conf.getLocation(), conf.getRoot());
-	// }
-	// else if (line.find("index ", 0) != std::string::npos)
-	// 	conf.setIndex(get_key(line));
 	else if (line.find("default_error_pages ", 0) != std::string::npos)
 		conf.setDefaultErrorPages(get_key(line));
 	else if (line.find("client_body_size ", 0) != std::string::npos)
@@ -86,20 +77,15 @@ void add_location(std::string line, Configuration& conf)
 				pos++;
 			location = line.substr(pos_temp, pos - pos_temp);
 			line = line.substr(pos, line.length() - pos);
-			// std::cout << "LOcATION: " << location << std::endl;
-			// std::cout << "LINE: " << line << std::endl;
 			pos = -1;
 		}
 		else if (pos == line.find("root ", 0))
 		{
 			pos = pos + 5;
 			pos_temp = pos;
-			// std::cout << "POS: " << pos << std::endl;
-			// std::cout << "LINE: " << line << std::endl;
 			while (pos != line.find(';', pos_temp))
 				pos++;
 			root = line.substr(pos_temp, pos - pos_temp);
-			// std::cout << "root: " << root << std::endl;
 			line = line.substr(pos, line.length() - pos);
 			pos = -1;
 		}
@@ -110,7 +96,6 @@ void add_location(std::string line, Configuration& conf)
 			while (pos != line.find(';', pos_temp))
 				pos++;
 			index = line.substr(pos_temp, pos - pos_temp);
-			// std::cout << "index: " << index << std::endl;
 			line = line.substr(pos, line.length() - pos);
 			pos = -1;
 		}
@@ -121,7 +106,6 @@ void add_location(std::string line, Configuration& conf)
 			while (pos != line.find(';', pos_temp))
 				pos++;
 			client_body_size = line.substr(pos_temp, pos - pos_temp);
-			// std::cout << "client_body_size: " << client_body_size << std::endl;
 			line = line.substr(pos, line.length() - pos);
 			pos = -1;
 		}
@@ -132,7 +116,6 @@ void add_location(std::string line, Configuration& conf)
 			while (pos != line.find(';', pos_temp))
 				pos++;
 			http_method = line.substr(pos_temp, pos - pos_temp);
-			// std::cout << "http_method: " << http_method << std::endl;
 			line = line.substr(pos, line.length() - pos);
 			pos = -1;
 		}
@@ -155,7 +138,6 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 	std::stringstream content;
 	content << file.rdbuf();   //содержимое файла переписываем в контент для дальнейшей работы с ним. файл менять не можем
 	servers = split_line(content.str());		// делим конфиг файл на блоки - каждый сервер записываем в отдельный стринг для дальнейшего распарсивания строки, для каждого серв создается отдельный конф
-	// Configuration	conf;
 	for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
 		line = *it;
@@ -185,7 +167,6 @@ int	read_conf(const char *path , std::vector<Configuration> &config)
 			}
 			pos++;
 		}
-		// conf.getPath();
 		config.push_back(conf);
 		serv_count++;
 	}

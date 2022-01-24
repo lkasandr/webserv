@@ -14,7 +14,6 @@ typedef struct {
 	std::string location;
 	std::string root;
 	std::string index;
-	// std::string default_error_page;
 	int _client_body_size;
 	std::string _http_method;
 } location;
@@ -32,12 +31,6 @@ private:
 	bool			method_post;
 	bool			method_delete;
 	bool			method_put;
-	// std::string		location;
-	// std::string location;
-	// std::string root;
-
-	// std::map<std::string, std::string> path;
-
 	std::string		index;
 	std::string		CGI_pass;
 	int				autoindex;
@@ -63,16 +56,10 @@ public:
 	bool		getPost() const;
 	bool		getDelete() const;
 	bool		getPut() const;
-	// std::string getLocation() const;
-	// std::string getRoot() const;
 	int			getAutoindex() const;
-	// std::map<std::string, std::string> getPath() const;
-	// std::string getLocation() const;
-	// std::string	getIndex() const;
 	const std::string &getCGI() const;
 
 	const std::vector<location>	&getArray() const;
-	// struct location getLocationStruct() const;
 
 	void		setHost(const std::string &value) ;
 	void		setPort(const std::string &value);
@@ -81,10 +68,7 @@ public:
 	void		setClientBodySize(const std::string &value) ;
 	void		setHttpMethod(const std::string &value);
 	void		setLocation(const std::string &value);
-	// void		setIndex(std::string value);
 	void		setCGI(const std::string &value);
-	// void		setRoot(std::string value);
-	// void		setPath(std::string location, std::string root);
 	void		setAutoindexOn(void);
 	void		setAutoindexOff(void);
 

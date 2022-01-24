@@ -257,35 +257,5 @@ std::ostream& operator<<(std::ostream& out, const Request& request)
 	out << "Host: " << request.getHeaders().find("Host")->second << std::endl;
 	if(request.getBody().size() < 1000)
 		out << request.getBody() << std::endl;
-	// if (request.getHeaders().find("Content-Length") != request.getHeaders().end())
-	// 	out << "Content-Length: " << request.getHeaders().find("Content-Length")->second << std::endl;
-	// if (request.getHeaders().find("Content-Type") != request.getHeaders().end())
-	// 	out << "Content-Type: " << request.getHeaders().find("Content-Length")->second << std::endl;
-	// if (request.getHeaders().find("Cookie") != request.getHeaders().end())
-	// 	out << "Cookie: " << request.getHeaders().find("Cookie")->second << std::endl;
-	
 	return (out);
 }
-
-
-// curl http://localhost:8000     			+
-
-// curl http://localhost:8000
-//    -H "Cache-Control: must-revalidate"
-//    -H "Pragma: no-cache"
-//    -H "Expires: 0"             			+
-
-// curl -I http://localhost:8000  			+
-
-// curl -I --http2 http://localhost:8000  	+
-
-// curl -L http://localhost:8000 			+
-	
-// для вывода this->headers:
-// std::cout << "\033[35mMethod: " << getMethod() << "\033[0m" << std::endl;
-// std::cout << "\033[35mURI: " << getUri() << "\033[0m" << std::endl;
-// std::cout << "\033[35mHTTP Version: " << getHTTP_version() << "\033[0m" << std::endl;
-// std::map<std::string, std::string>::iterator it;
-// std::cout << "HEADERS: " << std::endl;
-// for (it=this->headers.begin(); it!=this->headers.end(); it++)
-// 	std::cout << "\033[35m" << it->first << ' ' << it->second << "\033[0m" << std::endl;

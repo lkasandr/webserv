@@ -46,7 +46,6 @@ int Socket::listen_socket()
         std::cerr << "Error in putting into listening mode." << std::endl;
         return (-1);
     }
-    // fcntl(this->get_listening_socket_fd(), F_SETFL, O_NONBLOCK);
     return 0;
 }
 
@@ -59,7 +58,6 @@ int Socket::accept_socket()
         std::cerr << "Connection error." << std::endl;
 		exit(1);
     }
-    // fcntl(this->accept_socket_fd, F_SETFL, O_NONBLOCK);
     return (this->accept_socket_fd);
 }
 

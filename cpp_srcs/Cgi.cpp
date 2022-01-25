@@ -143,13 +143,13 @@ int	CgiProcess::execCGI(const std::string & cgi_path)
 		switch (m)
 		{
 		case PY:
-			path = "/usr/bin/python3";  
+			path = "/usr/local/bin/python3";
 			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
 			chdir(root_directory.c_str());
 			break;
 		case PHP:
-			path = "/usr/bin/php-cgi";  
+			path = "/usr/bin/php";
   			script = this->request.getScriptPath();; 
 			root_directory = get_cwd() + request.getUri().substr(0, request.getUri().find_last_of("/"));
 			chdir(root_directory.c_str());
